@@ -12,7 +12,7 @@
     // ============================================================================
     
     const CONFIG = {
-        // Default backend URL - can be overridden via localStorage
+        // UPDATED: Your actual Render backend URL
         BACKEND_URL: localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com',
         TIMEOUT: 15000, // 15 seconds
         RETRY_ATTEMPTS: 2,
@@ -206,9 +206,6 @@
     // BROADCAST CHANNEL API (ALTERNATIVE COMMUNICATION METHOD)
     // ============================================================================
     
-    // This provides an alternative communication method using Broadcast Channel API
-    // Useful for cross-tab communication within the same domain
-    
     const broadcastChannel = new BroadcastChannel('site_communication');
     
     broadcastChannel.onmessage = async (event) => {
@@ -221,7 +218,7 @@
             let action;
             if (payload.name && payload.email && payload.message) {
                 action = 'SUBMIT_CONTACT';
-            } else if (payload.solar_irradiance !== undefined) {
+            } else if (payload.solar !== undefined || payload.solar_irradiance !== undefined) {
                 action = 'RUN_SIMULATION';
             } else {
                 throw new Error('Could not determine action from payload');
@@ -255,9 +252,6 @@
     // LOCALSTORAGE FALLBACK (BACKUP METHOD)
     // ============================================================================
     
-    // Check for pending requests in localStorage every 2 seconds
-    // This acts as a fallback if postMessage or BroadcastChannel fail
-    
     setInterval(() => {
         const pendingRequests = localStorage.getItem('backend_queue');
         
@@ -268,12 +262,10 @@
                 if (Array.isArray(requests) && requests.length > 0) {
                     log('Found pending requests in localStorage', requests);
                     
-                    // Process the first request
                     const request = requests[0];
                     
                     routeMessage(request.action, request.payload)
                         .then(data => {
-                            // Store the response
                             localStorage.setItem('backend_response', JSON.stringify({
                                 id: request.id,
                                 status: 'success',
@@ -281,7 +273,6 @@
                                 timestamp: Date.now()
                             }));
                             
-                            // Remove processed request
                             requests.shift();
                             localStorage.setItem('backend_queue', JSON.stringify(requests));
                             
@@ -297,7 +288,6 @@
                                 timestamp: Date.now()
                             }));
                             
-                            // Remove failed request
                             requests.shift();
                             localStorage.setItem('backend_queue', JSON.stringify(requests));
                         });
