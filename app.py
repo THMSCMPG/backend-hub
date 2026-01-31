@@ -21,8 +21,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-# Precise CORS for security
-CORS(app, resources={r"/api/*": {"origins": ["https://thmscmpg.github.io", "http://localhost:4000"]}})
+
+# UPDATED CORS - Allow all GitHub Pages subdomains
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "https://thmscmpg.github.io",
+            "https://thmscmpg.github.io/*",
+            "http://localhost:4000",
+            "http://127.0.0.1:4000"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": False
+    }
+})
 
 # SMTP Setup
 app.config.update(
@@ -35,7 +48,7 @@ app.config.update(
 )
 
 mail = Mail(app)
-CONTACT_RECIPIENT = os.environ.get("CONTACT_EMAIL", "admin@aura-mf.com")
+CONTACT_RECIPIENT = os.environ.get("CONTACT_EMAIL", os.environ.get("MAIL_USERNAME", "admin@example.com"))
 
 # ============================================================================
 # PHYSICS & SIMULATION ENGINE
@@ -118,13 +131,19 @@ def generate_plot(temp_data):
 # API ROUTES
 # ============================================================================
 
-@app.route('/api/simulate', methods=['GET', 'POST'])
+@app.route('/api/simulate', methods=['GET', 'POST', 'OPTIONS'])
 def handle_simulation():
+    # Handle preflight
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     # 1. Get Inputs (Default or Request)
     data = request.json if request.is_json else {}
     solar = float(data.get('solar', 1000.0))
     wind = float(data.get('wind', 2.0))
     ambient = float(data.get('ambient', 298.15))
+    
+    logger.info(f"Simulation request: solar={solar}, wind={wind}, ambient={ambient}")
     
     # 2. Update Multi-Fidelity State
     current_fid = state_manager.step()
@@ -151,36 +170,122 @@ def handle_simulation():
         }
     })
 
-@app.route('/api/contact', methods=['POST'])
+@app.route('/api/contact', methods=['POST', 'OPTIONS'])
 def handle_contact():
+    # Handle preflight
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     data = request.get_json()
     if not data or data.get('website_hp'): # Honeypot check
         return jsonify({"status": "success"}), 200 # Silent drop for bots
 
+    logger.info(f"Contact form submission from: {data.get('email')}")
+
     try:
         msg = Message(
-            subject=f"AURA-MF Dashboard: {data.get('name')}",
+            subject=f"Contact from {data.get('name')} - THMSCMPG Portfolio",
             recipients=[CONTACT_RECIPIENT],
-            body=f"From: {data.get('email')}\n\nMessage: {data.get('message')}"
+            body=f"From: {data.get('name')} <{data.get('email')}>\n\nMessage:\n{data.get('message')}"
         )
         mail.send(msg)
+        logger.info("Email sent successfully")
         return jsonify({"status": "success", "message": "Message sent!"})
     except Exception as e:
         logger.error(f"Contact Error: {e}")
         return jsonify({"status": "error", "message": "Email service failed"}), 500
 
-@app.route('/api/health')
+@app.route('/api/health', methods=['GET', 'OPTIONS'])
 def health():
-    return jsonify({"status": "active", "version": "1.0.0"})
+    # Handle preflight
+    if request.method == 'OPTIONS':
+        return '', 204
+        
+    return jsonify({
+        "status": "active", 
+        "version": "1.0.0",
+        "timestamp": datetime.now().isoformat()
+    })
 
 @app.route('/')
 def docs():
     return render_template_string("""
-        <h1>AURA-MF API v1.0.0</h1>
-        <p>Status: Running</p>
-        <p>Last Sim Time: {{ time }}</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>AURA-MF Backend API</title>
+            <style>
+                body { 
+                    font-family: system-ui; 
+                    max-width: 800px; 
+                    margin: 50px auto; 
+                    padding: 20px;
+                    background: #f5f5f5;
+                }
+                .container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                h1 { color: #667eea; }
+                .status { 
+                    background: #e8f5e9; 
+                    padding: 15px; 
+                    border-radius: 5px;
+                    margin: 20px 0;
+                    border-left: 4px solid #4CAF50;
+                }
+                .endpoint {
+                    background: #f5f5f5;
+                    padding: 10px;
+                    margin: 10px 0;
+                    border-radius: 5px;
+                    font-family: monospace;
+                }
+                a { color: #667eea; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🚀 AURA-MF Backend API</h1>
+                <div class="status">
+                    ✅ Status: <strong>Running</strong><br>
+                    🕐 Uptime: {{ time }} simulation steps
+                </div>
+                
+                <h2>Available Endpoints</h2>
+                <div class="endpoint">GET /api/health - Health check</div>
+                <div class="endpoint">POST /api/contact - Contact form submission</div>
+                <div class="endpoint">POST /api/simulate - Physics simulation</div>
+                
+                <h2>Frontend Sites</h2>
+                <p>
+                    <a href="https://thmscmpg.github.io" target="_blank">Portfolio (THMSCMPG)</a><br>
+                    <a href="https://thmscmpg.github.io/CircuitNotes" target="_blank">CircuitNotes</a><br>
+                    <a href="https://thmscmpg.github.io/AURA-MF" target="_blank">AURA-MF</a>
+                </p>
+                
+                <p style="margin-top: 40px; color: #666; font-size: 0.9em;">
+                    Backend for THMSCMPG GitHub Pages • Powered by Flask + Render
+                </p>
+            </div>
+        </body>
+        </html>
     """, time=state_manager.time)
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    origin = request.headers.get('Origin')
+    if origin and 'thmscmpg.github.io' in origin:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    return response
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    logger.info(f"Starting server on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
