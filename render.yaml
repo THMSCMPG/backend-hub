@@ -1,0 +1,10 @@
+1services:
+2  - type: web
+3    name: aura-mf-backend
+4    runtime: python
+5    buildCommand: pip install -r requirements.txt
+6    startCommand: gunicorn app:app
+7    envVars:
+8      - key: PYTHON_VERSION
+9        value: 3.11.0
+10
