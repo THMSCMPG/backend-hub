@@ -13,7 +13,7 @@
     
     const CONFIG = {
         // Default backend URL - can be overridden via localStorage
-        BACKEND_URL: localStorage.getItem('BACKEND_URL') || 'https://your-app.onrender.com',
+        BACKEND_URL: localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com',
         TIMEOUT: 15000, // 15 seconds
         RETRY_ATTEMPTS: 2,
         RETRY_DELAY: 1000
