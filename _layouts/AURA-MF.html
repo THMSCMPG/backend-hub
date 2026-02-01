@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page.title }} | AURA-MF</title>
     
-    <!-- Centralized Middend CSS -->
-    <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/style.css">
+    <!-- Compiled CSS from SASS (uses site's baseurl) -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    
+    <!-- Project-Specific CSS (absolute URL to backend-hub) -->
     <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/aura-mf.css">
 
     <!-- KaTeX for Mathematical Rendering -->
@@ -22,14 +24,10 @@
 </head>
 <body>
     
-    {{% include nav_main.html %}}
-    {{% include nav_second.html %}}
+    {% include nav_main.html %}
+    {% include nav_second.html %}
 
     <main class="container">
-        <header class="page-header">
-            <h1>{{ page.title }}</h1>
-        </header>
-
         <article class="content-area">
             {{ content }}
         </article>
@@ -48,6 +46,7 @@
     </footer>
     
     <!-- Backend Bridge iframe for contact form and physics API communication -->
+    <!-- DO NOT REMOVE - Critical for backend communication -->
     <iframe 
         id="backend-bridge" 
         src="https://thmscmpg.github.io/backend-hub" 
