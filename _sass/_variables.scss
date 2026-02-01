@@ -1,6 +1,7 @@
-
-
 :root {
+/* ============================================
+   COLOR PALETTE
+   ============================================ */
 --primary: #10b981; /* Emerald */
 --primary-hover: #059669;
 --dark: #0f172a; /* Slate 900 */
@@ -12,32 +13,78 @@
 --warning: #e74c3c; /* Alizarin Red */
 --info: #3498db;    /* Peter River Blue */
 --accent: #f39c12;  /* Orange */
-/* Z-Index Scale (5 variables) */
+
+/* ============================================
+   Z-INDEX SCALE
+   Maintains consistent layering across components
+   ============================================ */
 --z-navbar: 1000;
 --z-dropdown: 1001;
-/* ... etc */
+--z-menu-btn: 1001;
+--z-sidebar: 1002;
 
-/* Transitions (3 variables) */
+/* ============================================
+   TRANSITIONS
+   ============================================ */
 --transition-fast: 0.2s;
-/* ... etc */
+--transition-normal: 0.3s;
+--transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-/* Shadows (6 variables) */
+/* ============================================
+   SHADOWS
+   ============================================ */
 --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-/* ... etc */
+--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+--shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+--shadow-card: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+--shadow-navbar: 0 2px 10px rgba(0, 0, 0, 0.1);
+--shadow-dropdown: 0px 8px 16px rgba(0, 0, 0, 0.4);
 
-/* Spacing Scale (6 variables) */
+/* ============================================
+   SPACING SCALE
+   Based on 4px grid
+   ============================================ */
 --spacing-xs: 8px;
-/* ... etc */
+--spacing-sm: 12px;
+--spacing-md: 20px;
+--spacing-lg: 30px;
+--spacing-xl: 60px;
+--spacing-2xl: 80px;
 
-/* Border Radius (5 variables) */
+/* ============================================
+   BORDER RADIUS SCALE
+   ============================================ */
 --radius-sm: 4px;
-/* ... etc */
+--radius-md: 8px;
+--radius-lg: 12px;
+--radius-pill: 20px;
+--radius-circle: 50%;
 
-/* Typography (11 variables) */
+/* ============================================
+   TYPOGRAPHY SCALE
+   ============================================ */
 --font-size-xs: 0.75rem;
-/* ... etc */
+--font-size-sm: 0.85rem;
+--font-size-base: 1rem;
+--font-size-md: 0.9rem;
+--font-size-lg: 1.1rem;
+--font-size-xl: 1.25rem;
+--font-size-2xl: 1.5rem;
+--font-size-3xl: 2rem;
+--font-size-4xl: 2.5rem;
+--font-size-5xl: 3rem;
 
-/* Containers (2 variables) */
+/* ============================================
+   CONTAINER WIDTHS
+   ============================================ */
 --container-sm: 1100px;
 --container-md: 1200px;
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS (for reference)
+   Use these in @media queries
+   ============================================ */
+/* Mobile: max-width: 768px */
+/* Tablet: 769px - 1024px */
+/* Desktop: min-width: 1025px */
 }
