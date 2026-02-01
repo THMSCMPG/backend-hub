@@ -4,7 +4,6 @@
    THEME.CSS - Navigation & Layout Components
    Consolidated from: AURA-MF, CircuitNotes, Profile
    ============================================ */
-{
 /* --- NAVBAR - DESKTOP --- */
 .navbar {
     background: var(--dark-muted);
@@ -248,5 +247,4 @@ footer a:hover {
     .sidebar-mobile {
         display: none !important;
     }
-}
 }
