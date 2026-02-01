@@ -92,10 +92,7 @@
             }
         );
 
-        res.status(200).json({ 
-            status: 'verified_by_render',
-            timestamp: Date.now()
-        });
+        log('Backend confirmed receipt', responseData);
         return response;
     }
     
