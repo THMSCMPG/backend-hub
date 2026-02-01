@@ -1,9 +1,11 @@
 <!-- Mobile Sidebar Toggle Button -->
-<button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">MENU &#9662;</button>
+<button class="menu-btn" onclick="toggleSidebar()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mySidebar">
+    MENU &#9662;
+</button>
 
 <!-- Mobile Sidebar -->
-<div id="mySidebar" class="sidebar-mobile">
-    <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()">&times;</a>
+<div id="mySidebar" class="sidebar-mobile" role="navigation" aria-label="Mobile navigation" aria-hidden="true">
+    <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" aria-label="Close navigation menu">&times;</a>
     
     <!-- Hardcoded Main Navigation for Mobile -->
     <a href="https://thmscmpg.github.io/index.html">Home</a>
@@ -13,10 +15,10 @@
 </div>
 
 <!-- Desktop Navigation Bar -->
-<nav class="navbar">
+<nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="container">
-        <a href="https://thmscmpg.github.io/" class="logo" target="_blank" rel="noopener noreferrer">
-            <i class="fas fa-bolt-lightning"></i> THMSCMPG
+        <a href="https://thmscmpg.github.io/" class="logo" aria-label="THMSCMPG Home">
+            <i class="fas fa-bolt-lightning" aria-hidden="true"></i> THMSCMPG
         </a>
         
         <ul class="nav-links">
@@ -26,30 +28,32 @@
             <li><a href="https://thmscmpg.github.io/reports.html">LabReports</a></li>
             <li><a href="https://thmscmpg.github.io/portfolio/Campagna_CV_2025.pdf" target="_blank" rel="noopener noreferrer">CV</a></li>
 
-            <!-- Documentation Dropdown (uses relative_url for same-site links) -->
+            <!-- Documentation Dropdown -->
             <li class="dropdown">
-                <span class="nav-label">Jump to Docs</span>
-                <a href="javascript:void(0)" class="dropbtn"><i class="fas fa-bars"></i></a>
-                <div class="dropdown-content">
+                <span class="nav-label" aria-hidden="true">Jump to Docs</span>
+                <button class="dropbtn" aria-label="Open documentation menu" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="dropdown-content" role="menu" aria-label="Documentation links">
                     <!-- CircuitNotes Pages -->
-                    <a href="https://thmscmpg.github.io/CircuitNotes/index.html">CircuitNotes</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/master-reference.html">MasterRef</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/basic-5v-circuits.html">BasicCircuits</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/led-demos.html">LED</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/matrix-keypad-theory.html">Matrix</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/oled-buzzer-theory.html">OLED</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/photoresistor-demos.html">Photoresistor</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/rgb-led-demos.html">RGBLED</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/rotary-encoder-demos.html">Rotary</a>
-                    <a href="https://thmscmpg.github.io/CircuitNotes/seven-segment-dip.html">SevenDip</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/index.html" role="menuitem">CircuitNotes</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/master-reference.html" role="menuitem">MasterRef</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/basic-5v-circuits.html" role="menuitem">BasicCircuits</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/led-demos.html" role="menuitem">LED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/matrix-keypad-theory.html" role="menuitem">Matrix</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/oled-buzzer-theory.html" role="menuitem">OLED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/photoresistor-demos.html" role="menuitem">Photoresistor</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/rgb-led-demos.html" role="menuitem">RGBLED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/rotary-encoder-demos.html" role="menuitem">Rotary</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/seven-segment-dip.html" role="menuitem">SevenDip</a>
                     
                     <!-- AURA-MF Pages -->
-                    <a href="https://thmscmpg.github.io/AURA-MF/index.html">AURA-MF</a>
-                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv1-gold-standard.html">SimV1</a>
-                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv2-multifidelity.html">SimV2</a>
-                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv3-bayesian.html">SimV3</a>
-                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv4-ml-orchestrator.html">SimV4</a>
-                    <a href="https://thmscmpg.github.io/AURA-MF/pages/interactive/dashboard.html">Dashboard</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/index.html" role="menuitem">AURA-MF</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv1-gold-standard.html" role="menuitem">SimV1</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv2-multifidelity.html" role="menuitem">SimV2</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv3-bayesian.html" role="menuitem">SimV3</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv4-ml-orchestrator.html" role="menuitem">SimV4</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/interactive/dashboard.html" role="menuitem">Dashboard</a>
                 </div>
             </li>
         </ul>
@@ -60,11 +64,15 @@
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            if(this.getAttribute('href').startsWith('#') && this.getAttribute('href').length > 1) {
+            const href = this.getAttribute('href');
+            if(href.startsWith('#') && href.length > 1) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Update focus for accessibility
+                    target.focus();
+                    // Update active state
                     document.querySelectorAll('.peek-nav a').forEach(a => a.classList.remove('active'));
                     this.classList.add('active');
                 }
@@ -72,13 +80,65 @@
         });
     });
 
-    // Sidebar toggle function
+    // Sidebar toggle function with ARIA updates
     function toggleSidebar() {
         const sidebar = document.getElementById("mySidebar");
-        if (sidebar.style.width === "250px") {
-            sidebar.style.width = "0";
-        } else {
-            sidebar.style.width = "250px";
+        const menuBtn = document.querySelector('.menu-btn');
+        
+        if (sidebar) {
+            const isOpen = sidebar.style.width === "250px";
+            
+            // Toggle sidebar
+            sidebar.style.width = isOpen ? "0" : "250px";
+            
+            // Update ARIA attributes
+            sidebar.setAttribute('aria-hidden', isOpen);
+            if (menuBtn) {
+                menuBtn.setAttribute('aria-expanded', !isOpen);
+            }
+            
+            // Trap focus when sidebar is open
+            if (!isOpen) {
+                const firstLink = sidebar.querySelector('a');
+                if (firstLink) {
+                    firstLink.focus();
+                }
+            }
         }
     }
+    
+    // Dropdown accessibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdown = document.querySelector('.dropdown');
+        const dropbtn = dropdown ? dropdown.querySelector('.dropbtn') : null;
+        const dropdownContent = dropdown ? dropdown.querySelector('.dropdown-content') : null;
+        
+        if (dropbtn && dropdownContent) {
+            // Toggle dropdown on button click
+            dropbtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', !isExpanded);
+                dropdownContent.style.display = isExpanded ? 'none' : 'block';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropbtn.setAttribute('aria-expanded', 'false');
+                    dropdownContent.style.display = 'none';
+                }
+            });
+            
+            // Close dropdown on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    dropbtn.setAttribute('aria-expanded', 'false');
+                    dropdownContent.style.display = 'none';
+                    dropbtn.focus();
+                }
+            });
+        }
+    });
 </script>
