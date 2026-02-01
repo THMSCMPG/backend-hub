@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} | CircuitNotes</title>
+    <title>{{ page.title | default: "CircuitNotes" }} | Thomas Campagna</title>
     
-    <!-- Centralized Middend CSS -->
-    <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/style.css">
+    <!-- SEO -->
+    {% seo %}
+    
+    <!-- Compiled CSS from SASS (uses site's baseurl) -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    
+    <!-- Project-Specific CSS (absolute URL to backend-hub) -->
     <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/circuitnotes.css">
 
     <!-- External Libraries via CDN -->
@@ -14,10 +19,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    {% if site.favicon %}
+    <link rel="icon" type="image/png" href="{{ site.favicon | relative_url }}">
+    {% endif %}
 </head>
 <body>
 
-    {{% include nav_main.html %}}
+    {% include nav_main.html %}
 
     <main class="container">
         {{ content }}
