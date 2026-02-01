@@ -10,13 +10,13 @@
    ============================================ */
 
 /* --- Core Foundation --- */
-@import url('core.css');
+@import "core.css";
 
 /* --- Theme & Navigation --- */
-@import url('theme.css');
+@import "theme.css";
 
 /* --- Reusable Components --- */
-@import url('components.css');
+@import "components.css";
 
 /* ============================================
    SITE-SPECIFIC OVERRIDES
