@@ -1,0 +1,460 @@
+/* ============================================
+   PROFILE (THMSCMPG) PROJECT-SPECIFIC STYLES
+   Layers on top of compiled style.css (shared SCSS base).
+   Contains only rules that are unique to the Profile site or that
+   override shared defaults to match the original site.
+   ============================================ */
+
+/* ============================================
+   PAGE HEADER — Dark title bar
+   Same pattern as CircuitNotes; used by the Profile layout.
+   ============================================ */
+.page-header {
+    background: var(--dark-muted);
+    color: white;
+    padding: 0;
+    margin-top: 8px !important;
+    border-bottom: 3px solid var(--primary);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.page-header .container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.page-header h1 {
+    margin: 0;
+    margin-top: 10px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: white;
+}
+
+/* ============================================
+   HERO OVERRIDE — White card style
+   The shared .hero is a dark gradient banner.
+   Profile's .hero is white with a bottom border —
+   a completely different visual treatment.
+   ============================================ */
+.hero {
+    background: white;
+    padding: 80px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 0;
+    color: var(--text);
+}
+
+.hero h1 {
+    font-size: 3rem;
+    color: var(--dark);
+    margin: 0 0 16px 0;
+    letter-spacing: -0.025em;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    max-width: 700px;
+    margin: 0 auto 32px;
+}
+
+/* ============================================
+   PROFILE PICTURE
+   Circular avatar with emerald border.
+   ============================================ */
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    margin-bottom: 20px;
+    object-fit: cover;
+}
+
+/* ============================================
+   SECTION TITLE — Left-border accent heading
+   ============================================ */
+.section-title {
+    margin: 60px 0 30px;
+    font-size: 1.8rem;
+    color: var(--dark);
+    border-left: 4px solid var(--primary);
+    padding-left: 15px;
+}
+
+/* ============================================
+   PROJECT GRID & CARDS
+   Profile uses 320px minmax, matching CircuitNotes.
+   ============================================ */
+.project-grid,
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 80px;
+}
+
+.project-card,
+.category-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.project-card:hover,
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+}
+
+/* ============================================
+   TAGS — Green pill badges
+   ============================================ */
+.tag {
+    background: #ecfdf5;
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ============================================
+   CONTENT BOXES — Profile palette
+   Matches CircuitNotes palette for consistency
+   across the site when viewed together.
+   ============================================ */
+.theory-box {
+    background: #e8f4f8;
+    padding: 15px;
+    border-left: 4px solid var(--info);
+    margin: 15px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.math-box,
+.formula {
+    background: #fef5e7;
+    padding: 15px;
+    border-left: 4px solid var(--accent);
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.materials-box,
+.tips-box {
+    background: #d5f4e6;
+    padding: 15px;
+    border-left: 4px solid var(--primary);
+    margin: 15px 0;
+}
+
+.warning-box,
+.warning {
+    background: #ffe6e6;
+    padding: 15px;
+    border-left: 4px solid var(--warning);
+    margin: 15px 0;
+}
+
+/* ============================================
+   CODE & CIRCUIT DIAGRAMS
+   ============================================ */
+.circuit-diagram,
+.code-section {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+    white-space: pre;
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+/* ============================================
+   MATRIX KEYPAD GRID
+   ============================================ */
+.key-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 60px);
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.key {
+    background: #34495e;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+/* ============================================
+   WAVEFORM
+   ============================================ */
+.waveform {
+    background: #fff;
+    border: 2px solid #334155;
+    padding: 15px;
+    font-family: monospace;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+/* ============================================
+   BTN-LINK — Navigation link cards with arrow
+   ============================================ */
+.btn-link {
+    text-decoration: none;
+    padding: 12px 16px;
+    background: var(--light);
+    border-radius: 8px;
+    color: var(--text);
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-link:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: white;
+}
+
+.btn-link:after {
+    content: '→';
+}
+
+/* ============================================
+   DOWNLOAD BUTTON — Green pill style
+   ============================================ */
+.download-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary) !important;
+    color: white !important;
+    padding: 12px 24px !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    font-weight: bold !important;
+    margin: 20px 0 !important;
+    transition: 0.3s;
+}
+
+.download-btn:hover {
+    background: var(--primary-hover) !important;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   PAGE SELECT DROPDOWN
+   ============================================ */
+#page-select {
+    width: 100%;
+    padding: 10px;
+    background: var(--dark-muted);
+    color: white;
+    border-radius: 5px;
+    border: 1px solid #475569;
+    cursor: pointer;
+}
+
+/* ============================================
+   LEGACY HEADING CLASSES
+   .circuit-title and .circuit-head were used in
+   Profile content before the content-area pattern.
+   Kept for backward compatibility.
+   ============================================ */
+h1.circuit-title {
+    color: #2c3e50;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+h2.circuit-head {
+    color: #34495e;
+    background: #ecf0f1;
+    padding: 10px;
+    border-left: 5px solid var(--primary);
+}
+
+/* ============================================
+   MOBILE SIDEBAR — Profile variant
+   Profile used .sidebar (not .sidebar-mobile), sliding
+   from the right, same as CircuitNotes.
+   ============================================ */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed !important;
+    z-index: 10002;
+    top: 0;
+    right: 0;
+    background-color: var(--dark-muted);
+    overflow-x: hidden;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-top: 80px;
+    border-left: 2px solid var(--primary);
+}
+
+.sidebar a {
+    padding: 15px 32px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #94a3b8;
+    display: block;
+    transition: 0.3s;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar a:hover {
+    color: var(--primary);
+    background: rgba(16, 185, 129, 0.1);
+    padding-left: 40px;
+}
+
+.sidebar .close-btn {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 30px;
+    color: var(--primary);
+    border-bottom: none;
+}
+
+/* ============================================
+   CONTACT FORM
+   Custom form styling specific to Profile.
+   The shared SCSS has .form-input/.form-textarea but
+   Profile uses its own .contact-form layout with
+   native <input> and <textarea> selectors.
+   ============================================ */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.submit-btn {
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    align-self: flex-start;
+}
+
+.submit-btn:hover {
+    background: #059669;
+}
+
+.submit-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+#formResponse {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.success-msg {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.error-msg {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* ============================================
+   FOOTER — .footer class variant
+   ============================================ */
+.footer {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--dark-muted);
+    color: #94a3b8;
+    margin-top: 60px;
+    border-top: 3px solid var(--primary);
+}
+
+.footer p {
+    margin-bottom: 4px;
+    color: inherit;
+}
+
+.footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+/* ============================================
+   RESPONSIVE — PROFILE SPECIFIC
+   ============================================ */
+@media screen and (max-width: 768px) {
+    .navbar {
+        display: none !important;
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    body {
+        padding-top: 20px;
+    }
+}
