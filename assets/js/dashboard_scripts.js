@@ -97,53 +97,41 @@ const dashboardState = new DashboardState();
 // API COMMUNICATION
 // ============================================================================
 
-/**
- * Fetch simulation data from API with timeout
- * FIXED: Changed from GET to POST and added default parameters
- */
 async function fetchSimulationData() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
     
+    // Helper to get slider values safely
+    const getVal = (id) => parseFloat(document.getElementById(id)?.value);
+
+    const currentParams = {
+        solar: getVal('solar-irradiance') || 1000,
+        wind: getVal('wind-speed') || 1.0,
+        // CRITICAL: Convert Slider Celsius to Backend Kelvin
+        ambient: getVal('ambient-temperature') + 273.15, 
+        cell_efficiency: getVal('cell-efficiency') || 0.20,
+        thermal_conductivity: getVal('thermal-conductivity') || 130,
+        absorptivity: getVal('absorptivity') || 0.95,
+        emissivity: getVal('emissivity') || 0.90
+    };
+
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
-            method: 'POST',  // FIXED: Changed from GET
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                solar: 1000.0,
-                wind: 2.0,
-                ambient: 298.15,
-                cell_efficiency: 0.20,
-                thermal_conductivity: 130.0,
-                absorptivity: 0.95,
-                emissivity: 0.90
-            }),  // FIXED: Added default parameters
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentParams),
             signal: controller.signal
         });
         
         clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
         dashboardState.recordSuccess(data);
-        
         return data;
-        
     } catch (error) {
         clearTimeout(timeoutId);
         dashboardState.recordError();
-        
-        if (error.name === 'AbortError') {
-            console.error('Request timeout');
-        } else {
-            console.error('Fetch error:', error.message);
-        }
-        
         throw error;
     }
 }
@@ -198,94 +186,63 @@ function getHeatmapColor(value, min, max, scheme = 'thermal') {
 }
 
 /**
- * Draw temperature heatmap on canvas
+ * FIXED: Handles Kelvin-to-Celsius conversion and provides 
+ * structural safety for the 2D array rendering.
  */
 function drawTemperatureHeatmap(canvasId, temperatureField) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) {
-        console.error(`Canvas element '${canvasId}' not found`);
+    if (!canvas || !temperatureField || !temperatureField.length) {
+        console.warn('Heatmap skip: Canvas or data field missing');
         return;
     }
-    
-    const ctx = canvas.getContext('2d');
-    const gridSize = temperatureField.length;
-    
-    // Set canvas size
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    const cellWidth = canvasWidth / gridSize;
-    const cellHeight = canvasHeight / gridSize;
-    
-    // Find min/max for color scaling
-    let minTemp = Infinity;
-    let maxTemp = -Infinity;
-    
-    for (let row of temperatureField) {
-        for (let temp of row) {
-            minTemp = Math.min(minTemp, temp);
-            maxTemp = Math.max(maxTemp, temp);
-        }
-    }
-    
-    // Draw cells
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            const temp = temperatureField[i][j];
-            const color = getHeatmapColor(temp, minTemp, maxTemp, CONFIG.HEATMAP.colorScheme);
-            
-            // Draw cell
-            ctx.fillStyle = color;
-            ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-            
-            // Draw grid lines if enabled
-            if (CONFIG.HEATMAP.showGrid) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-            }
-            
-            // Draw temperature values if enabled
-            if (CONFIG.HEATMAP.showValues && gridSize <= 10) {
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(
-                    temp.toFixed(1), 
-                    j * cellWidth + cellWidth / 2, 
-                    i * cellHeight + cellHeight / 2
-                );
-            }
-        }
-    }
-    
-    // Draw color legend
-    const legendWidth = 20;
-    const legendHeight = canvasHeight - 40;
-    const legendX = canvasWidth - legendWidth - 10;
-    const legendY = 20;
-    
-    const gradient = ctx.createLinearGradient(legendX, legendY + legendHeight, legendX, legendY);
-    gradient.addColorStop(0, getHeatmapColor(minTemp, minTemp, maxTemp));
-    gradient.addColorStop(0.5, getHeatmapColor((minTemp + maxTemp) / 2, minTemp, maxTemp));
-    gradient.addColorStop(1, getHeatmapColor(maxTemp, minTemp, maxTemp));
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(legendX, legendY, legendWidth, legendHeight);
-    
-    // Draw border
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(legendX, legendY, legendWidth, legendHeight);
-    
-    // Draw labels
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${maxTemp.toFixed(1)}°C`, legendX - 5, legendY);
-    ctx.fillText(`${minTemp.toFixed(1)}°C`, legendX - 5, legendY + legendHeight);
-}
 
+    const ctx = canvas.getContext('2d');
+    const rows = temperatureField.length;
+    const cols = temperatureField[0].length;
+
+    // Canvas/Cell scaling
+    const cellWidth = canvas.width / cols;
+    const cellHeight = canvas.height / rows;
+
+    // 1. Data Analysis: Find Min/Max in Kelvin
+    let minK = Infinity;
+    let maxK = -Infinity;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const val = temperatureField[r][c];
+            if (val < minK) minK = val;
+            if (val > maxK) maxK = val;
+        }
+    }
+
+    // 2. Rendering Loop
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            const tempK = temperatureField[i][j];
+            
+            // CONVERSION: Map Kelvin to Celsius for the color logic
+            // (Assuming standard 273.15 offset)
+            const tempC = tempK - 273.15;
+            const minC = minK - 273.15;
+            const maxC = maxK - 273.15;
+
+            // Get color based on relative position in the current range
+            ctx.fillStyle = getHeatmapColor(tempC, minC, maxC, CONFIG.HEATMAP.colorScheme);
+            
+            // Draw the cell (using floor/ceil to prevent sub-pixel gaps)
+            ctx.fillRect(
+                Math.floor(j * cellWidth), 
+                Math.floor(i * cellHeight), 
+                Math.ceil(cellWidth), 
+                Math.ceil(cellHeight)
+            );
+        }
+    }
+
+    // 3. Update Legend Labels
+    updateHeatmapLegend(minK - 273.15, maxK - 273.15);
+}
 // ============================================================================
 // UI UPDATES
 // ============================================================================
