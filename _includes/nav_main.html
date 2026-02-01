@@ -1,41 +1,55 @@
-
+<!-- Mobile Sidebar Toggle Button -->
 <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">MENU &#9662;</button>
 
+<!-- Mobile Sidebar -->
 <div id="mySidebar" class="sidebar-mobile">
     <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()">&times;</a>
     
-    {% assign main_links = site.data.navigation | where: "section", "main" %}
-    {% for item in main_links %}
-        <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
-            {{ item.name }}
-        </a>
-    {% endfor %}
+    <!-- Hardcoded Main Navigation for Mobile -->
+    <a href="https://thmscmpg.github.io/index.html">Home</a>
+    <a href="https://thmscmpg.github.io/projects.html">Research</a>
+    <a href="https://thmscmpg.github.io/reports.html">LabReports</a>
+    <a href="https://thmscmpg.github.io/portfolio/Campagna_CV_2025.pdf" target="_blank" rel="noopener noreferrer">CV</a>
 </div>
 
+<!-- Desktop Navigation Bar -->
 <nav class="navbar">
     <div class="container">
-        <a href="https://github.com/THMSCMPG/" class="logo" target="_blank" rel="noopener noreferrer">
+        <a href="https://thmscmpg.github.io/" class="logo" target="_blank" rel="noopener noreferrer">
             <i class="fas fa-bolt-lightning"></i> THMSCMPG
         </a>
         
         <ul class="nav-links">
-            {% assign main_links = site.data.navigation | where: "section", "main" %}
-            {% for item in main_links %}
-            <li>
-                <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                    {{ item.name }}
-                </a>
-            </li>
-            {% endfor %}
+            <!-- Hardcoded Main Links (absolute URLs for cross-site navigation) -->
+            <li><a href="https://thmscmpg.github.io/index.html">Home</a></li>
+            <li><a href="https://thmscmpg.github.io/projects.html">Research</a></li>
+            <li><a href="https://thmscmpg.github.io/reports.html">LabReports</a></li>
+            <li><a href="https://thmscmpg.github.io/portfolio/Campagna_CV_2025.pdf" target="_blank" rel="noopener noreferrer">CV</a></li>
 
+            <!-- Documentation Dropdown (uses relative_url for same-site links) -->
             <li class="dropdown">
                 <span class="nav-label">Jump to Docs</span>
                 <a href="javascript:void(0)" class="dropbtn"><i class="fas fa-bars"></i></a>
                 <div class="dropdown-content">
-                    {% assign doc_links = site.data.navigation | where: "section", "docs" %}
-                    {% for item in doc_links %}
-                        <a href="{{ item.link | relative_url }}">{{ item.name }}</a>
-                    {% endfor %}
+                    <!-- CircuitNotes Pages -->
+                    <a href="https://thmscmpg.github.io/CircuitNotes/index.html">CircuitNotes</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/master-reference.html">MasterRef</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/basic-5v-circuits.html">BasicCircuits</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/led-demos.html">LED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/matrix-keypad-theory.html">Matrix</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/oled-buzzer-theory.html">OLED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/photoresistor-demos.html">Photoresistor</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/rgb-led-demos.html">RGBLED</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/rotary-encoder-demos.html">Rotary</a>
+                    <a href="https://thmscmpg.github.io/CircuitNotes/seven-segment-dip.html">SevenDip</a>
+                    
+                    <!-- AURA-MF Pages -->
+                    <a href="https://thmscmpg.github.io/AURA-MF/index.html">AURA-MF</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv1-gold-standard.html">SimV1</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv2-multifidelity.html">SimV2</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv3-bayesian.html">SimV3</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/simv4-ml-orchestrator.html">SimV4</a>
+                    <a href="https://thmscmpg.github.io/AURA-MF/pages/interactive/dashboard.html">Dashboard</a>
                 </div>
             </li>
         </ul>
@@ -43,29 +57,28 @@
 </nav>
 
 <script>
-         // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                if(this.getAttribute('href').startsWith('#') && this.getAttribute('href').length > 1) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Update active state in peek nav
-                        document.querySelectorAll('.peek-nav a').forEach(a => a.classList.remove('active'));
-                        this.classList.add('active');
-                    }
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            if(this.getAttribute('href').startsWith('#') && this.getAttribute('href').length > 1) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.querySelectorAll('.peek-nav a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
                 }
-            });
-        });
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById("mySidebar");
-            // Check if the sidebar is open (250px) or closed (0)
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
             }
+        });
+    });
+
+    // Sidebar toggle function
+    function toggleSidebar() {
+        const sidebar = document.getElementById("mySidebar");
+        if (sidebar.style.width === "250px") {
+            sidebar.style.width = "0";
+        } else {
+            sidebar.style.width = "250px";
         }
-    </script>
+    }
+</script>
