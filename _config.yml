@@ -1,3 +1,27 @@
+name: ""
+title: Thomas Campagna
+email: thmscmpgn@gmail.com
+description: >-
+  Undergraduate Physics & Math Student at Austin Peay State University. 
+  Aspiring Computational Physicist specializing in Photonics and Environmental Physics.
+  
+# Site Settings
+url: "https://THMSCMPG.github.io"
+baseurl: "/backend-hub"
+
+# Build Settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+remote_theme: THMSCMPG/backend-hub
 sass:
   sass_dir: _sass
-  style: expanded
+
+kramdown:
+  math_engine: mathjax
+  input: GFM
+  syntax_highlighter: rouge
+
+favicon: /assets/favicon.png
