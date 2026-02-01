@@ -1,33 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} | AURA-MF</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- Compiled CSS from SASS (uses site's baseurl) -->
+    <!-- Primary Meta Tags -->
+    <title>{{ page.title }} | AURA-MF</title>
+    <meta name="title" content="{{ page.title | default: site.title }}">
+    <meta name="description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    <meta name="author" content="{{ site.author }}">
+    <meta name="keywords" content="photovoltaic, multi-fidelity, simulation, CFD, machine learning, solar energy">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    <meta property="og:title" content="{{ page.title | default: site.title }}">
+    <meta property="og:description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ page.url | absolute_url }}">
+    <meta property="twitter:title" content="{{ page.title | default: site.title }}">
+    <meta property="twitter:description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    
+    <!-- SEO Plugin -->
+    {% seo %}
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Compiled CSS from SASS -->
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     
-    <!-- Project-Specific CSS (absolute URL to backend-hub) -->
+    <!-- Project-Specific CSS -->
     <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/aura-mf.css">
 
     <!-- KaTeX for Mathematical Rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" 
+          integrity="sha512-fHwaWebuwA7NSF5Qg/af4UeDx9XqUpYpOGgubo3yWu+b2IQR4UeQwbb42Ti7gVAjNtVoI/I9TEoYeu9omwcC6g==" 
+          crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" 
+            integrity="sha512-LQNxIMR5rXv7o+b1l8+N1EZMfhG7iFZ9HhnbJkTp4zjNr5Wvst75AqUeFDxeRUa7l5vEDyUiAip3tW0zGvsbIg==" 
+            crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" 
+            integrity="sha512-iWiuBS5nt6r60fCz26Nd0Zqe0nbk1ZTIQbl3Kv7kYsX+yKMUFHzjetcfOmWqKBMkCkb4mZO11W5AGJSilCFbIg==" 
+            crossorigin="anonymous"></script>
     
-    <!-- External Libraries via CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    {% if site.favicon %}
+    <link rel="icon" type="image/png" href="{{ site.favicon | relative_url }}">
+    {% endif %}
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#10b981">
+    
+    <!-- RSS Feed -->
+    {% feed_meta %}
 </head>
 <body>
+    <!-- Skip to main content link -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: var(--primary); color: white; text-decoration: none;">
+        Skip to main content
+    </a>
     
     {% include nav_main.html %}
     {% include nav_second.html %}
 
-    <main class="container">
+    <main id="main-content" class="container" role="main">
         <article class="content-area">
             {{ content }}
         </article>
@@ -37,40 +90,59 @@
         {% endif %}
     </main>
 
-    <footer class="footer">
-        <p>Thomas Campagna | Physics & Mathematics</p>
-        <p>&copy; 2025 AURA-MF Project</p>
-        <p>&copy; 2026 CircuitNotes Project</p>
+    <footer class="footer" role="contentinfo">
+        <p>{{ site.author }} | Physics & Mathematics</p>
+        <p>&copy; {{ 'now' | date: "%Y" }} AURA-MF Project</p>
         <p style="font-size: 0.8rem;">Licensed under the MIT License.</p>
-        <a href="https://github.com/THMSCMPG" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        <a href="https://github.com/THMSCMPG" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+            <i class="fab fa-github" aria-hidden="true"></i> GitHub
+        </a>
     </footer>
     
-    <!-- Backend Bridge iframe for contact form and physics API communication -->
-    <!-- DO NOT REMOVE - Critical for backend communication -->
+    <!-- Backend Bridge iframe - DO NOT REMOVE -->
+    <!-- Critical for contact form and physics API communication -->
     <iframe 
         id="backend-bridge" 
         src="https://thmscmpg.github.io/backend-hub" 
         style="display:none; width:0; height:0; border:0;"
-        aria-hidden="true">
+        aria-hidden="true"
+        title="Backend communication bridge">
     </iframe>
 
+    <!-- Scripts -->
     <script>
         // Mobile sidebar toggle
         function toggleSidebar() {
             const sidebar = document.getElementById('mySidebar');
-            sidebar.classList.toggle('open');
-            document.body.classList.toggle('sidebar-open');
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+                document.body.classList.toggle('sidebar-open');
+                sidebar.setAttribute('aria-hidden', !sidebar.classList.contains('open'));
+            }
         }
 
-        // KaTeX Auto-render for mathematical expressions
+        // KaTeX Auto-render
         document.addEventListener("DOMContentLoaded", function() {
             if (typeof renderMathInElement !== 'undefined') {
                 renderMathInElement(document.body, {
                     delimiters: [
                         {left: "$$", right: "$$", display: true},
-                        {left: "$", right: "$", display: false}
-                    ]
+                        {left: "$", right: "$", display: false},
+                        {left: "\\[", right: "\\]", display: true},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false
                 });
+            }
+        });
+        
+        // Close sidebar on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('mySidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
             }
         });
     </script>
