@@ -190,7 +190,9 @@
                         id: confirmation.timestamp 
                     }, '*');
                 }
-            });
+            } catch (err) {
+                console.error('Submission Error:', err);
+                showResponse(err.message || 'Communication failed', false);
 
         
         setInterval(() => {
