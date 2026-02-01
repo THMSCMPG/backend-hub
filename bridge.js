@@ -14,7 +14,7 @@
     const CONFIG = {
         // UPDATED: Your actual Render backend URL
         BACKEND_URL: localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com',
-        TIMEOUT: 15000, // 15 seconds
+        TIMEOUT: 30000, // 30 seconds
         RETRY_ATTEMPTS: 2,
         RETRY_DELAY: 1000
     };
