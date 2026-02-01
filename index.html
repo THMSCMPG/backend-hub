@@ -65,13 +65,13 @@
         <p style="color: #888; font-size: 0.9em;">Active Monitoring: Cross-Origin Message Router</p>
         
         <div class="status active" id="status-bar">
-            <span id="status-icon">✅</span> <span id="status-text">Bridge Protocol Operational</span>
+            <span id="status-icon">✅</span> <span id="status-text">Bridge Operational</span>
         </div>
         
         <div class="stats">
             <div class="stat-item">
                 <label>Messages Routed</label>
-                <div class="value" id="count-val">0</div>
+                <div class="value" id="countEl">0</div>
                 <div class="subvalue">Total traffic volume</div>
             </div>
             <div class="stat-item">
@@ -157,15 +157,15 @@
             if (!action || !id) return;
 
             state.msgCount++;
-            const countEl = document.getElementById('count-val');
+            const countEl = document.getElementById('countEl');
             if (countEl) {
                 countEl.innerText = state.msgCount; // use innerText for reliability
                 countEl.style.color = '#4CAF50'; 
                 setTimeout(() => countEl.style.color = '#fff', 300);
             } else {
-                console.error("CRITICAL: count-val element not found in DOM!");
+                console.error("CRITICAL: countEl element not found in DOM!");
             }
-            document.getElementById('count-val').textContent = state.msgCount;
+            document.getElementById('countEl').textContent = state.msgCount;
             log('traffic', `Received: ${action} (ID: ${id})`);
 
             // 1. Immediate ACK to keep frontend responsive
