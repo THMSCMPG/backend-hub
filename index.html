@@ -135,4 +135,327 @@
             color: #a5b3ce;
             font-size: 0.8rem;
             overflow-x: auto;
-            white
+            white-space: pre-wrap;
+        }
+
+        /* --- SIDEBAR CONTROLS --- */
+        .control-group { margin-bottom: 25px; }
+        
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 8px;
+            transition: opacity 0.2s;
+            color: white;
+        }
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-primary { background: var(--accent-color); }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: #1a1c23; }
+        .btn-danger { background: var(--error); }
+        .btn-outline { background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); }
+
+        .endpoint-list .endpoint {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .endpoint.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-left-color: var(--accent-color);
+        }
+
+        /* Pulse Animation */
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .dot.red { background: var(--error); box-shadow: 0 0 10px var(--error); }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="card header-card">
+        <h1>
+            <span class="dot" id="system-dot"></span>
+            DevOps Bridge Hub
+        </h1>
+        <div class="status-badge" id="bridge-status">
+            <span>●</span> Connected
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">Total Traffic</div>
+                <div class="stat-value" id="msg-count">0</div>
+                <div class="stat-sub" id="msg-rate">0 req/min</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Session Uptime</div>
+                <div class="stat-value" id="uptime">00:00</div>
+                <div class="stat-sub">Since Load</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Last Source</div>
+                <div class="stat-value" id="last-source">None</div>
+                <div class="stat-sub" id="last-time">--:--</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📡 Live Network Stream</h2>
+            <div class="terminal-window" id="terminal">
+                <div class="log-entry">
+                    <span class="log-time">System</span>
+                    <span class="log-source">INIT</span>
+                    <span class="log-msg">Bridge Hub Initialized. Waiting for traffic...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card payload-viewer">
+            <h2>🔍 Last JSON Payload</h2>
+            <pre id="json-viewer">// Waiting for data packet...</pre>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="card control-group">
+            <h2>Backend Health</h2>
+            <div class="endpoint" id="backend-health-indicator">
+                <span>API Status</span>
+                <span style="color: var(--text-secondary)" id="api-latency">Checking...</span>
+            </div>
+            <button class="btn btn-outline" onclick="checkBackend()">Ping Server</button>
+        </div>
+
+        <div class="card control-group endpoint-list">
+            <h2>Active Frontends</h2>
+            <div class="endpoint" id="ep-main">
+                <span>Main Site</span>
+                <span class="dot" style="background: #555; box-shadow:none;"></span>
+            </div>
+            <div class="endpoint" id="ep-circuit">
+                <span>CircuitNotes</span>
+                <span class="dot" style="background: #555; box-shadow:none;"></span>
+            </div>
+            <div class="endpoint" id="ep-aura">
+                <span>AURA-MF</span>
+                <span class="dot" style="background: #555; box-shadow:none;"></span>
+            </div>
+        </div>
+
+        <div class="card control-group">
+            <h2>Dev Tools</h2>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Simulate incoming traffic:</p>
+            <button class="btn btn-success" onclick="simTraffic('success')">Simulate Success</button>
+            <button class="btn btn-warning" onclick="simTraffic('warning')">Simulate Warning</button>
+            <button class="btn btn-danger" onclick="simTraffic('error')">Simulate Error</button>
+            <button class="btn btn-outline" onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // CONFIGURATION & STATE
+    // ============================================
+    const CONFIG = {
+        channelName: 'site_communication', // Must match sender channel
+        backendUrl: 'https://aura-mf-backend.onrender.com/api/health',
+        maxLogs: 50
+    };
+
+    const state = {
+        count: parseInt(sessionStorage.getItem('dev_msg_count')) || 0,
+        startTime: Date.now(),
+        timestamps: []
+    };
+
+    // Restore Count on Load
+    document.getElementById('msg-count').innerText = state.count;
+
+    // ============================================
+    // BROADCAST LISTENER (The Core)
+    // ============================================
+    const channel = new BroadcastChannel(CONFIG.channelName);
+
+    channel.onmessage = (event) => {
+        handleTraffic(event.data);
+    };
+
+    function handleTraffic(data) {
+        // 1. Update Counters
+        state.count++;
+        sessionStorage.setItem('dev_msg_count', state.count);
+        document.getElementById('msg-count').innerText = state.count;
+
+        // 2. Update Rate
+        updateRate();
+
+        // 3. Extract Info
+        const source = data.source || 'Unknown';
+        const payload = data.payload || data; // Fallback if no payload key
+        const type = detectType(payload);
+        
+        // 4. Update UI
+        document.getElementById('last-source').innerText = source.substring(0, 12);
+        document.getElementById('last-time').innerText = new Date().toLocaleTimeString();
+        
+        // 5. Log & Highlight
+        addLog(source, JSON.stringify(payload), type);
+        updateJsonViewer(payload);
+        flashEndpoint(source);
+    }
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    function detectType(payload) {
+        // Simple logic to color code logs based on content
+        const str = JSON.stringify(payload).toLowerCase();
+        if (str.includes('error') || str.includes('fail')) return 'error';
+        if (str.includes('warn')) return 'warning';
+        return 'info';
+    }
+
+    function addLog(source, message, type) {
+        const terminal = document.getElementById('terminal');
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        
+        const row = document.createElement('div');
+        row.className = `log-entry ${type}`;
+        row.innerHTML = `
+            <span class="log-time">${time}</span>
+            <span class="log-source">${source}</span>
+            <span class="log-msg">${message}</span>
+        `;
+
+        terminal.appendChild(row);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        // Cleanup old logs
+        if (terminal.children.length > CONFIG.maxLogs) {
+            terminal.removeChild(terminal.children[1]); // Keep header
+        }
+    }
+
+    function updateJsonViewer(data) {
+        const viewer = document.getElementById('json-viewer');
+        // Pretty print JSON with 2 spaces
+        viewer.textContent = JSON.stringify(data, null, 2);
+        
+        // Visual flash to indicate update
+        viewer.style.backgroundColor = '#2a2d36';
+        setTimeout(() => viewer.style.backgroundColor = '#15171c', 300);
+    }
+
+    function flashEndpoint(source) {
+        let id = 'ep-main'; // Default
+        const s = source.toLowerCase();
+        
+        if (s.includes('circuit')) id = 'ep-circuit';
+        if (s.includes('aura')) id = 'ep-aura';
+
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.add('active');
+            // Turn dot green
+            el.querySelector('.dot').style.background = '#10b981';
+            el.querySelector('.dot').style.boxShadow = '0 0 10px #10b981';
+
+            // Reset after 1 second
+            setTimeout(() => {
+                el.classList.remove('active');
+                el.querySelector('.dot').style.background = '#555';
+                el.querySelector('.dot').style.boxShadow = 'none';
+            }, 1000);
+        }
+    }
+
+    function updateRate() {
+        const now = Date.now();
+        state.timestamps.push(now);
+        // Remove timestamps older than 60s
+        state.timestamps = state.timestamps.filter(t => t > now - 60000);
+        document.getElementById('msg-rate').innerText = `${state.timestamps.length} req/min`;
+    }
+
+    // ============================================
+    // DEV TOOLS & SIMULATION
+    // ============================================
+    
+    function simTraffic(type) {
+        const sources = ['AURA-MF', 'CircuitNotes', 'Main Site'];
+        const src = sources[Math.floor(Math.random() * sources.length)];
+        
+        let payload = { action: 'test_ping', status: 'ok', timestamp: Date.now() };
+        
+        if (type === 'error') payload = { error: 'Database Connection Failed', code: 500 };
+        if (type === 'warning') payload = { warning: 'High Latency Detected', ms: 450 };
+
+        // Send to self to test logic
+        handleTraffic({ source: src, payload: payload });
+    }
+
+    function clearLogs() {
+        document.getElementById('terminal').innerHTML = '';
+        state.count = 0;
+        sessionStorage.setItem('dev_msg_count', 0);
+        document.getElementById('msg-count').innerText = '0';
+        addLog('System', 'Logs cleared by user', 'info');
+    }
+
+    async function checkBackend() {
+        const statusEl = document.getElementById('api-latency');
+        statusEl.innerText = "Pinging...";
+        statusEl.style.color = "#fbbf24"; // yellow
+
+        const start = Date.now();
+        try {
+            // Using fetch with a short timeout
+            const controller = new AbortController();
+            setTimeout(() => controller.abort(), 3000);
+            
+            await fetch(CONFIG.backendUrl, { signal: controller.signal, mode: 'no-cors' }); 
+            // Note: no-cors is opaque, so we assume success if no network error
+            
+            const ms = Date.now() - start;
+            statusEl.innerText = `${ms}ms (OK)`;
+            statusEl.style.color = "#10b981"; // green
+        } catch (e) {
+            statusEl.innerText = "Offline";
+            statusEl.style.color = "#ef4444"; // red
+            addLog('System', `Backend Check Failed: ${e.message}`, 'error');
+        }
+    }
+
+    // ============================================
+    // CLOCK & INIT
+    // ============================================
+    setInterval(() => {
+        const now = Date.now();
+        const diff = Math.floor((now - state.startTime) / 1000);
+        const m = Math.floor(diff / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('uptime').innerText = `${m}:${s}`;
+    }, 1000);
+
+    // Initial backend check
+    setTimeout(checkBackend, 1000);
+
+</script>
+</body>
+</html>
