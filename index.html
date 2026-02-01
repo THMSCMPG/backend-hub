@@ -128,7 +128,7 @@
         let messageCount = 0;
         
         async function checkBackendHealth() {
-            const backendUrl = localStorage.getItem('BACKEND_URL') || 'https://your-app.onrender.com';
+            const backendUrl = localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com';
             try {
                 const response = await fetch(`${backendUrl}/api/health`);
                 const data = await response.json();
