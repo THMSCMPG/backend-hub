@@ -103,6 +103,13 @@
             isOnline: false
         };
 
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('backend-url-display').textContent = CONFIG.BACKEND_URL.replace('https://', '');
+            document.getElementById('start-val').textContent = `Session started ${new Date().toLocaleTimeString()}`;
+            // Initial Health Check
+            checkHealth();
+            setInterval(checkHealth, 30000);
+        });
         document.getElementById('backend-url-display').textContent = CONFIG.BACKEND_URL.replace('https://', '');
 
         function log(type, msg) {
@@ -159,7 +166,7 @@
             }
             document.getElementById('count-val').textContent = state.msgCount;
             log('traffic', `Received: ${action} (ID: ${id})`);
-            
+
             // 1. Immediate ACK to keep frontend responsive
             event.source.postMessage({ id, status: 'success', data: { received: true } }, event.origin);
 
@@ -182,12 +189,12 @@
             }
         });
 
-        // UI Refreshers
         setInterval(() => {
             const diff = Math.floor((Date.now() - state.startTime) / 1000);
             const m = Math.floor(diff / 60).toString().padStart(2, '0');
             const s = (diff % 60).toString().padStart(2, '0');
-            document.getElementById('uptime-val').textContent = `${m}:${s}`;
+            const upEl = document.getElementById('uptime-val');
+            if (upEl) upEl.textContent = `${m}:${s}`;
         }, 1000);
 
         setInterval(checkHealth, 30000);
