@@ -90,10 +90,21 @@
         </div>
     </div>
 
+    <!-- ================================================================
+         bridge.js is the actual message router with full retry logic.
+         The monitor UI below is display-only; it taps into the same
+         'message' event to update counters and the terminal log.
+         ============================================================== -->
+    <script src="bridge.js"></script>
+
     <script>
-        const CONFIG = {
-            BACKEND_URL: 'https://aura-mf-backend.onrender.com',
-            TIMEOUT: 120000
+        // ──────────────────────────────────────────────────────────────
+        // MONITOR UI — display-only layer for the terminal dashboard.
+        // Does NOT intercept or handle any messages; bridge.js does that.
+        // ──────────────────────────────────────────────────────────────
+
+        const MONITOR_CONFIG = {
+            BACKEND_URL: 'https://aura-mf-backend.onrender.com'
         };
 
         const state = {
@@ -116,11 +127,11 @@
         async function checkHealth() {
             const start = Date.now();
             try {
-                const res = await fetch(`${CONFIG.BACKEND_URL}/api/health`);
+                const res = await fetch(`${MONITOR_CONFIG.BACKEND_URL}/api/health`);
                 const lat = Date.now() - start;
                 document.getElementById('latency-val').textContent = `${lat}ms`;
                 document.getElementById('latency-val').style.color = lat > 500 ? '#f59e0b' : '#4CAF50';
-                if(!state.isOnline) {
+                if (!state.isOnline) {
                     log('success', 'Backend link established');
                     state.isOnline = true;
                 }
@@ -131,43 +142,22 @@
             }
         }
 
-        window.addEventListener('message', async (event) => {
+        // Passive observer: counts messages flowing through for the dashboard.
+        // Does NOT call postMessage or handle any routing.
+        window.addEventListener('message', (event) => {
             if (!event.origin.includes('github.io') && !event.origin.includes('localhost')) return;
 
-            const { action, id, payload } = event.data;
+            const { action, id } = event.data || {};
             if (!action || !id) return;
 
             state.msgCount++;
             document.getElementById('countEl').textContent = state.msgCount;
-            log('traffic', `Received: ${action} (ID: ${id})`);
-
-            if (action === 'RENDER_CONFIRMED') {
-                log('success', 'Render confirmed receipt');
-                return;
-            }
-
-            try {
-                let endpoint = action.includes('CONTACT') ? '/api/contact' : '/api/simulate';
-                const response = await fetch(`${CONFIG.BACKEND_URL}${endpoint}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    log('success', `Relayed to Render: ${endpoint}`);
-                    event.source.postMessage({ id, status: 'success' }, event.origin);
-                } else {
-                    log('error', `Backend rejected request: ${response.status}`);
-                }
-            } catch (err) {
-                log('error', `Relay failed: ${err.message}`);
-            }
+            log('traffic', `Observed: ${action} (ID: ${id})`);
         });
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('backend-url-display').textContent = CONFIG.BACKEND_URL.replace('https://', '');
+            document.getElementById('backend-url-display').textContent = MONITOR_CONFIG.BACKEND_URL.replace('https://', '');
             document.getElementById('start-val').textContent = `Session started ${new Date().toLocaleTimeString()}`;
             checkHealth();
             setInterval(checkHealth, 30000);
