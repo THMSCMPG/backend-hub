@@ -13,9 +13,8 @@
  *   - ML confidence tracking
  *   - Error handling and reconnection logic
  * 
- * 
- * Author: THMSCMPG
- * Version: 1.2.0 (Fixed)
+ * Version: 1.3.0 (Production-Ready)
+ * Fixed: Temperature unit handling, heatmap rendering, ID synchronization
  */
 
 // ============================================================================
@@ -24,11 +23,11 @@
 
 const CONFIG = window.DASHBOARD_CONFIG || {
     API_BASE_URL: 'https://aura-mf-backend.onrender.com',
-    TIMEOUT: 15000,          // AbortController timeout (ms)
-    FETCH_INTERVAL: 5000,    // polling interval (ms) — 5s for free-tier Render
+    TIMEOUT: 30000,          // Extended for cold starts
+    FETCH_INTERVAL: 5000,    // 5 seconds for live updates
     LIVE_UPDATE_ENABLED: false,
     
-    // Dashboard Element IDs
+    // Dashboard Element IDs - SYNCHRONIZED WITH HTML
     ELEMENTS: {
         temperatureCanvas: 'temperatureHeatmap',
         runButton: 'run-button',
@@ -47,53 +46,15 @@ const CONFIG = window.DASHBOARD_CONFIG || {
     
     // Visualization Settings
     HEATMAP: {
-        colorScheme: 'thermal',  // 'thermal' or 'viridis'
-        showGrid: true,
-        showValues: false  // Show temperature values on cells
+        colorScheme: 'turbo',  // 'turbo' or 'thermal'
+        showGrid: false,
+        showValues: false
     }
 };
 
 // ============================================================================
 // STATE MANAGEMENT
 // ============================================================================
-
-// 1. Slider Display Logic
-const sliderConfigs = [
-    {id: 'solar-irradiance', display: 'solar-value', format: v => v},
-    {id: 'ambient-temperature', display: 'temp-value', format: v => (v - 273.15).toFixed(1)},
-    {id: 'wind-speed', display: 'wind-value', format: v => parseFloat(v).toFixed(1)},
-    {id: 'cell-efficiency', display: 'efficiency-value', format: v => (v * 100).toFixed(0)},
-    {id: 'thermal-conductivity', display: 'conductivity-value', format: v => v},
-    {id: 'absorptivity', display: 'absorptivity-value', format: v => parseFloat(v).toFixed(2)},
-    {id: 'emissivity', display: 'emissivity-value', format: v => parseFloat(v).toFixed(2)}
-];
-
-// Initialize sliders when the page loads
-window.addEventListener('DOMContentLoaded', () => {
-    sliderConfigs.forEach(s => {
-        const el = document.getElementById(s.id);
-        const disp = document.getElementById(s.display);
-        if (el && disp) {
-            el.addEventListener('input', () => disp.textContent = s.format(el.value));
-            // Set initial values
-            disp.textContent = s.format(el.value);
-        }
-    });
-});
-
-// 2. The Toggle Logic
-window.toggleLiveUpdates = function(isEnabled) {
-    // This assumes you added LIVE_UPDATE_ENABLED: false to your CONFIG object
-    CONFIG.LIVE_UPDATE_ENABLED = isEnabled;
-    
-    if (isEnabled) {
-        console.log("▶️ Live Mode Active");
-        updateLoop(); 
-    } else {
-        console.log("⏹️ Live Mode Paused");
-        // The loop will naturally stop at the next check in updateLoop()
-    }
-};
 
 class DashboardState {
     constructor() {
@@ -131,48 +92,54 @@ class DashboardState {
 const dashboardState = new DashboardState();
 
 // ============================================================================
+// SLIDER INITIALIZATION
+// ============================================================================
+
+const sliderConfigs = [
+    {id: 'solar-irradiance', display: 'solar-value', format: v => v},
+    {id: 'ambient-temperature', display: 'temp-value', format: v => (v - 273.15).toFixed(1)},
+    {id: 'wind-speed', display: 'wind-value', format: v => parseFloat(v).toFixed(1)},
+    {id: 'cell-efficiency', display: 'efficiency-value', format: v => (v * 100).toFixed(0)},
+    {id: 'thermal-conductivity', display: 'conductivity-value', format: v => v},
+    {id: 'absorptivity', display: 'absorptivity-value', format: v => parseFloat(v).toFixed(2)},
+    {id: 'emissivity', display: 'emissivity-value', format: v => parseFloat(v).toFixed(2)}
+];
+
+// Initialize sliders when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+    sliderConfigs.forEach(s => {
+        const el = document.getElementById(s.id);
+        const disp = document.getElementById(s.display);
+        if (el && disp) {
+            el.addEventListener('input', () => disp.textContent = s.format(el.value));
+            // Set initial values
+            disp.textContent = s.format(el.value);
+        }
+    });
+});
+
+// ============================================================================
+// LIVE UPDATE TOGGLE
+// ============================================================================
+
+window.toggleLiveUpdates = function(isEnabled) {
+    CONFIG.LIVE_UPDATE_ENABLED = isEnabled;
+    
+    if (isEnabled) {
+        console.log("▶️ Live Mode Active");
+        updateLoop(); 
+    } else {
+        console.log("⏹️ Live Mode Paused");
+    }
+};
+
+// ============================================================================
 // API COMMUNICATION
 // ============================================================================
 
-async function fetchSimulationData() {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
-    
-    // Helper to get slider values safely
-    const getVal = (id) => parseFloat(document.getElementById(id)?.value);
-
-    const currentParams = {
-        solar: getVal('solar-irradiance') || 1000,
-        wind: getVal('wind-speed') || 1.0,
-        // CRITICAL: Convert Slider Celsius to Backend Kelvin
-        ambient: getVal('ambient-temperature') + 273.15, 
-        cell_efficiency: getVal('cell-efficiency') || 0.20,
-        thermal_conductivity: getVal('thermal-conductivity') || 130,
-        absorptivity: getVal('absorptivity') || 0.95,
-        emissivity: getVal('emissivity') || 0.90
-    };
-
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentParams),
-            signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const data = await response.json();
-        dashboardState.recordSuccess(data);
-        return data;
-    } catch (error) {
-        clearTimeout(timeoutId);
-        dashboardState.recordError();
-        throw error;
-    }
-}
-
+/**
+ * Main simulation function - called by button click or live updates
+ */
 window.runSimulation = async function() {
     const runBtn = document.getElementById(CONFIG.ELEMENTS.runButton);
     const loading = document.getElementById(CONFIG.ELEMENTS.loading);
@@ -188,41 +155,67 @@ window.runSimulation = async function() {
     }
 
     try {
-        // 2. Collect Parameters (Direct Kelvin from slider)
+        // 2. Collect Parameters
+        // CRITICAL FIX: Slider value is ALREADY in Kelvin (280-330 range)
+        // Do NOT add 273.15!
         const params = {
-            solar: parseFloat(document.getElementById('solar-irradiance').value),
-            ambient: parseFloat(document.getElementById('ambient-temperature').value), // Removed + 273.15
-            wind: parseFloat(document.getElementById('wind-speed').value),
-            cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
-            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
-            absorptivity: parseFloat(document.getElementById('absorptivity').value),
-            emissivity: parseFloat(document.getElementById('emissivity').value)
+            solar: parseFloat(document.getElementById('solar-irradiance')?.value || 1000),
+            ambient: parseFloat(document.getElementById('ambient-temperature')?.value || 298.15), // Already Kelvin
+            wind: parseFloat(document.getElementById('wind-speed')?.value || 2.0),
+            cell_efficiency: parseFloat(document.getElementById('cell-efficiency')?.value || 0.20),
+            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity')?.value || 130),
+            absorptivity: parseFloat(document.getElementById('absorptivity')?.value || 0.95),
+            emissivity: parseFloat(document.getElementById('emissivity')?.value || 0.90)
         };
 
-        // 3. API Request
+        console.log('📤 Sending parameters:', params);
+
+        // 3. API Request with extended timeout for cold starts
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
+
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(params)
+            body: JSON.stringify(params),
+            signal: controller.signal
         });
 
-        const data = await response.json();
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-            throw new Error(data.error || `Server responded with ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server error ${response.status}`);
         }
+
+        const data = await response.json();
+        console.log('📥 Received data:', data);
         
         // 4. Update State and UI
         dashboardState.recordSuccess(data);
-        if (results) results.style.display = 'block'; // Ensure container is visible
+        if (results) results.style.display = 'block';
         updateDashboard(data);
+        updateStatusIndicator(true);
 
     } catch (error) {
-        console.error('Simulation Error:', error);
+        console.error('❌ Simulation Error:', error);
+        
+        // Enhanced error messages
+        let errorMessage = error.message;
+        if (error.name === 'AbortError') {
+            errorMessage = 'Backend is waking up (cold start). Please try again in 10 seconds.';
+        } else if (errorMessage.includes('Failed to fetch')) {
+            errorMessage = 'Cannot connect to backend. Check if https://aura-mf-backend.onrender.com is online.';
+        }
+        
         if (errorEl) {
-            errorEl.textContent = '❌ ' + error.message;
+            errorEl.textContent = `❌ ${errorMessage}`;
             errorEl.classList.add('active');
         }
+        
+        dashboardState.recordError();
+        updateStatusIndicator(false);
+        
     } finally {
         // 5. Restore UI
         if (runBtn) runBtn.disabled = false;
@@ -231,59 +224,61 @@ window.runSimulation = async function() {
 };
 
 // ============================================================================
-// VISUALIZATION
+// VISUALIZATION - HEATMAP
 // ============================================================================
 
 /**
- * Color interpolation for heatmap
+ * Turbo colormap - perceptually uniform, blue to red
  */
-function getHeatmapColor(value, min, max, scheme = 'thermal') {
-    // Normalize value to 0-1
-    const normalized = (value - min) / (max - min);
+function getTurboColor(normalized) {
+    // Clamp to [0, 1]
+    const t = Math.max(0, Math.min(1, normalized));
     
-    if (scheme === 'thermal') {
-        // Blue → Green → Yellow → Red (thermal scale)
-        if (normalized < 0.25) {
-            // Blue to Cyan
-            const t = normalized * 4;
-            return `rgb(${Math.round(0 * (1-t) + 0 * t)}, 
-                        ${Math.round(0 * (1-t) + 255 * t)}, 
-                        ${Math.round(255 * (1-t) + 255 * t)})`;
-        } else if (normalized < 0.5) {
-            // Cyan to Green
-            const t = (normalized - 0.25) * 4;
-            return `rgb(0, 
-                        ${Math.round(255)}, 
-                        ${Math.round(255 * (1-t) + 0 * t)})`;
-        } else if (normalized < 0.75) {
-            // Green to Yellow
-            const t = (normalized - 0.5) * 4;
-            return `rgb(${Math.round(0 * (1-t) + 255 * t)}, 
-                        ${Math.round(255)}, 
-                        0)`;
-        } else {
-            // Yellow to Red
-            const t = (normalized - 0.75) * 4;
-            return `rgb(255, 
-                        ${Math.round(255 * (1-t) + 0 * t)}, 
-                        0)`;
-        }
-    }
+    // Turbo-inspired HSL gradient
+    const hue = (1 - t) * 240;  // 240 (blue) → 0 (red)
+    const saturation = 70 + t * 20;  // 70% → 90%
+    const lightness = 45 + t * 10;   // 45% → 55%
     
-    // Default: Simple blue to red
-    return `rgb(${Math.round(normalized * 255)}, 
-                0, 
-                ${Math.round((1 - normalized) * 255)})`;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 /**
- * FIXED: Handles Kelvin-to-Celsius conversion and provides 
- * structural safety for the 2D array rendering.
+ * Thermal colormap - blue → cyan → yellow → red
+ */
+function getThermalColor(normalized) {
+    const t = Math.max(0, Math.min(1, normalized));
+    
+    if (t < 0.25) {
+        // Blue to Cyan
+        const local = t * 4;
+        return `rgb(0, ${Math.round(local * 255)}, 255)`;
+    } else if (t < 0.5) {
+        // Cyan to Green
+        const local = (t - 0.25) * 4;
+        return `rgb(0, 255, ${Math.round((1 - local) * 255)})`;
+    } else if (t < 0.75) {
+        // Green to Yellow
+        const local = (t - 0.5) * 4;
+        return `rgb(${Math.round(local * 255)}, 255, 0)`;
+    } else {
+        // Yellow to Red
+        const local = (t - 0.75) * 4;
+        return `rgb(255, ${Math.round((1 - local) * 255)}, 0)`;
+    }
+}
+
+/**
+ * CRITICAL FIX: Proper heatmap rendering with correct temperature handling
  */
 function drawTemperatureHeatmap(canvasId, temperatureField) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas || !temperatureField || !temperatureField.length) {
-        console.warn('Heatmap skip: Canvas or data field missing');
+    if (!canvas) {
+        console.warn('Canvas element not found:', canvasId);
+        return;
+    }
+    
+    if (!temperatureField || !temperatureField.length) {
+        console.warn('Temperature field data is invalid or empty');
         return;
     }
 
@@ -295,7 +290,7 @@ function drawTemperatureHeatmap(canvasId, temperatureField) {
     const cellWidth = canvas.width / cols;
     const cellHeight = canvas.height / rows;
 
-    // 1. Data Analysis: Find Min/Max in Kelvin
+    // 1. Find Min/Max in the temperature field (Kelvin)
     let minK = Infinity;
     let maxK = -Infinity;
 
@@ -307,33 +302,41 @@ function drawTemperatureHeatmap(canvasId, temperatureField) {
         }
     }
 
-    // 2. Rendering Loop
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            const tempK = temperatureField[i][j];
-            
-            // CONVERSION: Map Kelvin to Celsius for the color logic
-            // (Assuming standard 273.15 offset)
-            const tempC = tempK - 273.15;
-            const minC = minK - 273.15;
-            const maxC = maxK - 273.15;
+    // Convert to Celsius for display
+    const minC = minK - 273.15;
+    const maxC = maxK - 273.15;
+    const range = maxC - minC || 1;  // Avoid division by zero
 
-            // Get color based on relative position in the current range
-            ctx.fillStyle = getHeatmapColor(tempC, minC, maxC, CONFIG.HEATMAP.colorScheme);
+    // 2. Rendering Loop
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const tempK = temperatureField[row][col];
+            const tempC = tempK - 273.15;
             
-            // Draw the cell (using floor/ceil to prevent sub-pixel gaps)
+            // Normalize to [0, 1]
+            const normalized = (tempC - minC) / range;
+            
+            // Get color based on scheme
+            if (CONFIG.HEATMAP.colorScheme === 'thermal') {
+                ctx.fillStyle = getThermalColor(normalized);
+            } else {
+                ctx.fillStyle = getTurboColor(normalized);
+            }
+            
+            // Draw the cell with slight overlap to avoid gaps
             ctx.fillRect(
-                Math.floor(j * cellWidth), 
-                Math.floor(i * cellHeight), 
-                Math.ceil(cellWidth), 
-                Math.ceil(cellHeight)
+                Math.floor(col * cellWidth), 
+                Math.floor(row * cellHeight), 
+                Math.ceil(cellWidth + 1), 
+                Math.ceil(cellHeight + 1)
             );
         }
     }
 
     // 3. Update Legend Labels
-    updateHeatmapLegend(minK - 273.15, maxK - 273.15);
+    updateHeatmapLegend(minC, maxC);
 }
+
 // ============================================================================
 // UI UPDATES
 // ============================================================================
@@ -397,34 +400,35 @@ function updateMLConfidence(confidence) {
 function updateTemperatureStats(stats) {
     if (!stats) return;
     
-    const elements = {
-        min: document.getElementById(CONFIG.ELEMENTS.minTemp),
-        max: document.getElementById(CONFIG.ELEMENTS.maxTemp),
-        avg: document.getElementById(CONFIG.ELEMENTS.avgTemp)
-    };
+    // CRITICAL: Stats are already in Celsius from backend
+    const avgEl = document.getElementById(CONFIG.ELEMENTS.avgTemp);
+    if (avgEl) avgEl.textContent = `${stats.avg_t.toFixed(1)} °C`;
     
-    if (elements.min) elements.min.textContent = stats.min_t.toFixed(2) + '°C';
-    if (elements.max) elements.max.textContent = stats.max_t.toFixed(2) + '°C';
-    if (elements.avg) elements.avg.textContent = stats.avg_t.toFixed(2) + '°C';
+    const maxEl = document.getElementById(CONFIG.ELEMENTS.maxTemp);
+    if (maxEl) maxEl.textContent = `${stats.max_t.toFixed(1)} °C`;
+    
+    const minEl = document.getElementById('minTemp');
+    if (minEl) minEl.textContent = `${stats.min_t.toFixed(1)} °C`;
 }
 
 /**
  * Update simulation time
  */
-function updateSimulationTime(timestamp) {
+function updateSimulationTime(runtimeMs) {
     const element = document.getElementById(CONFIG.ELEMENTS.simulationTime);
     if (!element) return;
     
-    element.textContent = `${timestamp.toFixed(1)}s`;
+    element.textContent = `${runtimeMs.toFixed(1)} ms`;
 }
+
 /**
-* Update heatmap legend
-**/
+ * Update heatmap legend
+ */
 function updateHeatmapLegend(minC, maxC) {
     const minEl = document.getElementById('heatmap-min-val');
     const maxEl = document.getElementById('heatmap-max-val');
-    if (minEl) minEl.textContent = minC.toFixed(1) + '°C';
-    if (maxEl) maxEl.textContent = maxC.toFixed(1) + '°C';
+    if (minEl) minEl.textContent = `${minC.toFixed(1)}°C`;
+    if (maxEl) maxEl.textContent = `${maxC.toFixed(1)}°C`;
 }
 
 /**
@@ -435,27 +439,29 @@ function updateStatusIndicator(isConnected) {
     if (!element) return;
     
     if (isConnected) {
-        element.textContent = '🟢 Connected';
+        element.textContent = '🟢 Engine Connected';
+        element.className = 'status-online';
         element.style.color = '#4CAF50';
     } else {
-        element.textContent = '🔴 Disconnected';
+        element.textContent = '🔴 Connection Lost';
+        element.className = '';
         element.style.color = '#F44336';
     }
 }
 
 /**
- * Update fidelity history chart (simple text-based)
+ * Update fidelity history chart
  */
 function updateFidelityHistory() {
     const element = document.getElementById(CONFIG.ELEMENTS.fidelityHistory);
     if (!element || dashboardState.fidelityHistory.length === 0) return;
     
-    const symbols = ['▁', '▄', '▇'];  // LF, MF, HF
+    const icons = ['⚡', '⚙️', '🔥'];  // LF, MF, HF
     const colors = ['#4CAF50', '#FF9800', '#F44336'];
     
     let html = '';
     for (let fidelity of dashboardState.fidelityHistory.slice(-30)) {
-        html += `<span style="color: ${colors[fidelity]}">${symbols[fidelity]}</span>`;
+        html += `<span style="color: ${colors[fidelity]}">${icons[fidelity]}</span>`;
     }
     
     element.innerHTML = html;
@@ -466,6 +472,8 @@ function updateFidelityHistory() {
  */
 function updateDashboard(data) {
     try {
+        console.log('🔄 Updating dashboard with data:', data);
+        
         // Temperature heatmap
         drawTemperatureHeatmap(CONFIG.ELEMENTS.temperatureCanvas, data.temperature_field);
         
@@ -478,25 +486,26 @@ function updateDashboard(data) {
         // ML confidence
         updateMLConfidence(data.ml_confidence);
         
-        // Simulation time
-        updateSimulationTime(data.timestamp);
+        // Simulation time (use runtime_ms from stats)
+        if (data.stats && data.stats.runtime_ms !== undefined) {
+            updateSimulationTime(data.stats.runtime_ms);
+        }
         
         // Temperature statistics
         updateTemperatureStats(data.stats);
         
-        // Status indicator
-        updateStatusIndicator(true);
-        
         // Fidelity history
         updateFidelityHistory();
         
+        console.log('✅ Dashboard updated successfully');
+        
     } catch (error) {
-        console.error('Error updating dashboard:', error);
+        console.error('❌ Error updating dashboard:', error);
     }
 }
 
 // ============================================================================
-// MAIN UPDATE LOOP
+// MAIN UPDATE LOOP (for live updates)
 // ============================================================================
 
 /**
@@ -509,11 +518,11 @@ async function updateLoop() {
     }
     
     try {
-        const data = await fetchSimulationData();
-        updateDashboard(data);
+        // Reuse the runSimulation function for consistency
+        await window.runSimulation();
         
     } catch (error) {
-        updateStatusIndicator(false);
+        console.error('Update loop error:', error);
         
         // Exponential backoff on errors
         if (dashboardState.errorCount > 5) {
@@ -537,6 +546,7 @@ async function updateLoop() {
  */
 function initializeDashboard() {
     console.log('🚀 AURA-MF Dashboard initializing...');
+    console.log('📍 API URL:', CONFIG.API_BASE_URL);
     
     // Verify required elements exist
     const requiredElements = [
@@ -546,25 +556,43 @@ function initializeDashboard() {
         CONFIG.ELEMENTS.mlConfidence
     ];
     
+    const missing = [];
     for (let elementId of requiredElements) {
         if (!document.getElementById(elementId)) {
-            console.warn(`Warning: Required element '${elementId}' not found`);
+            missing.push(elementId);
+            console.warn(`⚠️ Warning: Required element '${elementId}' not found`);
         }
+    }
+    
+    if (missing.length === 0) {
+        console.log('✅ All required elements found');
+    } else {
+        console.error('❌ Missing elements:', missing);
     }
     
     // Set canvas size if exists
     const canvas = document.getElementById(CONFIG.ELEMENTS.temperatureCanvas);
-    if (canvas && canvas.width === 0) {
-        canvas.width = 400;
-        canvas.height = 400;
+    if (canvas) {
+        if (canvas.width === 0 || canvas.height === 0) {
+            canvas.width = 400;
+            canvas.height = 400;
+        }
+        console.log(`📐 Canvas size: ${canvas.width}×${canvas.height}`);
     }
     
-    // Start update loop
-    updateLoop();
+    // Check backend health
+    fetch(`${CONFIG.API_BASE_URL}/api/health`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('✅ Backend health check passed:', data);
+            updateStatusIndicator(true);
+        })
+        .catch(error => {
+            console.warn('⚠️ Backend not immediately available (may be in cold start):', error.message);
+            updateStatusIndicator(false);
+        });
     
     console.log('✓ Dashboard initialized');
-    console.log(`  Fetching from: ${CONFIG.API_BASE_URL}`);
-    console.log(`  Update interval: ${CONFIG.FETCH_INTERVAL}ms`);
 }
 
 // Start when DOM is ready
@@ -580,8 +608,11 @@ if (document.readyState === 'loading') {
 
 // Make functions available globally for testing
 window.AURADashboard = {
-    fetchSimulationData,
+    runSimulation: window.runSimulation,
     updateDashboard,
     dashboardState,
-    CONFIG
+    CONFIG,
+    drawTemperatureHeatmap
 };
+
+console.log('📦 dashboard_scripts.js v1.3.0 loaded');
