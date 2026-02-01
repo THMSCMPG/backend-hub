@@ -58,13 +58,5 @@ if (savedData) {
 }
 ```
 
-### File Structure
-```plaintext
-/aura-mf-backend
-  ├── README.md
-  ├── .gitignore
-  ├── app.py
-  └── requirements.txt
-```
 
 
