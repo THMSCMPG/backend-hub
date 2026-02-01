@@ -18,444 +18,178 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-gradient); color: var(--text-primary); min-height: 100vh; padding: 20px; display: flex; justify-content: center; }
+        .dashboard { width: 100%; max-width: 1200px; display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
 
-        body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+        .header-card { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border-left: 3px solid var(--accent-color); }
+        .stat-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; }
 
-        .dashboard {
-            width: 100%;
-            max-width: 1200px;
-            display: grid;
-            grid-template-columns: 1fr 350px; /* Main Content | Sidebar */
-            gap: 20px;
-        }
-
-        /* Responsive Layout */
-        @media (max-width: 900px) {
-            .dashboard { grid-template-columns: 1fr; }
-        }
-
-        /* --- CARDS --- */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .header-card {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(90deg, #24262d 0%, #2d3039 100%);
-        }
-
-        h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 12px; }
-        h2 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 15px; }
-
-        .status-badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .status-badge.offline { background: rgba(239, 68, 68, 0.15); color: var(--error); }
-
-        /* --- STATS GRID --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .stat-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 5px; }
-        .stat-sub { font-size: 0.8rem; color: var(--text-secondary); }
-
-        /* --- TERMINAL (LOGS) --- */
-        .terminal-window {
-            height: 400px;
-            background: var(--terminal-bg);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-size: 0.85rem;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: grid;
-            grid-template-columns: 80px 100px 1fr;
-            gap: 10px;
-            align-items: start;
-        }
-
+        .terminal-window { height: 350px; background: var(--terminal-bg); border-radius: 8px; padding: 15px; font-family: monospace; font-size: 0.85rem; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .log-entry { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 80px 100px 1fr; gap: 10px; }
         .log-time { color: var(--text-secondary); }
         .log-source { color: var(--accent-color); font-weight: bold; }
-        .log-msg { word-break: break-word; color: #d1d5db; }
-        
+        .log-msg { word-break: break-all; color: #d1d5db; }
         .log-entry.error .log-msg { color: var(--error); }
-        .log-entry.warning .log-msg { color: var(--warning); }
-
-        /* --- PAYLOAD INSPECTOR --- */
-        .payload-viewer {
-            margin-top: 20px;
-        }
         
-        pre {
-            background: #15171c;
-            padding: 15px;
-            border-radius: 6px;
-            color: #a5b3ce;
-            font-size: 0.8rem;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-
-        /* --- SIDEBAR CONTROLS --- */
-        .control-group { margin-bottom: 25px; }
+        pre { background: #15171c; padding: 15px; border-radius: 6px; color: #a5b3ce; font-size: 0.8rem; overflow-x: auto; white-space: pre-wrap; }
         
-        .btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-bottom: 8px;
-            transition: opacity 0.2s;
-            color: white;
-        }
-        .btn:hover { opacity: 0.9; }
-        
-        .btn-primary { background: var(--accent-color); }
-        .btn-success { background: var(--success); }
-        .btn-warning { background: var(--warning); color: #1a1c23; }
-        .btn-danger { background: var(--error); }
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 8px; color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); }
-
-        .endpoint-list .endpoint {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 8px;
-            border-radius: 6px;
-            border-left: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .endpoint.active {
-            background: rgba(99, 102, 241, 0.15);
-            border-left-color: var(--accent-color);
-        }
-
-        /* Pulse Animation */
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
-        .dot.red { background: var(--error); box-shadow: 0 0 10px var(--error); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
     <div class="card header-card">
-        <h1>
-            <span class="dot" id="system-dot"></span>
-            DevOps Bridge Hub
-        </h1>
-        <div class="status-badge" id="bridge-status">
-            <span>●</span> Connected
-        </div>
+        <h1><span class="dot"></span> DevOps Bridge Hub</h1>
+        <div id="api-status" style="color: var(--text-secondary); font-size: 0.9rem;">API: Checking...</div>
     </div>
 
     <div class="main-content">
         <div class="stats-grid">
             <div class="stat-box">
-                <div class="stat-label">Total Traffic</div>
+                <div class="stat-label">Messages</div>
                 <div class="stat-value" id="msg-count">0</div>
-                <div class="stat-sub" id="msg-rate">0 req/min</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Session Uptime</div>
+                <div class="stat-label">Uptime</div>
                 <div class="stat-value" id="uptime">00:00</div>
-                <div class="stat-sub">Since Load</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Last Source</div>
-                <div class="stat-value" id="last-source">None</div>
-                <div class="stat-sub" id="last-time">--:--</div>
+                <div class="stat-label">Status</div>
+                <div class="stat-value" style="color: var(--success); font-size: 1.2rem;">READY</div>
             </div>
         </div>
 
         <div class="card">
-            <h2>📡 Live Network Stream</h2>
+            <h2>📡 Network Traffic</h2>
             <div class="terminal-window" id="terminal">
-                <div class="log-entry">
-                    <span class="log-time">System</span>
-                    <span class="log-source">INIT</span>
-                    <span class="log-msg">Bridge Hub Initialized. Waiting for traffic...</span>
-                </div>
+                <div class="log-entry"><span class="log-time">System</span><span class="log-source">INIT</span><span class="log-msg">Bridge active. Listening for cross-origin requests...</span></div>
             </div>
         </div>
 
-        <div class="card payload-viewer">
-            <h2>🔍 Last JSON Payload</h2>
-            <pre id="json-viewer">// Waiting for data packet...</pre>
+        <div class="card">
+            <h2>🔍 Last Payload</h2>
+            <pre id="json-viewer">// No data received yet...</pre>
         </div>
     </div>
 
     <div class="sidebar">
-        <div class="card control-group">
-            <h2>Backend Health</h2>
-            <div class="endpoint" id="backend-health-indicator">
-                <span>API Status</span>
-                <span style="color: var(--text-secondary)" id="api-latency">Checking...</span>
-            </div>
-            <button class="btn btn-outline" onclick="checkBackend()">Ping Server</button>
-        </div>
-
-        <div class="card control-group endpoint-list">
-            <h2>Active Frontends</h2>
-            <div class="endpoint" id="ep-main">
-                <span>Main Site</span>
-                <span class="dot" style="background: #555; box-shadow:none;"></span>
-            </div>
-            <div class="endpoint" id="ep-circuit">
-                <span>CircuitNotes</span>
-                <span class="dot" style="background: #555; box-shadow:none;"></span>
-            </div>
-            <div class="endpoint" id="ep-aura">
-                <span>AURA-MF</span>
-                <span class="dot" style="background: #555; box-shadow:none;"></span>
-            </div>
-        </div>
-
-        <div class="card control-group">
-            <h2>Dev Tools</h2>
-            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Simulate incoming traffic:</p>
-            <button class="btn btn-success" onclick="simTraffic('success')">Simulate Success</button>
-            <button class="btn btn-warning" onclick="simTraffic('warning')">Simulate Warning</button>
-            <button class="btn btn-danger" onclick="simTraffic('error')">Simulate Error</button>
-            <button class="btn btn-outline" onclick="clearLogs()">Clear Logs</button>
+        <div class="card">
+            <h2>Configuration</h2>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Backend Target:</p>
+            <code id="current-url" style="font-size: 0.7rem; display: block; margin-bottom: 15px; color: var(--accent-color);"></code>
+            <button class="btn btn-outline" onclick="location.reload()">Refresh Hub</button>
+            <button class="btn btn-outline" onclick="clearLogs()">Clear Console</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ============================================
-    // CONFIGURATION & STATE
-    // ============================================
+    /**
+     * BRIDGE LOGIC & UI INTEGRATION
+     */
     const CONFIG = {
-        channelName: 'site_communication', // Must match sender channel
-        backendUrl: 'https://aura-mf-backend.onrender.com/api/health',
-        maxLogs: 50
+        BACKEND_URL: 'https://aura-mf-backend.onrender.com',
+        TIMEOUT: 30000
     };
 
-    const state = {
-        count: parseInt(sessionStorage.getItem('dev_msg_count')) || 0,
-        startTime: Date.now(),
-        timestamps: []
-    };
+    const state = { count: 0, startTime: Date.now() };
+    document.getElementById('current-url').innerText = CONFIG.BACKEND_URL;
 
-    // Restore Count on Load
-    document.getElementById('msg-count').innerText = state.count;
-
-    // ============================================
-    // BROADCAST LISTENER (The Core)
-    // ============================================
-    const channel = new BroadcastChannel(CONFIG.channelName);
-
-    channel.onmessage = (event) => {
-        handleTraffic(event.data);
-    };
-
-    function handleTraffic(data) {
-        // 1. Update Counters
-        state.count++;
-        sessionStorage.setItem('dev_msg_count', state.count);
-        document.getElementById('msg-count').innerText = state.count;
-
-        // 2. Update Rate
-        updateRate();
-
-        // 3. Extract Info
-        const source = data.source || 'Unknown';
-        const payload = data.payload || data; // Fallback if no payload key
-        const type = detectType(payload);
-        
-        // 4. Update UI
-        document.getElementById('last-source').innerText = source.substring(0, 12);
-        document.getElementById('last-time').innerText = new Date().toLocaleTimeString();
-        
-        // 5. Log & Highlight
-        addLog(source, JSON.stringify(payload), type);
-        updateJsonViewer(payload);
-        flashEndpoint(source);
-    }
-
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-    
-    function detectType(payload) {
-        // Simple logic to color code logs based on content
-        const str = JSON.stringify(payload).toLowerCase();
-        if (str.includes('error') || str.includes('fail')) return 'error';
-        if (str.includes('warn')) return 'warning';
-        return 'info';
-    }
-
-    function addLog(source, message, type) {
+    // --- UI HELPERS ---
+    function addLog(source, message, type = 'info') {
         const terminal = document.getElementById('terminal');
-        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-        
         const row = document.createElement('div');
         row.className = `log-entry ${type}`;
         row.innerHTML = `
-            <span class="log-time">${time}</span>
+            <span class="log-time">${new Date().toLocaleTimeString()}</span>
             <span class="log-source">${source}</span>
             <span class="log-msg">${message}</span>
         `;
-
         terminal.appendChild(row);
         terminal.scrollTop = terminal.scrollHeight;
-
-        // Cleanup old logs
-        if (terminal.children.length > CONFIG.maxLogs) {
-            terminal.removeChild(terminal.children[1]); // Keep header
-        }
-    }
-
-    function updateJsonViewer(data) {
-        const viewer = document.getElementById('json-viewer');
-        // Pretty print JSON with 2 spaces
-        viewer.textContent = JSON.stringify(data, null, 2);
         
-        // Visual flash to indicate update
-        viewer.style.backgroundColor = '#2a2d36';
-        setTimeout(() => viewer.style.backgroundColor = '#15171c', 300);
-    }
-
-    function flashEndpoint(source) {
-        let id = 'ep-main'; // Default
-        const s = source.toLowerCase();
-        
-        if (s.includes('circuit')) id = 'ep-circuit';
-        if (s.includes('aura')) id = 'ep-aura';
-
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('active');
-            // Turn dot green
-            el.querySelector('.dot').style.background = '#10b981';
-            el.querySelector('.dot').style.boxShadow = '0 0 10px #10b981';
-
-            // Reset after 1 second
-            setTimeout(() => {
-                el.classList.remove('active');
-                el.querySelector('.dot').style.background = '#555';
-                el.querySelector('.dot').style.boxShadow = 'none';
-            }, 1000);
-        }
-    }
-
-    function updateRate() {
-        const now = Date.now();
-        state.timestamps.push(now);
-        // Remove timestamps older than 60s
-        state.timestamps = state.timestamps.filter(t => t > now - 60000);
-        document.getElementById('msg-rate').innerText = `${state.timestamps.length} req/min`;
-    }
-
-    // ============================================
-    // DEV TOOLS & SIMULATION
-    // ============================================
-    
-    function simTraffic(type) {
-        const sources = ['AURA-MF', 'CircuitNotes', 'Main Site'];
-        const src = sources[Math.floor(Math.random() * sources.length)];
-        
-        let payload = { action: 'test_ping', status: 'ok', timestamp: Date.now() };
-        
-        if (type === 'error') payload = { error: 'Database Connection Failed', code: 500 };
-        if (type === 'warning') payload = { warning: 'High Latency Detected', ms: 450 };
-
-        // Send to self to test logic
-        handleTraffic({ source: src, payload: payload });
+        state.count++;
+        document.getElementById('msg-count').innerText = state.count;
     }
 
     function clearLogs() {
         document.getElementById('terminal').innerHTML = '';
         state.count = 0;
-        sessionStorage.setItem('dev_msg_count', 0);
         document.getElementById('msg-count').innerText = '0';
-        addLog('System', 'Logs cleared by user', 'info');
     }
 
-    async function checkBackend() {
-        const statusEl = document.getElementById('api-latency');
-        statusEl.innerText = "Pinging...";
-        statusEl.style.color = "#fbbf24"; // yellow
+    // --- THE BRIDGE FUNCTIONALITY ---
+    window.addEventListener('message', async (event) => {
+        // Security Check
+        if (!event.origin.includes('github.io') && !event.origin.includes('localhost')) return;
 
-        const start = Date.now();
-        try {
-            // Using fetch with a short timeout
-            const controller = new AbortController();
-            setTimeout(() => controller.abort(), 3000);
-            
-            await fetch(CONFIG.backendUrl, { signal: controller.signal, mode: 'no-cors' }); 
-            // Note: no-cors is opaque, so we assume success if no network error
-            
-            const ms = Date.now() - start;
-            statusEl.innerText = `${ms}ms (OK)`;
-            statusEl.style.color = "#10b981"; // green
-        } catch (e) {
-            statusEl.innerText = "Offline";
-            statusEl.style.color = "#ef4444"; // red
-            addLog('System', `Backend Check Failed: ${e.message}`, 'error');
+        const { action, payload, id } = event.data;
+        if (!action || !id) return;
+
+        addLog('INBOUND', `${action} request received from ${event.origin}`);
+        document.getElementById('json-viewer').textContent = JSON.stringify(payload, null, 2);
+
+        // Handle the Logic
+        if (action === 'ENQUEUE_CONTACT' || action === 'SUBMIT_CONTACT') {
+            // 1. Immediate ACK (Asynchronous Pattern)
+            event.source.postMessage({ id, status: 'success', data: { message: "Queued" } }, event.origin);
+            addLog('BRIDGE', 'Sent ACK to frontend (Async)');
+
+            // 2. Background Processing
+            try {
+                const response = await fetch(`${CONFIG.BACKEND_URL}/api/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) addLog('BACKEND', 'Successfully delivered to Render.', 'success');
+                else throw new Error(`Status ${response.status}`);
+            } catch (err) {
+                addLog('ERROR', `Background delivery failed: ${err.message}`, 'error');
+            }
+        } 
+        
+        else if (action === 'HEALTH_CHECK') {
+            const start = Date.now();
+            try {
+                await fetch(`${CONFIG.BACKEND_URL}/api/health`);
+                const lat = Date.now() - start;
+                event.source.postMessage({ id, status: 'success', latency: lat }, event.origin);
+                addLog('SYSTEM', `Health check: ${lat}ms`);
+            } catch (err) {
+                event.source.postMessage({ id, status: 'error' }, event.origin);
+            }
         }
-    }
+    });
 
-    // ============================================
-    // CLOCK & INIT
-    // ============================================
+    // Uptime counter
     setInterval(() => {
-        const now = Date.now();
-        const diff = Math.floor((now - state.startTime) / 1000);
-        const m = Math.floor(diff / 60).toString().padStart(2, '0');
-        const s = (diff % 60).toString().padStart(2, '0');
+        const sec = Math.floor((Date.now() - state.startTime) / 1000);
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
         document.getElementById('uptime').innerText = `${m}:${s}`;
     }, 1000);
 
-    // Initial backend check
-    setTimeout(checkBackend, 1000);
-
+    // Initial Health Check
+    (async () => {
+        try {
+            await fetch(`${CONFIG.BACKEND_URL}/api/health`);
+            document.getElementById('api-status').innerText = "API: ONLINE";
+            document.getElementById('api-status').style.color = "var(--success)";
+        } catch (e) {
+            document.getElementById('api-status').innerText = "API: OFFLINE";
+            document.getElementById('api-status').style.color = "var(--error)";
+        }
+    })();
 </script>
 </body>
 </html>
