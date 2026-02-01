@@ -12,4 +12,32 @@
 --warning: #e74c3c; /* Alizarin Red */
 --info: #3498db;    /* Peter River Blue */
 --accent: #f39c12;  /* Orange */
+/* Z-Index Scale (5 variables) */
+--z-navbar: 1000;
+--z-dropdown: 1001;
+/* ... etc */
+
+/* Transitions (3 variables) */
+--transition-fast: 0.2s;
+/* ... etc */
+
+/* Shadows (6 variables) */
+--shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* ... etc */
+
+/* Spacing Scale (6 variables) */
+--spacing-xs: 8px;
+/* ... etc */
+
+/* Border Radius (5 variables) */
+--radius-sm: 4px;
+/* ... etc */
+
+/* Typography (11 variables) */
+--font-size-xs: 0.75rem;
+/* ... etc */
+
+/* Containers (2 variables) */
+--container-sm: 1100px;
+--container-md: 1200px;
 }
