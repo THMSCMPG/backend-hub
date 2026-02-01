@@ -17,48 +17,7 @@
 </head>
 <body>
 
-    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">MENU &#9662;</button>
-
-    <div id="mySidebar" class="sidebar-mobile">
-        <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()">&times;</a>
-        
-        {% assign main_links = site.data.navigation | where: "section", "main" %}
-        {% for item in main_links %}
-            <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                {{ item.name }}
-            </a>
-        {% endfor %}
-    </div>
-    
-    <nav class="navbar">
-        <div class="container">
-            <a href="https://github.com/THMSCMPG/" class="logo" target="_blank" rel="noopener noreferrer">
-                <i class="fas fa-bolt-lightning"></i> THMSCMPG
-            </a>
-            
-            <ul class="nav-links">
-                {% assign main_links = site.data.navigation | where: "section", "main" %}
-                {% for item in main_links %}
-                <li>
-                    <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                        {{ item.name }}
-                    </a>
-                </li>
-                {% endfor %}
-    
-                <li class="dropdown">
-                    <span class="nav-label">Jump to Docs</span>
-                    <a href="javascript:void(0)" class="dropbtn"><i class="fas fa-bars"></i></a>
-                    <div class="dropdown-content">
-                        {% assign doc_links = site.data.navigation | where: "section", "docs" %}
-                        {% for item in doc_links %}
-                            <a href="{{ item.link | relative_url }}">{{ item.name }}</a>
-                        {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    {{% include nav_main.html %}}
 
     <main class="container">
         {{ content }}
