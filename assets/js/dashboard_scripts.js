@@ -23,10 +23,10 @@
 // CONFIGURATION
 // ============================================================================
 
-const CONFIG = {
-    // API Configuration
-    API_BASE_URL : 'https://aura-mf-backend.onrender.com',
-    INTERVAL: 2000,  // 2 seconds
+    const CONFIG = {
+    API_BASE_URL: 'https://aura-mf-backend.onrender.com',
+    TIMEOUT: 15000,          // ← add: AbortController timeout (ms)
+    FETCH_INTERVAL: 5000,    // ← add: polling interval (ms) — 5s is gentler on a free-tier Render instance
     
     // Dashboard Element IDs
     ELEMENTS: {
@@ -372,16 +372,16 @@ function updateMLConfidence(confidence) {
 /**
  * Update temperature statistics
  */
-function updateTemperatureStats(metadata) {
+function updateTemperatureStats(stats) {
+    if (!stats) return;
     const elements = {
-        min: document.getElementById(CONFIG.ELEMENTS.minTemp),
         max: document.getElementById(CONFIG.ELEMENTS.maxTemp),
         avg: document.getElementById(CONFIG.ELEMENTS.avgTemp)
     };
-    
-    if (elements.min) elements.min.textContent = `${metadata.min_temp.toFixed(2)}°C`;
-    if (elements.max) elements.max.textContent = `${metadata.max_temp.toFixed(2)}°C`;
-    if (elements.avg) elements.avg.textContent = `${metadata.avg_temp.toFixed(2)}°C`;
+    if (elements.max) elements.max.textContent = stats.max_t.toFixed(2) + '°C';
+    if (elements.avg) elements.avg.textContent = stats.avg_t.toFixed(2) + '°C';
+    // min_temp does not exist in the backend response.
+    // Either add it to app.py or remove the minTemp element from dashboard.html.
 }
 
 /**
@@ -449,7 +449,7 @@ function updateDashboard(data) {
         updateSimulationTime(data.timestamp);
         
         // Temperature statistics
-        updateTemperatureStats(data.metadata);
+        updateTemperatureStats(data.stats);
         
         // Status indicator
         updateStatusIndicator(true);
