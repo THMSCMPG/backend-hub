@@ -159,10 +159,11 @@
             state.msgCount++;
             const countEl = document.getElementById('count-val');
             if (countEl) {
-                countEl.textContent = state.msgCount;
-                // Visual "Flash" to prove it worked
+                countEl.innerText = state.msgCount; // use innerText for reliability
                 countEl.style.color = '#4CAF50'; 
                 setTimeout(() => countEl.style.color = '#fff', 300);
+            } else {
+                console.error("CRITICAL: count-val element not found in DOM!");
             }
             document.getElementById('count-val').textContent = state.msgCount;
             log('traffic', `Received: ${action} (ID: ${id})`);
