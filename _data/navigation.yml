@@ -1,40 +1,60 @@
 - name: Home # 0
   link: https://thmscmpg.github.io/index.html
+  section: main
 - name: Research # 1
   link: https://thmscmpg.github.io/projects.html
+  section: main
 - name: LabReports # 2
   link: https://thmscmpg.github.io/reports.html
+  section: main
 - name: CV # 3
   link: https://thmscmpg.github.io/assets/Campagna_CV_2025.pdf
+  section: main
 - name: CircuitNotes # 4
   link: https://thmscmpg.github.io/CircuitNotes/index.html
+  section: docs
 - name: MasterRef # 5
   link: https://thmscmpg.github.io/CircuitNotes/master-reference.html
+  section: docs
 - name: BasicCircuits # 6
   link: https://thmscmpg.github.io/CircuitNotes/basic-5v-circuits.html
+  section: docs
 - name: LED # 7
   link: https://thmscmpg.github.io/CircuitNotes/led-demos.html
+  section: docs
 - name: Matrix # 8
   link: https://thmscmpg.github.io/CircuitNotes/matrix-keypad-theory.html
+  section: docs
 - name: OLED # 9
   link: https://thmscmpg.github.io/CircuitNotes/oled-buzzer-theory.html
+  section: docs
 - name: Photoresistor # 10
   link: https://thmscmpg.github.io/CircuitNotes/photoresistor-demos.html
+  section: docs
 - name: RGBLED # 11
   link: https://thmscmpg.github.io/CircuitNotes/rgb-led-demos.html
+  section: docs
 - name: Rotary # 12
   link: https://thmscmpg.github.io/CircuitNotes/rotary-encoder-demos.html
+  section: docs
 - name: SevenDip # 13
   link: https://thmscmpg.github.io/CircuitNotes/seven-segment-dip.html
-- name: Landing # 14
+  section: docs
+- name: AURA-MF # 14
   link: https://thmscmpg.github.io/AURA-MF/index.html
+  section: research
 - name: SimV1 # 15
   link: https://thmscmpg.github.io/AURA-MF/pages/simv1-gold-standard.html
+  section: research
 - name: SimV2 # 16
   link: https://thmscmpg.github.io/AURA-MF/pages/simv2-multifidelity.html
+  section: research
 - name: SimV3 # 17
   link: https://thmscmpg.github.io/AURA-MF/pages/simv3-bayesian.html
+  section: research
 - name: SimV4 # 18
   link: https://thmscmpg.github.io/AURA-MF/pages/simv4-ml-orchestrator.html
+  section: research
 - name: Dash # 19
   link: https://thmscmpg.github.io/AURA-MF/pages/interactive/dashboard.html
+  section: research
