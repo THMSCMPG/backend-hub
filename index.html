@@ -174,7 +174,11 @@
             // 2. Background Processing
             try {
                 let endpoint = action.includes('CONTACT') ? '/api/contact' : '/api/simulate';
-                const response = await fetch('https://aura-mf-backend.onrender.com/api/contact', { ... });
+                const response = await fetch('https://aura-mf-backend.onrender.com/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
 
                 if (response.ok) {
                     const confirmation = await response.json();
