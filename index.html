@@ -144,6 +144,11 @@
 
         // The Bridge Logic (Optimized: No JSON stringification of payloads)
         window.addEventListener('message', async (event) => {
+            if (event.data.action === 'PING') {
+                event.source.postMessage({ action: 'PONG' }, event.origin);
+                log('info', 'Frontend handshake established.');
+                return; // Don't count the ping as a routed message
+            }
             // Security Filter
             console.log("Hub received raw event:", event);
             if (!event.origin.includes('github.io') && !event.origin.includes('localhost')) return;
