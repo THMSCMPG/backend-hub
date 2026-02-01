@@ -1,53 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} | Thomas Campagna</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- Compiled CSS from SASS (uses site's baseurl) -->
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <!-- Primary Meta Tags -->
+    <title>{{ page.title }} | {{ site.title }}</title>
+    <meta name="title" content="{{ page.title | default: site.title }}">
+    <meta name="description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    <meta name="author" content="{{ site.author }}">
     
-    <!-- Project-Specific CSS (absolute URL to backend-hub) -->
-    <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/profile.css">
-
-    <!-- External Libraries via CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    <meta property="og:title" content="{{ page.title | default: site.title }}">
+    <meta property="og:description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="{{ page.url | absolute_url }}">
+    <meta property="twitter:title" content="{{ page.title | default: site.title }}">
+    <meta property="twitter:description" content="{{ page.description | default: site.description | strip_html | truncate: 160 }}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    
+    <!-- SEO Plugin -->
+    {% seo %}
+    
+    <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Compiled CSS from SASS -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    
+    <!-- Project-Specific CSS -->
+    <link rel="stylesheet" href="https://thmscmpg.github.io/backend-hub/assets/css/profile.css">
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    {% if site.favicon %}
+    <link rel="icon" type="image/png" href="{{ site.favicon | relative_url }}">
+    {% endif %}
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#10b981">
+    
+    <!-- RSS Feed -->
+    {% feed_meta %}
 </head>
 <body>
+    <!-- Skip to main content link -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: var(--primary); color: white; text-decoration: none;">
+        Skip to main content
+    </a>
 
     {% include nav_main.html %}
 
-    <header class="page-header">
+    <header class="page-header" role="banner">
         <div class="container">
             <h1>{{ page.title }}</h1>
         </div>
     </header>
 
-    <main class="container">
+    <main id="main-content" class="container" role="main">
         {{ content }}
     </main>
 
-    <footer>
+    <footer role="contentinfo">
         <div class="container">
-            <p>&copy; 2025 Thomas Campagna. All Rights Reserved.</p>
+            <p>&copy; {{ 'now' | date: "%Y" }} {{ site.author }}. All Rights Reserved.</p>
             <p>
-                <a href="https://github.com/THMSCMPG" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-github"></i> GitHub
-                </a> | 
+                <a href="https://github.com/THMSCMPG" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+                    <i class="fab fa-github" aria-hidden="true"></i> GitHub
+                </a>
             </p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script>
+        // Mobile sidebar toggle
         function toggleSidebar() {
             const sidebar = document.getElementById('mySidebar');
-            sidebar.classList.toggle('open');
-            document.body.classList.toggle('sidebar-open');
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+                document.body.classList.toggle('sidebar-open');
+                sidebar.setAttribute('aria-hidden', !sidebar.classList.contains('open'));
+            }
         }
+        
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('mySidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            }
+        });
     </script>
 
 </body>
