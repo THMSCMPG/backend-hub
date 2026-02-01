@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backend Bridge Hub</title>
+    <title>Backend Bridge Hub - Live Monitor</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -12,7 +18,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
             padding: 20px;
         }
         
@@ -21,13 +26,35 @@
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            text-align: center;
+            max-width: 900px;
+            width: 100%;
         }
         
         h1 {
             color: #2c3e50;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pulse {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        .info {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 20px;
         }
         
         .status {
@@ -49,33 +76,24 @@
             border: 2px solid #f44336;
         }
         
-        .info {
-            color: #666;
-            font-size: 0.95em;
-            margin-top: 20px;
-        }
-        
-        .endpoint {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-            word-break: break-all;
-        }
-        
         .stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 20px;
+            margin: 20px 0;
         }
         
         .stat-item {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
         
         .stat-item label {
@@ -83,20 +101,201 @@
             font-size: 0.85em;
             color: #6c757d;
             margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .stat-item .value {
-            font-size: 1.4em;
+            font-size: 1.8em;
             font-weight: 700;
             color: #2c3e50;
+        }
+
+        .stat-item .subvalue {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Live Terminal Feed */
+        .terminal-section {
+            margin-top: 30px;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .terminal-header h3 {
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .terminal-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background 0.2s;
+        }
+
+        .terminal-btn:hover {
+            background: #5568d3;
+        }
+
+        .terminal-btn.clear {
+            background: #e74c3c;
+        }
+
+        .terminal-btn.clear:hover {
+            background: #c0392b;
+        }
+
+        .terminal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            padding: 15px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .terminal-line {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-line:last-child {
+            border-bottom: none;
+        }
+
+        .terminal-timestamp {
+            color: #858585;
+            margin-right: 10px;
+        }
+
+        .terminal-type {
+            color: #4CAF50;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .terminal-type.error {
+            color: #f44336;
+        }
+
+        .terminal-type.warning {
+            color: #ff9800;
+        }
+
+        .terminal-type.info {
+            color: #2196F3;
+        }
+
+        .terminal-type.success {
+            color: #4CAF50;
+        }
+
+        .terminal-message {
+            color: #d4d4d4;
+        }
+
+        /* Scrollbar styling for terminal */
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #2e2e2e;
+            border-radius: 4px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        /* Connected frontends section */
+        .frontends {
+            margin-top: 20px;
+        }
+
+        .frontends h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoint-url {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .endpoint-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .endpoint-badge.inactive {
+            background: #9e9e9e;
+        }
+
+        /* Auto-scroll toggle */
+        .auto-scroll-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .auto-scroll-toggle input[type="checkbox"] {
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌉 Backend Bridge Hub</h1>
+        <h1>
+            <span class="pulse" id="pulse-indicator"></span>
+            🌉 Backend Bridge Hub
+        </h1>
         <p class="info">
-            This is the central communication bridge between my GitHub Pages frontends and Render backend.
+            Real-time communication bridge between GitHub Pages frontends and Render backend
         </p>
         
         <div class="status" id="status">
@@ -107,55 +306,315 @@
             <div class="stat-item">
                 <label>Messages Processed</label>
                 <div class="value" id="message-count">0</div>
+                <div class="subvalue" id="message-rate">0 msg/min</div>
             </div>
+            
+            <div class="stat-item">
+                <label>Connection Time</label>
+                <div class="value" id="connection-time">00:00</div>
+                <div class="subvalue" id="uptime-detail">Just started</div>
+            </div>
+            
             <div class="stat-item">
                 <label>Backend Status</label>
                 <div class="value" id="backend-status">Checking...</div>
+                <div class="subvalue" id="backend-latency">-- ms</div>
+            </div>
+
+            <div class="stat-item">
+                <label>Last Activity</label>
+                <div class="value" id="last-activity">Never</div>
+                <div class="subvalue" id="activity-type">--</div>
             </div>
         </div>
-        
-        <div class="info">
-            <strong>Connected Frontends:</strong>
-            <div class="endpoint">THMSCMPG.github.io</div>
-            <div class="endpoint">CircuitNotes</div>
-            <div class="endpoint">AURA-MF</div>
+
+        <!-- Live Terminal Feed -->
+        <div class="terminal-section">
+            <div class="terminal-header">
+                <h3>
+                    <span>📡</span>
+                    Live Activity Feed
+                </h3>
+                <div class="terminal-controls">
+                    <div class="auto-scroll-toggle">
+                        <input type="checkbox" id="auto-scroll" checked>
+                        <label for="auto-scroll">Auto-scroll</label>
+                    </div>
+                    <button class="terminal-btn" onclick="pauseTerminal()">
+                        <span id="pause-btn-text">⏸ Pause</span>
+                    </button>
+                    <button class="terminal-btn clear" onclick="clearTerminal()">🗑 Clear</button>
+                </div>
+            </div>
+            <div class="terminal" id="terminal"></div>
+        </div>
+
+        <!-- Connected Frontends -->
+        <div class="frontends">
+            <h3>Connected Frontends</h3>
+            <div class="endpoint">
+                <span class="endpoint-url">thmscmpg.github.io</span>
+                <span class="endpoint-badge" id="badge-main">Active</span>
+            </div>
+            <div class="endpoint">
+                <span class="endpoint-url">CircuitNotes</span>
+                <span class="endpoint-badge" id="badge-circuit">Active</span>
+            </div>
+            <div class="endpoint">
+                <span class="endpoint-url">AURA-MF</span>
+                <span class="endpoint-badge" id="badge-aura">Active</span>
+            </div>
         </div>
     </div>
     
     <script src="bridge.js"></script>
     <script>
-        // Simple dashboard updates
+        // ====================================================================
+        // STATE MANAGEMENT
+        // ====================================================================
+        
         let messageCount = 0;
+        let connectionStartTime = Date.now();
+        let lastMessageTime = null;
+        let messageTimestamps = [];
+        let terminalPaused = false;
+        let backendOnline = false;
+        
+        // ====================================================================
+        // TERMINAL LOGGING
+        // ====================================================================
+        
+        function logToTerminal(type, message) {
+            if (terminalPaused) return;
+            
+            const terminal = document.getElementById('terminal');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = `
+                <span class="terminal-timestamp">[${timestamp}]</span>
+                <span class="terminal-type ${type}">${type.toUpperCase()}</span>
+                <span class="terminal-message">${message}</span>
+            `;
+            
+            terminal.appendChild(line);
+            
+            // Auto-scroll if enabled
+            if (document.getElementById('auto-scroll').checked) {
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            
+            // Keep only last 100 lines
+            if (terminal.children.length > 100) {
+                terminal.removeChild(terminal.firstChild);
+            }
+        }
+        
+        function clearTerminal() {
+            document.getElementById('terminal').innerHTML = '';
+            logToTerminal('info', 'Terminal cleared');
+        }
+        
+        function pauseTerminal() {
+            terminalPaused = !terminalPaused;
+            const btn = document.getElementById('pause-btn-text');
+            if (terminalPaused) {
+                btn.textContent = '▶ Resume';
+                logToTerminal('warning', 'Terminal output paused');
+            } else {
+                btn.textContent = '⏸ Pause';
+                logToTerminal('info', 'Terminal output resumed');
+            }
+        }
+        
+        // ====================================================================
+        // BACKEND HEALTH CHECK
+        // ====================================================================
         
         async function checkBackendHealth() {
             const backendUrl = localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com';
+            const startTime = Date.now();
+            
             try {
+                logToTerminal('info', `Pinging backend: ${backendUrl}/api/health`);
+                
                 const response = await fetch(`${backendUrl}/api/health`);
                 const data = await response.json();
+                const latency = Date.now() - startTime;
                 
+                // Update status
                 document.getElementById('status').className = 'status active';
                 document.getElementById('status-icon').textContent = '✅';
                 document.getElementById('status-text').textContent = 'Bridge Active';
                 document.getElementById('backend-status').textContent = '✓ Online';
+                document.getElementById('backend-latency').textContent = `${latency}ms latency`;
+                
+                backendOnline = true;
+                
+                logToTerminal('success', `Backend online (${latency}ms) - Version ${data.version || 'unknown'}`);
+                
             } catch (error) {
+                // Update status
                 document.getElementById('status').className = 'status inactive';
                 document.getElementById('status-icon').textContent = '❌';
                 document.getElementById('status-text').textContent = 'Backend Offline';
                 document.getElementById('backend-status').textContent = '✗ Offline';
+                document.getElementById('backend-latency').textContent = 'No response';
+                
+                backendOnline = false;
+                
+                logToTerminal('error', `Backend check failed: ${error.message}`);
             }
         }
         
-        // Update message count when bridge processes messages
+        // ====================================================================
+        // MESSAGE TRACKING
+        // ====================================================================
+        
+        function recordMessage(action) {
+            messageCount++;
+            lastMessageTime = Date.now();
+            messageTimestamps.push(lastMessageTime);
+            
+            // Keep only last 60 messages for rate calculation
+            if (messageTimestamps.length > 60) {
+                messageTimestamps.shift();
+            }
+            
+            // Update UI
+            document.getElementById('message-count').textContent = messageCount;
+            updateMessageRate();
+            updateLastActivity(action);
+            
+            // Log to terminal
+            logToTerminal('info', `Message processed: ${action}`);
+        }
+        
+        function updateMessageRate() {
+            if (messageTimestamps.length < 2) {
+                document.getElementById('message-rate').textContent = '0 msg/min';
+                return;
+            }
+            
+            const now = Date.now();
+            const oneMinuteAgo = now - 60000;
+            const recentMessages = messageTimestamps.filter(t => t > oneMinuteAgo);
+            const rate = recentMessages.length;
+            
+            document.getElementById('message-rate').textContent = `${rate} msg/min`;
+        }
+        
+        function updateLastActivity(action) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            
+            document.getElementById('last-activity').textContent = timeStr;
+            document.getElementById('activity-type').textContent = action || 'Unknown';
+        }
+        
+        // ====================================================================
+        // CONNECTION TIMER
+        // ====================================================================
+        
+        function updateConnectionTime() {
+            if (!backendOnline) {
+                document.getElementById('connection-time').textContent = '--:--';
+                document.getElementById('uptime-detail').textContent = 'Disconnected';
+                return;
+            }
+            
+            const elapsed = Date.now() - connectionStartTime;
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            
+            let timeStr;
+            if (hours > 0) {
+                timeStr = `${hours}:${String(minutes % 60).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+            } else {
+                timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+            }
+            
+            document.getElementById('connection-time').textContent = timeStr;
+            
+            // Update uptime detail
+            let detail;
+            if (hours > 0) {
+                detail = `${hours}h ${minutes % 60}m connected`;
+            } else if (minutes > 0) {
+                detail = `${minutes}m ${seconds % 60}s connected`;
+            } else {
+                detail = `${seconds}s connected`;
+            }
+            document.getElementById('uptime-detail').textContent = detail;
+        }
+        
+        // ====================================================================
+        // MESSAGE LISTENER (Enhanced)
+        // ====================================================================
+        
         window.addEventListener('message', (event) => {
             if (event.data.action) {
-                messageCount++;
-                document.getElementById('message-count').textContent = messageCount;
+                recordMessage(event.data.action);
             }
         });
         
-        // Check health on load and every 30 seconds
-        checkBackendHealth();
-        setInterval(checkBackendHealth, 30000);
+        // Listen to bridge.js activity
+        if (window.BroadcastChannel) {
+            const channel = new BroadcastChannel('site_communication');
+            channel.onmessage = (event) => {
+                if (event.data.source === 'backend-hub') {
+                    // Response from our bridge
+                    if (event.data.status === 'success') {
+                        logToTerminal('success', `Response sent successfully`);
+                    } else if (event.data.status === 'error') {
+                        logToTerminal('error', `Error: ${event.data.error}`);
+                    }
+                } else {
+                    // Request from a frontend
+                    const action = determineAction(event.data.payload);
+                    logToTerminal('info', `Request from ${event.data.source}: ${action}`);
+                    recordMessage(action);
+                }
+            };
+        }
+        
+        function determineAction(payload) {
+            if (!payload) return 'Unknown';
+            if (payload.name && payload.email) return 'Contact Form';
+            if (payload.solar !== undefined) return 'Simulation';
+            return 'Unknown Action';
+        }
+        
+        // ====================================================================
+        // INITIALIZATION
+        // ====================================================================
+        
+        function init() {
+            logToTerminal('info', '🚀 Backend Bridge Hub initialized');
+            logToTerminal('info', 'Checking backend status...');
+            
+            // Initial health check
+            checkBackendHealth();
+            
+            // Periodic health check every 30 seconds
+            setInterval(checkBackendHealth, 30000);
+            
+            // Update connection time every second
+            setInterval(updateConnectionTime, 1000);
+            
+            // Update message rate every 10 seconds
+            setInterval(updateMessageRate, 10000);
+            
+            // Log startup complete
+            setTimeout(() => {
+                logToTerminal('success', 'System ready - Monitoring active');
+            }, 1000);
+        }
+        
+        // Start on load
+        init();
     </script>
 </body>
 </html>
