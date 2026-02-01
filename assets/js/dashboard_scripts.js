@@ -13,14 +13,9 @@
  *   - ML confidence tracking
  *   - Error handling and reconnection logic
  * 
- * FIXES APPLIED:
- *   - Removed duplicate updateDashboard function (lines 53-69)
- *   - Changed GET to POST with parameters (line 122)
- *   - Removed duplicate checkBackend function (lines 155-169)
- *   - Fixed API_BASE_URL references
  * 
- * Author: AURA-MF Development Team
- * Version: 1.1.0 (Fixed)
+ * Author: THMSCMPG
+ * Version: 1.2.0 (Fixed)
  */
 
 // ============================================================================
@@ -31,10 +26,14 @@ const CONFIG = window.DASHBOARD_CONFIG || {
     API_BASE_URL: 'https://aura-mf-backend.onrender.com',
     TIMEOUT: 15000,          // AbortController timeout (ms)
     FETCH_INTERVAL: 5000,    // polling interval (ms) — 5s for free-tier Render
+    LIVE_UPDATE_ENABLED: false,
     
     // Dashboard Element IDs
     ELEMENTS: {
         temperatureCanvas: 'temperatureHeatmap',
+        runButton: 'run-button',
+        loading: 'loading',
+        results: 'results-container',
         fidelityDisplay: 'fidelityLevel',
         energyResiduals: 'energyResiduals',
         mlConfidence: 'mlConfidence',
@@ -136,8 +135,52 @@ async function fetchSimulationData() {
     }
 }
 
-// REMOVED: Duplicate updateDashboard function (was lines 53-69)
-// REMOVED: Duplicate checkBackend function (was lines 155-169)
+window.runSimulation = async function() {
+        const runBtn = document.getElementById(CONFIG.ELEMENTS.runButton);
+        const loading = document.getElementById('loading');
+        
+        // Disable UI
+        runBtn.disabled = true;
+        if(loading) loading.classList.add('active');
+
+        try {
+            // Get values + Kelvin conversion
+            const params = {
+                solar: parseFloat(document.getElementById('solar-irradiance').value),
+                ambient: parseFloat(document.getElementById('ambient-temperature').value) + 273.15,
+                wind: parseFloat(document.getElementById('wind-speed').value),
+                cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
+                thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+                absorptivity: parseFloat(document.getElementById('absorptivity').value),
+                emissivity: parseFloat(document.getElementById('emissivity').value)
+            };
+
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            dashboardState.recordSuccess(data);
+            
+            // Use the original advanced update function
+            updateDashboard(data);
+
+        } catch (error) {
+            console.error('Simulation Error:', error);
+            const errEl = document.getElementById('error-message');
+            if(errEl) {
+                errEl.textContent = '❌ ' + error.message;
+                errEl.classList.add('active');
+            }
+        } finally {
+            runBtn.disabled = false;
+            if(loading) loading.classList.remove('active');
+        }
+    };
 
 // ============================================================================
 // VISUALIZATION
@@ -403,6 +446,11 @@ function updateDashboard(data) {
  * Main update loop - fetches data and updates dashboard
  */
 async function updateLoop() {
+    if (!CONFIG.LIVE_UPDATE_ENABLED) {
+        console.log("⏸️ Live updates are currently disabled.");
+        return; 
+    }
+    
     try {
         const data = await fetchSimulationData();
         updateDashboard(data);
@@ -418,8 +466,9 @@ async function updateLoop() {
         }
     }
     
-    // Schedule next update
-    setTimeout(updateLoop, CONFIG.FETCH_INTERVAL);
+    if (CONFIG.LIVE_UPDATE_ENABLED) {
+        setTimeout(updateLoop, CONFIG.FETCH_INTERVAL);
+    }
 }
 
 // ============================================================================
