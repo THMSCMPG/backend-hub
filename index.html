@@ -43,12 +43,14 @@
             height: 12px;
             border-radius: 50%;
             background: #4CAF50;
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
             animation: pulse-animation 2s infinite;
         }
 
         @keyframes pulse-animation {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
         }
         
         .info {
@@ -62,6 +64,9 @@
             margin: 20px 0;
             padding: 15px;
             border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .status.active {
@@ -179,6 +184,7 @@
         .terminal-line {
             padding: 2px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
         }
 
         .terminal-line:last-child {
@@ -188,52 +194,29 @@
         .terminal-timestamp {
             color: #858585;
             margin-right: 10px;
+            min-width: 80px;
         }
 
         .terminal-type {
-            color: #4CAF50;
-            margin-right: 10px;
+            min-width: 70px;
             font-weight: bold;
         }
 
-        .terminal-type.error {
-            color: #f44336;
-        }
-
-        .terminal-type.warning {
-            color: #ff9800;
-        }
-
-        .terminal-type.info {
-            color: #2196F3;
-        }
-
-        .terminal-type.success {
-            color: #4CAF50;
-        }
+        .terminal-type.error { color: #f44336; }
+        .terminal-type.warning { color: #ff9800; }
+        .terminal-type.info { color: #2196F3; }
+        .terminal-type.success { color: #4CAF50; }
+        .terminal-type.traffic { color: #E91E63; }
 
         .terminal-message {
             color: #d4d4d4;
+            word-break: break-word;
         }
 
-        /* Scrollbar styling for terminal */
-        .terminal::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .terminal::-webkit-scrollbar-track {
-            background: #2e2e2e;
-            border-radius: 4px;
-        }
-
-        .terminal::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
-
-        .terminal::-webkit-scrollbar-thumb:hover {
-            background: #777;
-        }
+        .terminal::-webkit-scrollbar { width: 8px; }
+        .terminal::-webkit-scrollbar-track { background: #2e2e2e; border-radius: 4px; }
+        .terminal::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        .terminal::-webkit-scrollbar-thumb:hover { background: #777; }
 
         /* Connected frontends section */
         .frontends {
@@ -254,6 +237,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        /* Animation class for when data is received */
+        .endpoint.receiving {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
         }
 
         .endpoint-url {
@@ -262,19 +252,19 @@
         }
 
         .endpoint-badge {
-            background: #4CAF50;
+            background: #9e9e9e;
             color: white;
             padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.75em;
             font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s;
         }
 
-        .endpoint-badge.inactive {
-            background: #9e9e9e;
+        .endpoint-badge.active {
+            background: #4CAF50;
         }
 
-        /* Auto-scroll toggle */
         .auto-scroll-toggle {
             display: flex;
             align-items: center;
@@ -283,9 +273,7 @@
             color: #666;
         }
 
-        .auto-scroll-toggle input[type="checkbox"] {
-            cursor: pointer;
-        }
+        .auto-scroll-toggle input[type="checkbox"] { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -299,7 +287,8 @@
         </p>
         
         <div class="status" id="status">
-            <span id="status-icon">⏳</span> <span id="status-text">Initializing...</span>
+            <span id="status-icon">⏳</span> 
+            <span id="status-text">Initializing Bridge Protocol...</span>
         </div>
         
         <div class="stats">
@@ -323,12 +312,11 @@
 
             <div class="stat-item">
                 <label>Last Activity</label>
-                <div class="value" id="last-activity">Never</div>
-                <div class="subvalue" id="activity-type">--</div>
+                <div class="value" id="last-activity">None</div>
+                <div class="subvalue" id="activity-type">Waiting for data...</div>
             </div>
         </div>
 
-        <!-- Live Terminal Feed -->
         <div class="terminal-section">
             <div class="terminal-header">
                 <h3>
@@ -349,36 +337,45 @@
             <div class="terminal" id="terminal"></div>
         </div>
 
-        <!-- Connected Frontends -->
         <div class="frontends">
-            <h3>Connected Frontends</h3>
-            <div class="endpoint">
+            <h3>Monitoring Endpoints</h3>
+            <div class="endpoint" id="ep-main">
                 <span class="endpoint-url">thmscmpg.github.io</span>
-                <span class="endpoint-badge" id="badge-main">Active</span>
+                <span class="endpoint-badge" id="badge-main">Standby</span>
             </div>
-            <div class="endpoint">
+            <div class="endpoint" id="ep-circuit">
                 <span class="endpoint-url">CircuitNotes</span>
-                <span class="endpoint-badge" id="badge-circuit">Active</span>
+                <span class="endpoint-badge" id="badge-circuit">Standby</span>
             </div>
-            <div class="endpoint">
+            <div class="endpoint" id="ep-aura">
                 <span class="endpoint-url">AURA-MF</span>
-                <span class="endpoint-badge" id="badge-aura">Active</span>
+                <span class="endpoint-badge" id="badge-aura">Standby</span>
             </div>
         </div>
     </div>
     
-    <script src="bridge.js"></script>
     <script>
         // ====================================================================
-        // STATE MANAGEMENT
+        // STATE MANAGEMENT & PERSISTENCE
         // ====================================================================
         
-        let messageCount = 0;
-        let connectionStartTime = Date.now();
+        // Load from Session Storage (so refresh doesn't reset stats)
+        let messageCount = parseInt(sessionStorage.getItem('bridge_msg_count')) || 0;
+        let connectionStartTime = parseInt(sessionStorage.getItem('bridge_start_time')) || Date.now();
+        
+        // If it's a new session, save the start time
+        if (!sessionStorage.getItem('bridge_start_time')) {
+            sessionStorage.setItem('bridge_start_time', connectionStartTime);
+        }
+
         let lastMessageTime = null;
-        let messageTimestamps = [];
+        let messageTimestamps = []; // For calculating rate
         let terminalPaused = false;
         let backendOnline = false;
+        let channel = null;
+
+        // Initialize UI with stored values
+        document.getElementById('message-count').textContent = messageCount;
         
         // ====================================================================
         // TERMINAL LOGGING
@@ -388,7 +385,8 @@
             if (terminalPaused) return;
             
             const terminal = document.getElementById('terminal');
-            const timestamp = new Date().toLocaleTimeString();
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString('en-US', { hour12: false });
             
             const line = document.createElement('div');
             line.className = 'terminal-line';
@@ -400,12 +398,12 @@
             
             terminal.appendChild(line);
             
-            // Auto-scroll if enabled
+            // Auto-scroll logic
             if (document.getElementById('auto-scroll').checked) {
                 terminal.scrollTop = terminal.scrollHeight;
             }
             
-            // Keep only last 100 lines
+            // Performance: Limit lines to 100
             if (terminal.children.length > 100) {
                 terminal.removeChild(terminal.firstChild);
             }
@@ -413,7 +411,7 @@
         
         function clearTerminal() {
             document.getElementById('terminal').innerHTML = '';
-            logToTerminal('info', 'Terminal cleared');
+            logToTerminal('info', 'Terminal cleared by user');
         }
         
         function pauseTerminal() {
@@ -421,10 +419,10 @@
             const btn = document.getElementById('pause-btn-text');
             if (terminalPaused) {
                 btn.textContent = '▶ Resume';
-                logToTerminal('warning', 'Terminal output paused');
+                logToTerminal('warning', 'Output paused...');
             } else {
                 btn.textContent = '⏸ Pause';
-                logToTerminal('info', 'Terminal output resumed');
+                logToTerminal('info', 'Output resumed');
             }
         }
         
@@ -433,84 +431,144 @@
         // ====================================================================
         
         async function checkBackendHealth() {
+            // Replace with your actual Render URL
             const backendUrl = localStorage.getItem('BACKEND_URL') || 'https://aura-mf-backend.onrender.com';
             const startTime = Date.now();
             
             try {
-                logToTerminal('info', `Pinging backend: ${backendUrl}/api/health`);
-                
-                const response = await fetch(`${backendUrl}/api/health`);
-                const data = await response.json();
+                // We use a small timeout to detect lag
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(`${backendUrl}/api/health`, { 
+                    signal: controller.signal,
+                    method: 'GET'
+                });
+                clearTimeout(timeoutId);
+
                 const latency = Date.now() - startTime;
                 
-                // Update status
-                document.getElementById('status').className = 'status active';
-                document.getElementById('status-icon').textContent = '✅';
-                document.getElementById('status-text').textContent = 'Bridge Active';
-                document.getElementById('backend-status').textContent = '✓ Online';
-                document.getElementById('backend-latency').textContent = `${latency}ms latency`;
-                
-                backendOnline = true;
-                
-                logToTerminal('success', `Backend online (${latency}ms) - Version ${data.version || 'unknown'}`);
+                if (response.ok) {
+                    setBackendStatus(true, latency);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
                 
             } catch (error) {
-                // Update status
-                document.getElementById('status').className = 'status inactive';
-                document.getElementById('status-icon').textContent = '❌';
-                document.getElementById('status-text').textContent = 'Backend Offline';
-                document.getElementById('backend-status').textContent = '✗ Offline';
-                document.getElementById('backend-latency').textContent = 'No response';
+                setBackendStatus(false, 0, error.message);
+            }
+        }
+
+        function setBackendStatus(isOnline, latency, errorMsg) {
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            const statusIcon = document.getElementById('status-icon');
+            const backendStatus = document.getElementById('backend-status');
+            const backendLatency = document.getElementById('backend-latency');
+
+            if (isOnline) {
+                statusDiv.className = 'status active';
+                statusIcon.textContent = '✅';
+                statusText.textContent = 'Bridge Active & Connected';
+                backendStatus.textContent = '✓ Online';
+                backendStatus.style.color = '#2e7d32';
+                backendLatency.textContent = `${latency}ms latency`;
                 
+                if (!backendOnline) {
+                    logToTerminal('success', `Connection established (${latency}ms)`);
+                }
+                backendOnline = true;
+            } else {
+                statusDiv.className = 'status inactive';
+                statusIcon.textContent = '❌';
+                statusText.textContent = 'Backend Unreachable';
+                backendStatus.textContent = '✗ Offline';
+                backendStatus.style.color = '#c62828';
+                backendLatency.textContent = 'No response';
+                
+                if (backendOnline) {
+                    logToTerminal('error', `Connection lost: ${errorMsg || 'Timeout'}`);
+                }
                 backendOnline = false;
-                
-                logToTerminal('error', `Backend check failed: ${error.message}`);
             }
         }
         
         // ====================================================================
-        // MESSAGE TRACKING
+        // TRAFFIC & MESSAGE TRACKING
         // ====================================================================
         
-        function recordMessage(action) {
+        function processIncomingMessage(source, payload) {
             messageCount++;
+            sessionStorage.setItem('bridge_msg_count', messageCount);
+            
             lastMessageTime = Date.now();
             messageTimestamps.push(lastMessageTime);
             
-            // Keep only last 60 messages for rate calculation
-            if (messageTimestamps.length > 60) {
-                messageTimestamps.shift();
-            }
+            // Clean up old timestamps (keep last 60 seconds)
+            const oneMinuteAgo = Date.now() - 60000;
+            messageTimestamps = messageTimestamps.filter(t => t > oneMinuteAgo);
+            
+            // Determine Action
+            const action = determineAction(payload);
             
             // Update UI
             document.getElementById('message-count').textContent = messageCount;
             updateMessageRate();
             updateLastActivity(action);
+            highlightEndpoint(source);
             
-            // Log to terminal
-            logToTerminal('info', `Message processed: ${action}`);
+            logToTerminal('traffic', `Received from [${source}]: ${action}`);
         }
         
         function updateMessageRate() {
-            if (messageTimestamps.length < 2) {
-                document.getElementById('message-rate').textContent = '0 msg/min';
-                return;
-            }
-            
-            const now = Date.now();
-            const oneMinuteAgo = now - 60000;
-            const recentMessages = messageTimestamps.filter(t => t > oneMinuteAgo);
-            const rate = recentMessages.length;
-            
+            const rate = messageTimestamps.length;
             document.getElementById('message-rate').textContent = `${rate} msg/min`;
         }
         
         function updateLastActivity(action) {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString();
-            
-            document.getElementById('last-activity').textContent = timeStr;
-            document.getElementById('activity-type').textContent = action || 'Unknown';
+            document.getElementById('last-activity').textContent = now.toLocaleTimeString();
+            document.getElementById('activity-type').textContent = action;
+        }
+
+        function determineAction(payload) {
+            if (!payload) return 'Ping';
+            if (payload.type === 'contact') return 'Contact Form';
+            if (payload.type === 'simulation') return 'Simulation Data';
+            if (payload.name && payload.email) return 'User Submission';
+            return 'Data Sync';
+        }
+
+        function highlightEndpoint(source) {
+            let elId = '';
+            let badgeId = '';
+
+            // Map source strings to UI elements
+            if (source.includes('thms') || source.includes('main')) { elId = 'ep-main'; badgeId = 'badge-main'; }
+            else if (source.includes('circuit')) { elId = 'ep-circuit'; badgeId = 'badge-circuit'; }
+            else if (source.includes('aura')) { elId = 'ep-aura'; badgeId = 'badge-aura'; }
+
+            if (elId) {
+                const el = document.getElementById(elId);
+                const badge = document.getElementById(badgeId);
+                
+                // Add visual flash
+                el.classList.add('receiving');
+                badge.classList.add('active');
+                badge.textContent = 'Active';
+                
+                // Remove flash after 500ms
+                setTimeout(() => {
+                    el.classList.remove('receiving');
+                }, 500);
+
+                // Reset badge to standby after 5 seconds of silence
+                if (el.dataset.timeout) clearTimeout(el.dataset.timeout);
+                el.dataset.timeout = setTimeout(() => {
+                    badge.classList.remove('active');
+                    badge.textContent = 'Standby';
+                }, 5000);
+            }
         }
         
         // ====================================================================
@@ -518,73 +576,46 @@
         // ====================================================================
         
         function updateConnectionTime() {
-            if (!backendOnline) {
-                document.getElementById('connection-time').textContent = '--:--';
-                document.getElementById('uptime-detail').textContent = 'Disconnected';
-                return;
-            }
-            
             const elapsed = Date.now() - connectionStartTime;
+            
             const seconds = Math.floor(elapsed / 1000);
             const minutes = Math.floor(seconds / 60);
             const hours = Math.floor(minutes / 60);
             
-            let timeStr;
-            if (hours > 0) {
-                timeStr = `${hours}:${String(minutes % 60).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
-            } else {
-                timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
-            }
+            const displaySec = (seconds % 60).toString().padStart(2, '0');
+            const displayMin = (minutes % 60).toString().padStart(2, '0');
+            const displayHour = hours.toString().padStart(2, '0');
+            
+            let timeStr = `${displayMin}:${displaySec}`;
+            if (hours > 0) timeStr = `${displayHour}:${timeStr}`;
             
             document.getElementById('connection-time').textContent = timeStr;
             
-            // Update uptime detail
-            let detail;
-            if (hours > 0) {
-                detail = `${hours}h ${minutes % 60}m connected`;
-            } else if (minutes > 0) {
-                detail = `${minutes}m ${seconds % 60}s connected`;
-            } else {
-                detail = `${seconds}s connected`;
-            }
+            let detail = `${minutes}m connected`;
+            if (hours > 0) detail = `${hours}h ${minutes%60}m connected`;
+            if (minutes < 1) detail = `${seconds}s connected`;
+            
             document.getElementById('uptime-detail').textContent = detail;
         }
         
         // ====================================================================
-        // MESSAGE LISTENER (Enhanced)
+        // BROADCAST CHANNEL LISTENER
         // ====================================================================
         
-        window.addEventListener('message', (event) => {
-            if (event.data.action) {
-                recordMessage(event.data.action);
-            }
-        });
-        
-        // Listen to bridge.js activity
-        if (window.BroadcastChannel) {
-            const channel = new BroadcastChannel('site_communication');
-            channel.onmessage = (event) => {
-                if (event.data.source === 'backend-hub') {
-                    // Response from our bridge
-                    if (event.data.status === 'success') {
-                        logToTerminal('success', `Response sent successfully`);
-                    } else if (event.data.status === 'error') {
-                        logToTerminal('error', `Error: ${event.data.error}`);
+        function initChannel() {
+            if (window.BroadcastChannel) {
+                // Use the standard channel name for your bridge
+                channel = new BroadcastChannel('site_communication');
+                
+                channel.onmessage = (event) => {
+                    if (event.data && event.data.source !== 'backend-hub') {
+                        processIncomingMessage(event.data.source || 'Unknown', event.data.payload);
                     }
-                } else {
-                    // Request from a frontend
-                    const action = determineAction(event.data.payload);
-                    logToTerminal('info', `Request from ${event.data.source}: ${action}`);
-                    recordMessage(action);
-                }
-            };
-        }
-        
-        function determineAction(payload) {
-            if (!payload) return 'Unknown';
-            if (payload.name && payload.email) return 'Contact Form';
-            if (payload.solar !== undefined) return 'Simulation';
-            return 'Unknown Action';
+                };
+                logToTerminal('info', 'BroadcastChannel "site_communication" bound');
+            } else {
+                logToTerminal('error', 'BroadcastChannel API not supported in this browser');
+            }
         }
         
         // ====================================================================
@@ -593,27 +624,23 @@
         
         function init() {
             logToTerminal('info', '🚀 Backend Bridge Hub initialized');
-            logToTerminal('info', 'Checking backend status...');
             
-            // Initial health check
+            initChannel();
+            
+            // Run health check immediately
             checkBackendHealth();
             
-            // Periodic health check every 30 seconds
-            setInterval(checkBackendHealth, 30000);
+            // Timers
+            setInterval(checkBackendHealth, 30000); // Check backend every 30s
+            setInterval(updateConnectionTime, 1000); // Update clock every 1s
             
-            // Update connection time every second
-            setInterval(updateConnectionTime, 1000);
-            
-            // Update message rate every 10 seconds
-            setInterval(updateMessageRate, 10000);
-            
-            // Log startup complete
+            // Simulate a connection log for visual confirmation
             setTimeout(() => {
-                logToTerminal('success', 'System ready - Monitoring active');
+                logToTerminal('info', 'Monitoring listeners active...');
             }, 1000);
         }
         
-        // Start on load
+        // Start system
         init();
     </script>
 </body>
