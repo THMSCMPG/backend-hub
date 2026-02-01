@@ -57,6 +57,44 @@ const CONFIG = window.DASHBOARD_CONFIG || {
 // STATE MANAGEMENT
 // ============================================================================
 
+// 1. Slider Display Logic
+const sliderConfigs = [
+    {id: 'solar-irradiance', display: 'solar-value', format: v => v},
+    {id: 'ambient-temperature', display: 'temp-value', format: v => (v - 273.15).toFixed(1)},
+    {id: 'wind-speed', display: 'wind-value', format: v => parseFloat(v).toFixed(1)},
+    {id: 'cell-efficiency', display: 'efficiency-value', format: v => (v * 100).toFixed(0)},
+    {id: 'thermal-conductivity', display: 'conductivity-value', format: v => v},
+    {id: 'absorptivity', display: 'absorptivity-value', format: v => parseFloat(v).toFixed(2)},
+    {id: 'emissivity', display: 'emissivity-value', format: v => parseFloat(v).toFixed(2)}
+];
+
+// Initialize sliders when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+    sliderConfigs.forEach(s => {
+        const el = document.getElementById(s.id);
+        const disp = document.getElementById(s.display);
+        if (el && disp) {
+            el.addEventListener('input', () => disp.textContent = s.format(el.value));
+            // Set initial values
+            disp.textContent = s.format(el.value);
+        }
+    });
+});
+
+// 2. The Toggle Logic
+window.toggleLiveUpdates = function(isEnabled) {
+    // This assumes you added LIVE_UPDATE_ENABLED: false to your CONFIG object
+    CONFIG.LIVE_UPDATE_ENABLED = isEnabled;
+    
+    if (isEnabled) {
+        console.log("▶️ Live Mode Active");
+        updateLoop(); 
+    } else {
+        console.log("⏹️ Live Mode Paused");
+        // The loop will naturally stop at the next check in updateLoop()
+    }
+};
+
 class DashboardState {
     constructor() {
         this.isConnected = false;
@@ -368,6 +406,15 @@ function updateSimulationTime(timestamp) {
     if (!element) return;
     
     element.textContent = `${timestamp.toFixed(1)}s`;
+}
+/**
+* Update heatmap legend
+**/
+function updateHeatmapLegend(minC, maxC) {
+    const minEl = document.getElementById('heatmap-min-val');
+    const maxEl = document.getElementById('heatmap-max-val');
+    if (minEl) minEl.textContent = minC.toFixed(1) + '°C';
+    if (maxEl) maxEl.textContent = maxC.toFixed(1) + '°C';
 }
 
 /**
