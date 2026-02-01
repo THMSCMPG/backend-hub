@@ -28,11 +28,11 @@
         <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()">&times;</a>
         {% assign main_links = site.data.navigation | where: "section", "main" %}
         {% for item in main_links %}
-            <a href="{{ item.link }}" {% if item.name == "CV" %}target="_blank"{% endif %}>{{ item.name }}</a>
+            <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank"{% endif %}>{{ item.name }}</a>
         {% endfor %}
         
         {% assign landing = site.data.navigation | where: "name", "Landing" | first %}
-        <a href="{{ landing.link }}">{{ landing.name }}</a>
+        <a href="{{ landing.link | relative_url }}">{{ landing.name }}</a>
     </div>
     
     <nav class="navbar">
@@ -43,11 +43,11 @@
             <ul class="nav-links">
                 {% assign main_links = site.data.navigation | where: "section", "main" %}
                 {% for item in main_links %}
-                    <li><a href="{{ item.link }}" {% if item.name == "CV" %}target="_blank"{% endif %}>{{ item.name }}</a></li>
+                    <li><a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank"{% endif %}>{{ item.name }}</a></li>
                 {% endfor %}
                 
                 {% assign landing = site.data.navigation | where: "name", "Landing" | first %}
-                <li><a href="{{ landing.link }}">{{ landing.name }}</a></li>
+                <li><a href="{{ landing.link | relative_url }}">{{ landing.name }}</a></li>
                 
                 <li class="dropdown">
                     <span class="nav-label">Jump to Docs</span>
@@ -55,7 +55,7 @@
                     <div class="dropdown-content">
                         {% assign doc_links = site.data.navigation | where: "section", "docs" %}
                         {% for item in doc_links %}
-                            <a href="{{ item.link }}">{{ item.name }}</a>
+                            <a href="{{ item.link | relative_url }}">{{ item.name }}</a>
                         {% endfor %}
                     </div>
                 </li>
@@ -67,7 +67,7 @@
     
     <nav class="peek-nav">
         {% assign landing = site.data.navigation | where: "name", "Landing" | first %}
-        <h2><a href="{{ landing.link }}">AURA-MF Menu</a></h2>
+        <h2><a href="{{ landing.link | relative_url }}">AURA-MF Menu</a></h2>
         <ul>
             <li><a href="#overview" class="active">Overview</a></li>
             <li><a href="#architecture">Architecture</a></li>
@@ -76,7 +76,7 @@
                     {% assign research_links = site.data.navigation | where: "section", "research" %}
                     {% for item in research_links %}
                         {% if item.name contains "Sim" %}
-                            <li><a href="{{ item.link }}">{{ item.name }}</a></li>
+                            <li><a href="{{ item.link | relative_url }}">{{ item.name }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -85,7 +85,7 @@
             <li><a href="#downloads">Downloads</a></li>
             
             {% assign dash = site.data.navigation | where: "name", "Dash" | first %}
-            <li><a href="{{ dash.link }}">{{ dash.name }}</a></li>
+            <li><a href="{{ dash.link | relative_url }}">{{ dash.name }}</a></li>
         </ul>
     </nav>
 

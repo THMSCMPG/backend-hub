@@ -24,7 +24,7 @@
         
         {% assign main_links = site.data.navigation | where: "section", "main" %}
         {% for item in main_links %}
-            <a href="{{ item.link }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
+            <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
                 {{ item.name }}
             </a>
         {% endfor %}
@@ -40,7 +40,7 @@
                 {% assign main_links = site.data.navigation | where: "section", "main" %}
                 {% for item in main_links %}
                 <li>
-                    <a href="{{ item.link }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <a href="{{ item.link | relative_url }}" {% if item.name == "CV" %}target="_blank" rel="noopener noreferrer"{% endif %}>
                         {{ item.name }}
                     </a>
                 </li>
@@ -52,7 +52,7 @@
                     <div class="dropdown-content">
                         {% assign doc_links = site.data.navigation | where: "section", "docs" %}
                         {% for item in doc_links %}
-                            <a href="{{ item.link }}">{{ item.name }}</a>
+                            <a href="{{ item.link | relative_url }}">{{ item.name }}</a>
                         {% endfor %}
                     </div>
                 </li>
