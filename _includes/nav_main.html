@@ -82,14 +82,20 @@
 
     // Sidebar toggle function with ARIA updates
     function toggleSidebar() {
-        const sidebar = document.getElementById("mySidebar");
+        const sidebar = document.getElementById("mobileSidebar");
         const menuBtn = document.querySelector('.menu-btn');
         
         if (sidebar) {
-            const isOpen = sidebar.style.width === "250px";
+            const isOpen = sidebar.classList.contains('open');
             
-            // Toggle sidebar
-            sidebar.style.width = isOpen ? "0" : "250px";
+            // Toggle sidebar with class
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                document.body.classList.remove('sidebar-open');
+            } else {
+                sidebar.classList.add('open');
+                document.body.classList.add('sidebar-open');
+            }
             
             // Update ARIA attributes
             sidebar.setAttribute('aria-hidden', isOpen);
@@ -99,9 +105,9 @@
             
             // Trap focus when sidebar is open
             if (!isOpen) {
-                const firstLink = sidebar.querySelector('a');
+                const firstLink = sidebar.querySelector('a:not(.close-btn)');
                 if (firstLink) {
-                    firstLink.focus();
+                    setTimeout(() => firstLink.focus(), 300);
                 }
             }
         }
@@ -114,20 +120,24 @@
         const dropdownContent = dropdown ? dropdown.querySelector('.dropdown-content') : null;
         
         if (dropbtn && dropdownContent) {
-            // Toggle dropdown on button click
+            // Toggle dropdown on button click (primarily for mobile)
             dropbtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                this.setAttribute('aria-expanded', !isExpanded);
-                dropdownContent.style.display = isExpanded ? 'none' : 'block';
+                // On mobile (touch devices), use click control
+                if (window.innerWidth <= 768 || ('ontouchstart' in window)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    dropdownContent.classList.toggle('show');
+                }
+                // On desktop, let CSS :hover handle it
             });
             
             // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!dropdown.contains(e.target)) {
                     dropbtn.setAttribute('aria-expanded', 'false');
-                    dropdownContent.style.display = 'none';
+                    dropdownContent.classList.remove('show');
                 }
             });
             
@@ -135,7 +145,7 @@
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     dropbtn.setAttribute('aria-expanded', 'false');
-                    dropdownContent.style.display = 'none';
+                    dropdownContent.classList.remove('show');
                     dropbtn.focus();
                 }
             });
