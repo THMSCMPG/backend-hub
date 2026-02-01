@@ -1,10 +1,3 @@
-/**
- * Physics Simulation - Bridge Integration
- * Add this script to the demo.html to connect simulations to the bridge
- * 
- * This replaces the direct fetch call with bridge communication
- */
-
 (function() {
     'use strict';
     
@@ -14,9 +7,6 @@
         BRIDGE_URL: 'https://thmscmpg.github.io/backend-bridge/'
     };
     
-    /**
-     * Send simulation request through the bridge
-     */
     function sendSimulationToBridge(params) {
         return new Promise((resolve, reject) => {
             const iframe = document.getElementById('backend-bridge');
@@ -64,9 +54,6 @@
         });
     }
     
-    /**
-     * Alternative: Use Broadcast Channel API
-     */
     function sendSimulationViaBroadcast(params) {
         return new Promise((resolve, reject) => {
             const channel = new BroadcastChannel('site_communication');
@@ -103,16 +90,16 @@
         });
     }
     
-    /**
-     * Updated runSimulation function
-     * This replaces the existing runSimulation in demo.html
-     */
     window.runSimulationThroughBridge = async function() {
-        // Collect parameters (same as original)
+        // Collect all 7 parameters — keys match what app.py reads via data.get()
         const params = {
-            solar: parseFloat(document.getElementById('solar-irradiance').value),
-            wind: parseFloat(document.getElementById('wind-speed').value),
-            ambient: parseFloat(document.getElementById('ambient-temperature').value)
+            solar:                parseFloat(document.getElementById('solar-irradiance').value),
+            ambient:              parseFloat(document.getElementById('ambient-temperature').value),
+            wind:                 parseFloat(document.getElementById('wind-speed').value),
+            cell_efficiency:      parseFloat(document.getElementById('cell-efficiency').value),
+            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+            absorptivity:         parseFloat(document.getElementById('absorptivity').value),
+            emissivity:           parseFloat(document.getElementById('emissivity').value)
         };
         
         // Show loading state
@@ -131,7 +118,7 @@
                 data = await sendSimulationViaBroadcast(params);
             }
             
-            // Display results (same as original)
+            // Display results
             displayResults(data);
             
         } catch (error) {
@@ -145,25 +132,34 @@
         }
     };
     
-    /**
-     * Display simulation results
-     */
     function displayResults(data) {
-        // Show visualization
+        const stats = data.stats;
+
+        // Heatmap
         if (data.visualization) {
             document.getElementById('visualization-image').src = 
                 'data:image/png;base64,' + data.visualization;
         }
         
-        // Update result values
-        if (data.stats) {
-            document.getElementById('temp-mean').textContent = 
-                data.stats.avg_t + ' °C';
-            document.getElementById('temp-max').textContent = 
-                data.stats.max_t + ' °C';
+        // Temperature cards
+        if (stats) {
+            document.getElementById('temp-mean').textContent =
+                stats.avg_t.toFixed(1) + ' °C';
+            document.getElementById('temp-max').textContent =
+                stats.max_t.toFixed(1) + ' °C';
+
+            // Power & efficiency
+            document.getElementById('power-total').textContent =
+                stats.power_total.toFixed(2) + ' W';
+            document.getElementById('efficiency-avg').textContent =
+                stats.eff_avg.toFixed(1) + ' %';
+
+            // Runtime
+            document.getElementById('runtime').textContent =
+                stats.runtime_ms.toFixed(1);
         }
         
-        // Show fidelity info
+        // Fidelity badge (optional element — only present if the page has one)
         if (data.fidelity_name) {
             const fidelityEl = document.getElementById('fidelity-level');
             if (fidelityEl) {
@@ -178,16 +174,3 @@
     console.log('✓ Physics simulation bridge integration loaded');
     
 })();
-
-/**
- * INTEGRATION INSTRUCTIONS:
- * 
- * 1. Add this script to demo.html after the existing scripts
- * 2. Update the run button onclick:
- *    <button onclick="runSimulationThroughBridge()">Run Simulation</button>
- * 
- * 3. Ensure the iframe is present:
- *    <iframe id="backend-bridge" 
- *            src="https://thmscmpg.github.io/backend-bridge/" 
- *            style="display:none"></iframe>
- */
