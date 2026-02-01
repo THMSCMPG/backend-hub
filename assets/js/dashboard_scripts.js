@@ -1,32 +1,36 @@
-
-
 /**
  * AURA-MF Dashboard - Frontend JavaScript
  * ========================================
  * 
- * Purpose: Fetch real-time simulation data from Alwaysdata API
+ * Purpose: Fetch real-time simulation data from Render API
  *          and update dashboard visualizations
  * 
  * Features:
- *   - Automatic data fetching every 2 seconds
+ *   - Automatic data fetching every 5 seconds
  *   - Temperature heatmap visualization
  *   - Fidelity level display with color coding
  *   - Energy balance monitoring
  *   - ML confidence tracking
  *   - Error handling and reconnection logic
  * 
+ * FIXES APPLIED:
+ *   - Removed duplicate updateDashboard function (lines 53-69)
+ *   - Changed GET to POST with parameters (line 122)
+ *   - Removed duplicate checkBackend function (lines 155-169)
+ *   - Fixed API_BASE_URL references
+ * 
  * Author: AURA-MF Development Team
- * Version: 1.0.0
+ * Version: 1.1.0 (Fixed)
  */
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
-    const CONFIG = {
+const CONFIG = window.DASHBOARD_CONFIG || {
     API_BASE_URL: 'https://aura-mf-backend.onrender.com',
-    TIMEOUT: 15000,          // ← add: AbortController timeout (ms)
-    FETCH_INTERVAL: 5000,    // ← add: polling interval (ms) — 5s is gentler on a free-tier Render instance
+    TIMEOUT: 15000,          // AbortController timeout (ms)
+    FETCH_INTERVAL: 5000,    // polling interval (ms) — 5s for free-tier Render
     
     // Dashboard Element IDs
     ELEMENTS: {
@@ -50,24 +54,6 @@
     }
 };
 
-async function updateDashboard() {
-    const status = document.getElementById('statusIndicator');
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/simulate`);
-        if (!res.ok) throw new Error('Offline');
-        const data = await res.json();
-        
-        status.innerText = "🟢 Connected";
-        status.style.color = "#2ecc71";
-        // Call your drawing functions here (drawHeatmap, etc.)
-    } catch (err) {
-        status.innerText = "⏳ Server waking up (30-60s)...";
-        status.style.color = "#f1c40f";
-    }
-}
-
-setInterval(updateDashboard, CONFIG.INTERVAL);
-        
 // ============================================================================
 // STATE MANAGEMENT
 // ============================================================================
@@ -113,6 +99,7 @@ const dashboardState = new DashboardState();
 
 /**
  * Fetch simulation data from API with timeout
+ * FIXED: Changed from GET to POST and added default parameters
  */
 async function fetchSimulationData() {
     const controller = new AbortController();
@@ -120,10 +107,19 @@ async function fetchSimulationData() {
     
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
-            method: 'GET',
+            method: 'POST',  // FIXED: Changed from GET
             headers: {
                 'Content-Type': 'application/json'
             },
+            body: JSON.stringify({
+                solar: 1000.0,
+                wind: 2.0,
+                ambient: 298.15,
+                cell_efficiency: 0.20,
+                thermal_conductivity: 130.0,
+                absorptivity: 0.95,
+                emissivity: 0.90
+            }),  // FIXED: Added default parameters
             signal: controller.signal
         });
         
@@ -152,22 +148,8 @@ async function fetchSimulationData() {
     }
 }
 
-async function checkBackend() {
-    const statusEl = document.getElementById('statusIndicator');
-    try {
-        // Ping the health endpoint we set up in the Render guide
-        const response = await fetch(`${API_BASE_URL}/api/health`);
-        if (response.ok) {
-            statusEl.innerHTML = "🟢 Connected";
-            statusEl.style.color = "#2ecc71";
-            startSimulation(); // Function to start your data loop
-        }
-    } catch (error) {
-        statusEl.innerHTML = "⏳ Waking up server (may take 30s)...";
-        setTimeout(checkBackend, 5000); // Retry every 5s
-    }
-}
-
+// REMOVED: Duplicate updateDashboard function (was lines 53-69)
+// REMOVED: Duplicate checkBackend function (was lines 155-169)
 
 // ============================================================================
 // VISUALIZATION
@@ -255,22 +237,22 @@ function drawTemperatureHeatmap(canvasId, temperatureField) {
             ctx.fillStyle = color;
             ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
             
-            // Draw grid lines
+            // Draw grid lines if enabled
             if (CONFIG.HEATMAP.showGrid) {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
             }
             
-            // Draw temperature values
-            if (CONFIG.HEATMAP.showValues) {
-                ctx.fillStyle = temp > (minTemp + maxTemp) / 2 ? '#fff' : '#000';
-                ctx.font = `${cellWidth * 0.3}px Arial`;
+            // Draw temperature values if enabled
+            if (CONFIG.HEATMAP.showValues && gridSize <= 10) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(
-                    temp.toFixed(1),
-                    j * cellWidth + cellWidth / 2,
+                    temp.toFixed(1), 
+                    j * cellWidth + cellWidth / 2, 
                     i * cellHeight + cellHeight / 2
                 );
             }
@@ -278,19 +260,11 @@ function drawTemperatureHeatmap(canvasId, temperatureField) {
     }
     
     // Draw color legend
-    drawColorLegend(ctx, canvasWidth, canvasHeight, minTemp, maxTemp);
-}
-
-/**
- * Draw color legend on canvas
- */
-function drawColorLegend(ctx, width, height, minTemp, maxTemp) {
     const legendWidth = 20;
-    const legendHeight = height * 0.6;
-    const legendX = width - legendWidth - 10;
-    const legendY = height * 0.2;
+    const legendHeight = canvasHeight - 40;
+    const legendX = canvasWidth - legendWidth - 10;
+    const legendY = 20;
     
-    // Draw gradient
     const gradient = ctx.createLinearGradient(legendX, legendY + legendHeight, legendX, legendY);
     gradient.addColorStop(0, getHeatmapColor(minTemp, minTemp, maxTemp));
     gradient.addColorStop(0.5, getHeatmapColor((minTemp + maxTemp) / 2, minTemp, maxTemp));
@@ -374,14 +348,16 @@ function updateMLConfidence(confidence) {
  */
 function updateTemperatureStats(stats) {
     if (!stats) return;
+    
     const elements = {
+        min: document.getElementById(CONFIG.ELEMENTS.minTemp),
         max: document.getElementById(CONFIG.ELEMENTS.maxTemp),
         avg: document.getElementById(CONFIG.ELEMENTS.avgTemp)
     };
+    
+    if (elements.min) elements.min.textContent = stats.min_t.toFixed(2) + '°C';
     if (elements.max) elements.max.textContent = stats.max_t.toFixed(2) + '°C';
     if (elements.avg) elements.avg.textContent = stats.avg_t.toFixed(2) + '°C';
-    // min_temp does not exist in the backend response.
-    // Either add it to app.py or remove the minTemp element from dashboard.html.
 }
 
 /**
@@ -546,4 +522,3 @@ window.AURADashboard = {
     dashboardState,
     CONFIG
 };
-
