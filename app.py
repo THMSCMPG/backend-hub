@@ -22,12 +22,13 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# UPDATED CORS - Allow all GitHub Pages subdomains
 CORS(app, resources={
     r"/api/*": {
         "origins": [
             "https://thmscmpg.github.io",
-            "https://thmscmpg.github.io/*",
+            "https://thmscmpg.github.io/backend-hub",
+            "https://thmscmpg.github.io/CircuitNotes",
+            "https://thmscmpg.github.io/AURA-MF",
             "http://localhost:4000",
             "http://127.0.0.1:4000"
         ],
@@ -36,7 +37,7 @@ CORS(app, resources={
         "supports_credentials": False
     }
 })
-
+    
 # SMTP Setup
 app.config.update(
     MAIL_SERVER='smtp.gmail.com',
@@ -279,7 +280,8 @@ def docs():
 @app.after_request
 def after_request(response):
     origin = request.headers.get('Origin')
-    if origin and 'thmscmpg.github.io' in origin:
+    # Allow any thmscmpg.github.io subdomain
+    if origin and origin.startswith('https://thmscmpg.github.io'):
         response.headers.add('Access-Control-Allow-Origin', origin)
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
