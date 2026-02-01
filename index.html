@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backend Bridge Hub - Live Monitor</title>
+    <title>Backend Bridge Hub v3.0 - Terminal Tracker</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -23,10 +23,23 @@
             border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            max-width: 900px;
+            max-width: 1100px;
             width: 100%;
         }
-        h1 { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 1.8rem; }
+        h1 { 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 1.8rem; 
+        }
+        .version-badge {
+            background: #667eea;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
         .pulse {
             width: 12px; height: 12px; border-radius: 50%;
             background: #4CAF50; box-shadow: 0 0 10px #4CAF50;
@@ -42,36 +55,155 @@
             display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3);
         }
         .status.active { border: 1px solid #4CAF50; color: #81c784; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-        .stat-item { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; }
-        .stat-item label { display: block; font-size: 0.75em; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-item .value { font-size: 1.6em; font-weight: 700; }
-        .stat-item .subvalue { font-size: 0.8em; color: #777; margin-top: 5px; }
-        .terminal {
-            background: #000; color: #0f0; font-family: monospace; font-size: 0.8em;
-            padding: 15px; border-radius: 8px; height: 200px; overflow-y: auto;
-            border: 1px solid #333; margin-top: 20px;
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+            margin: 20px 0; 
         }
-        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; display: flex; gap: 10px; }
-        .t-stamp { color: #888; }
-        .t-type { font-weight: bold; }
-        .info { color: #667eea; } .success { color: #4CAF50; } .error { color: #f44336; } .traffic { color: #f59e0b; }
+        .stat-item { 
+            background: rgba(255,255,255,0.05); 
+            padding: 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid #667eea; 
+        }
+        .stat-item label { 
+            display: block; 
+            font-size: 0.75em; 
+            color: #aaa; 
+            text-transform: uppercase; 
+            margin-bottom: 5px; 
+        }
+        .stat-item .value { 
+            font-size: 1.6em; 
+            font-weight: 700; 
+        }
+        .stat-item .subvalue { 
+            font-size: 0.8em; 
+            color: #777; 
+            margin-top: 5px; 
+        }
+        
+        /* Request Trackers */
+        .tracker-section {
+            margin-top: 30px;
+        }
+        .tracker-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tracker-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .request-card {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .request-card.success { border-left-color: #4CAF50; }
+        .request-card.error { border-left-color: #f44336; }
+        .request-card.pending { border-left-color: #f59e0b; }
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .request-id {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .request-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .request-status.success { background: #4CAF50; color: white; }
+        .request-status.error { background: #f44336; color: white; }
+        .request-status.pending { background: #f59e0b; color: white; }
+        .request-body {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        .request-timestamp {
+            font-size: 0.75rem;
+            color: #777;
+            margin-top: 8px;
+        }
+        
+        /* Terminal */
+        .terminal {
+            background: #000; 
+            color: #0f0; 
+            font-family: monospace; 
+            font-size: 0.8em;
+            padding: 15px; 
+            border-radius: 8px; 
+            height: 250px; 
+            overflow-y: auto;
+            border: 1px solid #333; 
+            margin-top: 20px;
+        }
+        .log-entry { 
+            margin-bottom: 4px; 
+            border-bottom: 1px solid #111; 
+            display: flex; 
+            gap: 10px; 
+            padding: 2px 0;
+        }
+        .t-stamp { color: #888; min-width: 80px; }
+        .t-type { font-weight: bold; min-width: 80px; }
+        .info { color: #667eea; } 
+        .success { color: #4CAF50; } 
+        .error { color: #f44336; } 
+        .traffic { color: #f59e0b; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><span class="pulse"></span> Bridge Hub Terminal</h1>
-        <p style="color: #888; font-size: 0.9em;">Active Monitoring: Cross-Origin Message Router</p>
+        <h1>
+            <span class="pulse"></span> 
+            Bridge Hub Terminal
+            <span class="version-badge">v3.0</span>
+        </h1>
+        <p style="color: #888; font-size: 0.9em;">Enhanced with Terminal Tracker: Real-time monitoring of Email & Physics API requests</p>
         
         <div class="status active" id="status-bar">
-            <span id="status-icon">✅</span> <span id="status-text">Bridge Operational</span>
+            <span id="status-icon">✅</span> 
+            <span id="status-text">Bridge Operational</span>
         </div>
         
         <div class="stats">
             <div class="stat-item">
-                <label>Messages Routed</label>
+                <label>Total Messages</label>
                 <div class="value" id="countEl">0</div>
-                <div class="subvalue">Total traffic volume</div>
+                <div class="subvalue">All traffic routed</div>
+            </div>
+            <div class="stat-item">
+                <label>Email Requests</label>
+                <div class="value" id="email-count">0</div>
+                <div class="subvalue" id="email-status">Waiting...</div>
+            </div>
+            <div class="stat-item">
+                <label>Physics Requests</label>
+                <div class="value" id="physics-count">0</div>
+                <div class="subvalue" id="physics-status">Waiting...</div>
             </div>
             <div class="stat-item">
                 <label>System Uptime</label>
@@ -83,24 +215,48 @@
                 <div class="value" id="latency-val">-- ms</div>
                 <div class="subvalue" id="backend-url-display">Connecting...</div>
             </div>
+            <div class="stat-item">
+                <label>Success Rate</label>
+                <div class="value" id="success-rate">100%</div>
+                <div class="subvalue">
+                    <span id="success-count" style="color: #4CAF50;">0</span> / 
+                    <span id="error-count" style="color: #f44336;">0</span>
+                </div>
+            </div>
         </div>
 
+        <!-- Email Request Tracker -->
+        <div class="tracker-section">
+            <h3>📧 Email Request Tracker</h3>
+            <div class="tracker-cards" id="email-tracker">
+                <div class="empty-state">No email requests yet</div>
+            </div>
+        </div>
+
+        <!-- Physics Request Tracker -->
+        <div class="tracker-section">
+            <h3>⚛️ Physics Request Tracker</h3>
+            <div class="tracker-cards" id="physics-tracker">
+                <div class="empty-state">No physics requests yet</div>
+            </div>
+        </div>
+
+        <!-- Terminal Log -->
         <div class="terminal" id="terminal">
-            <div class="log-entry"><span class="t-stamp">[SYS]</span><span class="t-type info">INFO</span><span>Router sequence started. Listening for signals.</span></div>
+            <div class="log-entry">
+                <span class="t-stamp">[SYS]</span>
+                <span class="t-type info">INFO</span>
+                <span>Router sequence started. Terminal Tracker enabled.</span>
+            </div>
         </div>
     </div>
 
-    <!-- ================================================================
-         bridge.js is the actual message router with full retry logic.
-         The monitor UI below is display-only; it taps into the same
-         'message' event to update counters and the terminal log.
-         ============================================================== -->
     <script src="bridge.js"></script>
 
     <script>
         // ──────────────────────────────────────────────────────────────
-        // MONITOR UI — display-only layer for the terminal dashboard.
-        // Does NOT intercept or handle any messages; bridge.js does that.
+        // TERMINAL TRACKER UI
+        // Listens to custom events from bridge.js
         // ──────────────────────────────────────────────────────────────
 
         const MONITOR_CONFIG = {
@@ -108,12 +264,17 @@
         };
 
         const state = {
-            msgCount: 0,
             startTime: Date.now(),
-            isOnline: false
+            isOnline: false,
+            totalMessages: 0,
+            emailRequests: [],
+            physicsRequests: [],
+            successCount: 0,
+            errorCount: 0
         };
 
-        function log(type, msg) {
+        // ── Terminal Logging ──
+        function logToTerminal(type, msg) {
             const t = document.getElementById('terminal');
             if (!t) return;
             const entry = document.createElement('div');
@@ -124,6 +285,7 @@
             t.scrollTop = t.scrollHeight;
         }
 
+        // ── Health Check ──
         async function checkHealth() {
             const start = Date.now();
             try {
@@ -132,30 +294,135 @@
                 document.getElementById('latency-val').textContent = `${lat}ms`;
                 document.getElementById('latency-val').style.color = lat > 500 ? '#f59e0b' : '#4CAF50';
                 if (!state.isOnline) {
-                    log('success', 'Backend link established');
+                    logToTerminal('success', 'Backend link established');
                     state.isOnline = true;
                 }
             } catch (e) {
                 document.getElementById('latency-val').textContent = 'ERR';
                 state.isOnline = false;
-                log('error', 'Backend unreachable');
+                logToTerminal('error', 'Backend unreachable');
             }
         }
 
-        // Passive observer: counts messages flowing through for the dashboard.
-        // Does NOT call postMessage or handle any routing.
+        // ── Render Request Card ──
+        function renderRequestCard(request, type) {
+            const card = document.createElement('div');
+            card.className = `request-card ${request.status}`;
+            card.innerHTML = `
+                <div class="request-header">
+                    <span class="request-id">${request.id}</span>
+                    <span class="request-status ${request.status}">${request.status.toUpperCase()}</span>
+                </div>
+                <div class="request-body">
+                    ${type === 'email' ? `From: ${request.payload?.email || 'Unknown'}` : `Simulation Type: ${request.payload?.type || 'Unknown'}`}
+                </div>
+                <div class="request-timestamp">
+                    ${new Date(request.timestamp).toLocaleString()}
+                    ${request.duration ? ` • ${request.duration.toFixed(0)}ms` : ''}
+                </div>
+            `;
+            return card;
+        }
+
+        // ── Update Trackers ──
+        function updateTrackers() {
+            // Email Tracker
+            const emailTracker = document.getElementById('email-tracker');
+            if (state.emailRequests.length === 0) {
+                emailTracker.innerHTML = '<div class="empty-state">No email requests yet</div>';
+            } else {
+                emailTracker.innerHTML = '';
+                state.emailRequests.slice(-5).reverse().forEach(req => {
+                    emailTracker.appendChild(renderRequestCard(req, 'email'));
+                });
+            }
+
+            // Physics Tracker
+            const physicsTracker = document.getElementById('physics-tracker');
+            if (state.physicsRequests.length === 0) {
+                physicsTracker.innerHTML = '<div class="empty-state">No physics requests yet</div>';
+            } else {
+                physicsTracker.innerHTML = '';
+                state.physicsRequests.slice(-5).reverse().forEach(req => {
+                    physicsTracker.appendChild(renderRequestCard(req, 'physics'));
+                });
+            }
+
+            // Update counters
+            document.getElementById('email-count').textContent = state.emailRequests.length;
+            document.getElementById('physics-count').textContent = state.physicsRequests.length;
+            
+            // Update status
+            const lastEmail = state.emailRequests[state.emailRequests.length - 1];
+            const lastPhysics = state.physicsRequests[state.physicsRequests.length - 1];
+            
+            document.getElementById('email-status').textContent = lastEmail 
+                ? `Last: ${lastEmail.status}` 
+                : 'Waiting...';
+            document.getElementById('physics-status').textContent = lastPhysics 
+                ? `Last: ${lastPhysics.status}` 
+                : 'Waiting...';
+
+            // Success rate
+            const total = state.successCount + state.errorCount;
+            const rate = total > 0 ? ((state.successCount / total) * 100).toFixed(1) : 100;
+            document.getElementById('success-rate').textContent = `${rate}%`;
+            document.getElementById('success-count').textContent = state.successCount;
+            document.getElementById('error-count').textContent = state.errorCount;
+        }
+
+        // ── Bridge Event Listeners ──
+        window.addEventListener('bridge-log', (event) => {
+            const { type, message } = event.detail;
+            logToTerminal(type, message);
+        });
+
+        window.addEventListener('bridge-status-update', (event) => {
+            const { id, status } = event.detail;
+            
+            // Update local trackers
+            const emailReq = state.emailRequests.find(r => r.id === id);
+            if (emailReq) {
+                emailReq.status = status;
+                emailReq.duration = event.detail.duration;
+            }
+            
+            const physicsReq = state.physicsRequests.find(r => r.id === id);
+            if (physicsReq) {
+                physicsReq.status = status;
+                physicsReq.duration = event.detail.duration;
+            }
+
+            // Update stats
+            if (status === 'success') state.successCount++;
+            if (status === 'error') state.errorCount++;
+
+            updateTrackers();
+        });
+
+        // ── Message Observer (counts traffic) ──
         window.addEventListener('message', (event) => {
             if (!event.origin.includes('github.io') && !event.origin.includes('localhost')) return;
 
-            const { action, id } = event.data || {};
+            const { action, id, payload } = event.data || {};
             if (!action || !id) return;
 
-            state.msgCount++;
-            document.getElementById('countEl').textContent = state.msgCount;
-            log('traffic', `Observed: ${action} (ID: ${id})`);
+            state.totalMessages++;
+            document.getElementById('countEl').textContent = state.totalMessages;
+
+            // Track by type
+            const request = { id, payload, status: 'pending', timestamp: Date.now() };
+            
+            if (action === 'SUBMIT_CONTACT') {
+                state.emailRequests.push(request);
+            } else if (action === 'RUN_SIMULATION') {
+                state.physicsRequests.push(request);
+            }
+
+            updateTrackers();
         });
 
-        // Initialization
+        // ── Initialization ──
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('backend-url-display').textContent = MONITOR_CONFIG.BACKEND_URL.replace('https://', '');
             document.getElementById('start-val').textContent = `Session started ${new Date().toLocaleTimeString()}`;
@@ -169,6 +436,8 @@
                 document.getElementById('uptime-val').textContent = `${m}:${s}`;
             }, 1000);
         });
+
+        logToTerminal('info', 'Terminal Tracker UI initialized');
     </script>
 </body>
 </html>

@@ -1,10 +1,13 @@
 /**
- * Backend Bridge - Communication Hub
+ * Backend Bridge v3.0 - Enhanced Communication Hub with Terminal Tracker
  * Routes messages from GitHub Pages frontends to Render backend
- * Supports: Contact forms, Physics simulations
+ * Supports: Contact forms, Physics simulations, Terminal Tracking
  * 
- * v2.0 — Fixed: fetchWithRetry control flow, dead variable reference,
- *         removed non-functional BroadcastChannel & localStorage polling.
+ * NEW in v3.0:
+ * - Terminal Tracker: Intercepts and logs all postMessage events
+ * - Email Request tracking (Contact Form)
+ * - Physics Sim API call tracking
+ * - Visual telemetry log for debugging
  */
 
 (function() {
@@ -22,28 +25,146 @@
     };
 
     // ========================================================================
+    // TERMINAL TRACKER STATE
+    // ========================================================================
+
+    const TRACKER = {
+        requests: new Map(),  // requestId -> {type, status, timestamp, payload}
+        emailRequests: new Map(),
+        physicsRequests: new Map(),
+        totalMessages: 0,
+        successCount: 0,
+        errorCount: 0
+    };
+
+    // ========================================================================
+    // TERMINAL LOGGING
+    // ========================================================================
+
+    function terminalLog(type, message, data = null) {
+        const timestamp = new Date().toISOString().slice(11, 19);
+        const logEntry = {
+            timestamp,
+            type,
+            message,
+            data
+        };
+
+        // Console log
+        const prefix = `[Bridge v3.0 | ${timestamp}]`;
+        switch(type) {
+            case 'success':
+                console.log(`%c${prefix} ✓ ${message}`, 'color: #4CAF50', data || '');
+                break;
+            case 'error':
+                console.error(`%c${prefix} ✗ ${message}`, 'color: #f44336', data || '');
+                break;
+            case 'traffic':
+                console.log(`%c${prefix} ⇄ ${message}`, 'color: #f59e0b', data || '');
+                break;
+            case 'info':
+                console.log(`%c${prefix} ℹ ${message}`, 'color: #667eea', data || '');
+                break;
+            default:
+                console.log(`${prefix} ${message}`, data || '');
+        }
+
+        // Dispatch custom event for Terminal UI
+        window.dispatchEvent(new CustomEvent('bridge-log', { 
+            detail: logEntry 
+        }));
+
+        return logEntry;
+    }
+
+    // ========================================================================
+    // REQUEST TRACKING
+    // ========================================================================
+
+    function trackRequest(id, type, payload) {
+        const request = {
+            id,
+            type,
+            payload,
+            status: 'pending',
+            timestamp: Date.now(),
+            startTime: performance.now()
+        };
+
+        TRACKER.requests.set(id, request);
+        TRACKER.totalMessages++;
+
+        // Track by type
+        if (type === 'SUBMIT_CONTACT') {
+            TRACKER.emailRequests.set(id, request);
+        } else if (type === 'RUN_SIMULATION') {
+            TRACKER.physicsRequests.set(id, request);
+        }
+
+        terminalLog('traffic', `New ${type} request`, { id, payloadSize: JSON.stringify(payload).length });
+    }
+
+    function updateRequestStatus(id, status, result = null) {
+        const request = TRACKER.requests.get(id);
+        if (!request) return;
+
+        request.status = status;
+        request.result = result;
+        request.duration = performance.now() - request.startTime;
+
+        if (status === 'success') {
+            TRACKER.successCount++;
+            terminalLog('success', `Request ${id} completed in ${request.duration.toFixed(2)}ms`, result);
+        } else if (status === 'error') {
+            TRACKER.errorCount++;
+            terminalLog('error', `Request ${id} failed`, result);
+        }
+
+        // Update type-specific trackers
+        if (TRACKER.emailRequests.has(id)) {
+            TRACKER.emailRequests.get(id).status = status;
+        }
+        if (TRACKER.physicsRequests.has(id)) {
+            TRACKER.physicsRequests.get(id).status = status;
+        }
+
+        // Dispatch update event
+        window.dispatchEvent(new CustomEvent('bridge-status-update', {
+            detail: { id, status, duration: request.duration }
+        }));
+    }
+
+    function getTrackerStats() {
+        return {
+            total: TRACKER.totalMessages,
+            success: TRACKER.successCount,
+            error: TRACKER.errorCount,
+            pending: TRACKER.totalMessages - TRACKER.successCount - TRACKER.errorCount,
+            emailRequests: Array.from(TRACKER.emailRequests.values()),
+            physicsRequests: Array.from(TRACKER.physicsRequests.values())
+        };
+    }
+
+    // Expose tracker stats globally for debugging
+    window.bridgeTracker = {
+        getStats: getTrackerStats,
+        getRequests: () => Array.from(TRACKER.requests.values()),
+        getEmailRequests: () => Array.from(TRACKER.emailRequests.values()),
+        getPhysicsRequests: () => Array.from(TRACKER.physicsRequests.values())
+    };
+
+    // ========================================================================
     // UTILITIES
     // ========================================================================
 
     function log(message, data = null) {
-        console.log(`[Backend Bridge] ${message}`, data || '');
+        terminalLog('info', message, data);
     }
 
     function logError(message, error) {
-        console.error(`[Backend Bridge ERROR] ${message}`, error);
+        terminalLog('error', message, error);
     }
 
-    /**
-     * Fetch with retry + exponential backoff + per-request AbortController.
-     * 
-     * FIX: The original had an early `return` inside the content-type block
-     * that made clearTimeout() and the response.ok guard unreachable.
-     * Restructured so the flow is:
-     *   1. fetch with AbortController timeout
-     *   2. clearTimeout (always reached)
-     *   3. check response.ok
-     *   4. parse JSON and return
-     */
     async function fetchWithRetry(url, options, attempts = CONFIG.RETRY_ATTEMPTS) {
         for (let i = 0; i < attempts; i++) {
             let timeoutId;
@@ -56,20 +177,17 @@
                     signal: controller.signal
                 });
 
-                // Always clear the timeout once we have a response
                 clearTimeout(timeoutId);
 
-                // Guard: reject non-2xx before trying to parse
                 if (!response.ok) {
                     let errorBody = `HTTP ${response.status}: ${response.statusText}`;
                     try {
                         const errText = await response.text();
                         if (errText) errorBody += ` — ${errText.substring(0, 200)}`;
-                    } catch (_) { /* ignore parse failure on error path */ }
+                    } catch (_) { }
                     throw new Error(errorBody);
                 }
 
-                // Parse response — validate content-type first
                 const contentType = response.headers.get('content-type') || '';
                 if (!contentType.includes('application/json')) {
                     const raw = await response.text();
@@ -83,10 +201,9 @@
                 logError(`Attempt ${i + 1}/${attempts} failed`, error);
 
                 if (i === attempts - 1) {
-                    throw error; // All retries exhausted
+                    throw error;
                 }
 
-                // Exponential backoff: 1.5s, 3s, 4.5s, ...
                 const delay = CONFIG.RETRY_BASE_DELAY * (i + 1);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
@@ -98,7 +215,7 @@
     // ========================================================================
 
     async function handleContactSubmission(payload) {
-        log('Processing contact form', payload);
+        log('Processing contact form submission', payload);
 
         const response = await fetchWithRetry(
             `${CONFIG.BACKEND_URL}/api/contact`,
@@ -109,12 +226,12 @@
             }
         );
 
-        log('Backend confirmed receipt', response);
+        log('Backend confirmed email receipt', response);
         return response;
     }
 
     async function handleSimulation(payload) {
-        log('Processing simulation request', payload);
+        log('Processing physics simulation request', payload);
 
         const response = await fetchWithRetry(
             `${CONFIG.BACKEND_URL}/api/simulate`,
@@ -125,6 +242,7 @@
             }
         );
 
+        log('Simulation completed', response);
         return response;
     }
 
@@ -160,11 +278,7 @@
     }
 
     // ========================================================================
-    // MESSAGE LISTENER
-    //
-    // postMessage is the ONLY viable cross-origin channel.
-    // BroadcastChannel and localStorage are same-origin only — they cannot
-    // cross the boundary between thmscmpg.github.io subpaths.
+    // MESSAGE LISTENER WITH TERMINAL TRACKING
     // ========================================================================
 
     window.addEventListener('message', async (event) => {
@@ -188,23 +302,27 @@
             return;
         }
 
-        log(`Received action: ${action}`, { id, payload });
+        // Track the request
+        trackRequest(id, action, payload);
 
         try {
             const data = await routeMessage(action, payload);
 
-            // Success: relay full response data back to the parent
+            // Update tracker: success
+            updateRequestStatus(id, 'success', data);
+
+            // Send response back to origin
             event.source.postMessage({
                 id: id,
                 status: 'success',
                 data: data
             }, event.origin);
 
-            log(`Successfully processed: ${action}`, { id });
-
         } catch (error) {
-            logError(`Failed to process: ${action}`, error);
+            // Update tracker: error
+            updateRequestStatus(id, 'error', error.message);
 
+            // Send error back to origin
             event.source.postMessage({
                 id: id,
                 status: 'error',
@@ -217,15 +335,24 @@
     // INITIALIZATION
     // ========================================================================
 
-    log('Backend Bridge initialized', {
+    log('Backend Bridge v3.0 with Terminal Tracker initialized', {
         backendUrl: CONFIG.BACKEND_URL,
         timeout: CONFIG.TIMEOUT,
         retryAttempts: CONFIG.RETRY_ATTEMPTS
     });
 
-    // Initial health check to warm the Render instance
+    // Initial health check
     handleHealthCheck()
-        .then(() => log('Backend is healthy'))
+        .then(() => {
+            log('Backend is healthy and ready');
+            window.dispatchEvent(new CustomEvent('bridge-ready'));
+        })
         .catch(error => logError('Backend health check failed (cold start expected)', error));
+
+    // Periodic stats logging (every 30 seconds)
+    setInterval(() => {
+        const stats = getTrackerStats();
+        terminalLog('info', 'Bridge Stats', stats);
+    }, 30000);
 
 })();

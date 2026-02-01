@@ -1,0 +1,404 @@
+<section class="demo-section" id="physics-sim">
+    <div class="container">
+        <h3>⚛️ Multi-Fidelity Physics Simulator</h3>
+        <p class="section-description">
+            Interactive particle physics simulation with three fidelity modes optimized for different devices and performance requirements.
+        </p>
+        
+        <div class="category-card">
+            <!-- Fidelity Mode Selector -->
+            <div class="fidelity-controls">
+                <label for="fidelity-mode"><strong>Fidelity Mode:</strong></label>
+                <select id="fidelity-mode" class="form-input">
+                    <option value="high">High - Sub-stepping, 60Hz+, Complex Interactions</option>
+                    <option value="medium" selected>Medium - Standard RAF, Basic Collisions</option>
+                    <option value="low">Low - Optimized Math, Reduced Particles, Mobile-Friendly</option>
+                </select>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="canvas-container">
+                <canvas id="physics-canvas" width="800" height="600"></canvas>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="physics-controls">
+                <button id="reset-btn" class="btn">Reset Simulation</button>
+                <button id="toggle-play" class="btn btn-secondary">Pause</button>
+                <div class="stats-display">
+                    <span id="fps-counter">FPS: 60</span>
+                    <span id="particle-count">Particles: 50</span>
+                    <span id="mode-display">Mode: Medium</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Physics Simulator Styles */
+.fidelity-controls {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.canvas-container {
+    background: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#physics-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 800px;
+    cursor: crosshair;
+}
+
+.physics-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.stats-display {
+    display: flex;
+    gap: 20px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .fidelity-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .physics-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-display {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+    // ================================================================
+    // MULTI-FIDELITY PHYSICS SIMULATOR
+    // Pure JavaScript with THREE.js-quality math
+    // Supports: High, Medium, Low fidelity modes
+    // ================================================================
+
+    const canvas = document.getElementById('physics-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const fidelitySelect = document.getElementById('fidelity-mode');
+    const resetBtn = document.getElementById('reset-btn');
+    const toggleBtn = document.getElementById('toggle-play');
+    const fpsCounter = document.getElementById('fps-counter');
+    const particleCounter = document.getElementById('particle-count');
+    const modeDisplay = document.getElementById('mode-display');
+
+    // ================================================================
+    // CONFIGURATION
+    // ================================================================
+    
+    const CONFIG = {
+        high: {
+            particleCount: 100,
+            updateFrequency: 60,
+            substeps: 4,
+            collisionAccuracy: 'exact',
+            friction: 0.002,
+            gravity: 0.5,
+            bounceDamping: 0.85
+        },
+        medium: {
+            particleCount: 50,
+            updateFrequency: 60,
+            substeps: 1,
+            collisionAccuracy: 'bounding-box',
+            friction: 0.005,
+            gravity: 0.5,
+            bounceDamping: 0.8
+        },
+        low: {
+            particleCount: 25,
+            updateFrequency: 30,
+            substeps: 1,
+            collisionAccuracy: 'simple',
+            friction: 0.01,
+            gravity: 0.5,
+            bounceDamping: 0.75
+        }
+    };
+
+    // ================================================================
+    // STATE
+    // ================================================================
+    
+    let state = {
+        fidelity: 'medium',
+        particles: [],
+        isPaused: false,
+        lastTime: 0,
+        frameCount: 0,
+        fps: 60
+    };
+
+    // ================================================================
+    // PARTICLE CLASS
+    // ================================================================
+    
+    class Particle {
+        constructor(x, y, radius, mass) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 4;
+            this.vy = (Math.random() - 0.5) * 4;
+            this.radius = radius;
+            this.mass = mass;
+            this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        }
+
+        update(config, dt) {
+            // Apply gravity
+            this.vy += config.gravity * dt;
+
+            // Apply friction
+            this.vx *= (1 - config.friction);
+            this.vy *= (1 - config.friction);
+
+            // Update position
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+
+            // Boundary collisions with damping
+            if (this.x - this.radius < 0) {
+                this.x = this.radius;
+                this.vx = -this.vx * config.bounceDamping;
+            }
+            if (this.x + this.radius > canvas.width) {
+                this.x = canvas.width - this.radius;
+                this.vx = -this.vx * config.bounceDamping;
+            }
+            if (this.y - this.radius < 0) {
+                this.y = this.radius;
+                this.vy = -this.vy * config.bounceDamping;
+            }
+            if (this.y + this.radius > canvas.height) {
+                this.y = canvas.height - this.radius;
+                this.vy = -this.vy * config.bounceDamping;
+            }
+        }
+
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+
+    // ================================================================
+    // COLLISION DETECTION & RESOLUTION
+    // ================================================================
+    
+    function checkCollisions(particles, accuracy) {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const p1 = particles[i];
+                const p2 = particles[j];
+
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const minDist = p1.radius + p2.radius;
+
+                if (distance < minDist) {
+                    if (accuracy === 'exact' || accuracy === 'bounding-box') {
+                        resolveCollision(p1, p2, dx, dy, distance);
+                    } else if (accuracy === 'simple') {
+                        simpleCollisionResponse(p1, p2, dx, dy, distance);
+                    }
+                }
+            }
+        }
+    }
+
+    function resolveCollision(p1, p2, dx, dy, distance) {
+        // Normalize collision vector
+        const nx = dx / distance;
+        const ny = dy / distance;
+
+        // Separate overlapping particles
+        const overlap = (p1.radius + p2.radius - distance) / 2;
+        p1.x -= nx * overlap;
+        p1.y -= ny * overlap;
+        p2.x += nx * overlap;
+        p2.y += ny * overlap;
+
+        // Relative velocity
+        const dvx = p2.vx - p1.vx;
+        const dvy = p2.vy - p1.vy;
+
+        // Relative velocity in collision normal direction
+        const dvn = dvx * nx + dvy * ny;
+
+        // Do not resolve if velocities are separating
+        if (dvn > 0) return;
+
+        // Coefficient of restitution (bounciness)
+        const restitution = 0.8;
+
+        // Impulse scalar
+        const impulse = -(1 + restitution) * dvn / (1/p1.mass + 1/p2.mass);
+
+        // Apply impulse
+        p1.vx -= impulse * nx / p1.mass;
+        p1.vy -= impulse * ny / p1.mass;
+        p2.vx += impulse * nx / p2.mass;
+        p2.vy += impulse * ny / p2.mass;
+    }
+
+    function simpleCollisionResponse(p1, p2, dx, dy, distance) {
+        // Simple velocity swap for low-fidelity mode
+        const tempVx = p1.vx;
+        const tempVy = p1.vy;
+        p1.vx = p2.vx * 0.9;
+        p1.vy = p2.vy * 0.9;
+        p2.vx = tempVx * 0.9;
+        p2.vy = tempVy * 0.9;
+    }
+
+    // ================================================================
+    // INITIALIZATION
+    // ================================================================
+    
+    function initParticles(fidelity) {
+        const config = CONFIG[fidelity];
+        state.particles = [];
+
+        for (let i = 0; i < config.particleCount; i++) {
+            const radius = 10 + Math.random() * 15;
+            const mass = radius * radius; // Mass proportional to area
+            const x = radius + Math.random() * (canvas.width - 2 * radius);
+            const y = radius + Math.random() * (canvas.height - 2 * radius);
+            state.particles.push(new Particle(x, y, radius, mass));
+        }
+
+        if (particleCounter) {
+            particleCounter.textContent = `Particles: ${state.particles.length}`;
+        }
+    }
+
+    // ================================================================
+    // ANIMATION LOOP
+    // ================================================================
+    
+    function animate(timestamp) {
+        if (!state.isPaused) {
+            const config = CONFIG[state.fidelity];
+            const dt = 1 / config.updateFrequency;
+
+            // Clear canvas
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Substep physics for high fidelity
+            for (let step = 0; step < config.substeps; step++) {
+                const subDt = dt / config.substeps;
+                
+                // Update particles
+                state.particles.forEach(p => p.update(config, subDt));
+
+                // Check collisions
+                checkCollisions(state.particles, config.collisionAccuracy);
+            }
+
+            // Draw particles
+            state.particles.forEach(p => p.draw(ctx));
+
+            // FPS Counter
+            state.frameCount++;
+            if (timestamp - state.lastTime >= 1000) {
+                state.fps = state.frameCount;
+                state.frameCount = 0;
+                state.lastTime = timestamp;
+                if (fpsCounter) {
+                    fpsCounter.textContent = `FPS: ${state.fps}`;
+                }
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    // ================================================================
+    // EVENT HANDLERS
+    // ================================================================
+    
+    if (fidelitySelect) {
+        fidelitySelect.addEventListener('change', (e) => {
+            state.fidelity = e.target.value;
+            initParticles(state.fidelity);
+            if (modeDisplay) {
+                modeDisplay.textContent = `Mode: ${state.fidelity.charAt(0).toUpperCase() + state.fidelity.slice(1)}`;
+            }
+        });
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            initParticles(state.fidelity);
+        });
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            state.isPaused = !state.isPaused;
+            toggleBtn.textContent = state.isPaused ? 'Play' : 'Pause';
+        });
+    }
+
+    // Click to add particles
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const radius = 15;
+        const mass = radius * radius;
+        state.particles.push(new Particle(x, y, radius, mass));
+        if (particleCounter) {
+            particleCounter.textContent = `Particles: ${state.particles.length}`;
+        }
+    });
+
+    // ================================================================
+    // START SIMULATION
+    // ================================================================
+    
+    initParticles(state.fidelity);
+    requestAnimationFrame(animate);
+
+    console.log('✓ Multi-Fidelity Physics Simulator initialized');
+})();
+</script>
