@@ -174,51 +174,61 @@ async function fetchSimulationData() {
 }
 
 window.runSimulation = async function() {
-        const runBtn = document.getElementById(CONFIG.ELEMENTS.runButton);
-        const loading = document.getElementById('loading');
-        
-        // Disable UI
-        runBtn.disabled = true;
-        if(loading) loading.classList.add('active');
+    const runBtn = document.getElementById(CONFIG.ELEMENTS.runButton);
+    const loading = document.getElementById(CONFIG.ELEMENTS.loading);
+    const results = document.getElementById(CONFIG.ELEMENTS.results);
+    const errorEl = document.getElementById('error-message');
+    
+    // 1. Reset UI State
+    if (runBtn) runBtn.disabled = true;
+    if (loading) loading.classList.add('active');
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.remove('active');
+    }
 
-        try {
-            // Get values + Kelvin conversion
-            const params = {
-                solar: parseFloat(document.getElementById('solar-irradiance').value),
-                ambient: parseFloat(document.getElementById('ambient-temperature').value) + 273.15,
-                wind: parseFloat(document.getElementById('wind-speed').value),
-                cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
-                thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
-                absorptivity: parseFloat(document.getElementById('absorptivity').value),
-                emissivity: parseFloat(document.getElementById('emissivity').value)
-            };
+    try {
+        // 2. Collect Parameters (Direct Kelvin from slider)
+        const params = {
+            solar: parseFloat(document.getElementById('solar-irradiance').value),
+            ambient: parseFloat(document.getElementById('ambient-temperature').value), // Removed + 273.15
+            wind: parseFloat(document.getElementById('wind-speed').value),
+            cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
+            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+            absorptivity: parseFloat(document.getElementById('absorptivity').value),
+            emissivity: parseFloat(document.getElementById('emissivity').value)
+        };
 
-            const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            });
+        // 3. API Request
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/simulate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        });
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const data = await response.json();
-            dashboardState.recordSuccess(data);
-            
-            // Use the original advanced update function
-            updateDashboard(data);
+        const data = await response.json();
 
-        } catch (error) {
-            console.error('Simulation Error:', error);
-            const errEl = document.getElementById('error-message');
-            if(errEl) {
-                errEl.textContent = '❌ ' + error.message;
-                errEl.classList.add('active');
-            }
-        } finally {
-            runBtn.disabled = false;
-            if(loading) loading.classList.remove('active');
+        if (!response.ok) {
+            throw new Error(data.error || `Server responded with ${response.status}`);
         }
-    };
+        
+        // 4. Update State and UI
+        dashboardState.recordSuccess(data);
+        if (results) results.style.display = 'block'; // Ensure container is visible
+        updateDashboard(data);
+
+    } catch (error) {
+        console.error('Simulation Error:', error);
+        if (errorEl) {
+            errorEl.textContent = '❌ ' + error.message;
+            errorEl.classList.add('active');
+        }
+    } finally {
+        // 5. Restore UI
+        if (runBtn) runBtn.disabled = false;
+        if (loading) loading.classList.remove('active');
+    }
+};
 
 // ============================================================================
 // VISUALIZATION
