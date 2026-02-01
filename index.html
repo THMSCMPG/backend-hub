@@ -138,15 +138,28 @@
         // The Bridge Logic (Optimized: No JSON stringification of payloads)
         window.addEventListener('message', async (event) => {
             // Security Filter
+            console.log("Hub received raw event:", event);
             if (!event.origin.includes('github.io') && !event.origin.includes('localhost')) return;
+
+            if (!event.data || !event.data.action) {
+            console.warn("Message received but missing 'action' property.");
+            return;
+            }
 
             const { action, id, payload } = event.data;
             if (!action || !id) return;
 
             state.msgCount++;
+            const countEl = document.getElementById('count-val');
+            if (countEl) {
+                countEl.textContent = state.msgCount;
+                // Visual "Flash" to prove it worked
+                countEl.style.color = '#4CAF50'; 
+                setTimeout(() => countEl.style.color = '#fff', 300);
+            }
             document.getElementById('count-val').textContent = state.msgCount;
-            log('info', `Routing ${action} [ID: ${id.split('-')[0]}]`);
-
+            log('traffic', `Received: ${action} (ID: ${id})`);
+            
             // 1. Immediate ACK to keep frontend responsive
             event.source.postMessage({ id, status: 'success', data: { received: true } }, event.origin);
 
