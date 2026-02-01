@@ -297,52 +297,6 @@ h2.circuit-head {
 }
 
 /* ============================================
-   MOBILE SIDEBAR — Profile variant
-   Profile used .sidebar (not .sidebar-mobile), sliding
-   from the right, same as CircuitNotes.
-   ============================================ */
-.sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed !important;
-    z-index: 10002;
-    top: 0;
-    right: 0;
-    background-color: var(--dark-muted);
-    overflow-x: hidden;
-    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding-top: 80px;
-    border-left: 2px solid var(--primary);
-}
-
-.sidebar a {
-    padding: 15px 32px;
-    text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #94a3b8;
-    display: block;
-    transition: 0.3s;
-    white-space: nowrap;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.sidebar a:hover {
-    color: var(--primary);
-    background: rgba(16, 185, 129, 0.1);
-    padding-left: 40px;
-}
-
-.sidebar .close-btn {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    font-size: 30px;
-    color: var(--primary);
-    border-bottom: none;
-}
-
-/* ============================================
    CONTACT FORM
    Custom form styling specific to Profile.
    The shared SCSS has .form-input/.form-textarea but
@@ -412,34 +366,6 @@ h2.circuit-head {
     background: #fee2e2;
     color: #991b1b;
     border: 1px solid #fecaca;
-}
-
-/* ============================================
-   FOOTER — .footer class variant
-   ============================================ */
-.footer {
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--dark-muted);
-    color: #94a3b8;
-    margin-top: 60px;
-    border-top: 3px solid var(--primary);
-}
-
-.footer p {
-    margin-bottom: 4px;
-    color: inherit;
-}
-
-.footer a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.footer a:hover {
-    text-decoration: underline;
-    color: white;
 }
 
 /* ============================================
