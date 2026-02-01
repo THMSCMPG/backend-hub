@@ -4,7 +4,7 @@
     // Configuration
     const CONFIG = {
         TIMEOUT: 15000,
-        BRIDGE_URL: 'https://thmscmpg.github.io/backend-bridge/'
+        BRIDGE_URL: 'https://thmscmpg.github.io/backend-hub/'  // FIXED: Was backend-bridge
     };
     
     function sendSimulationToBridge(params) {
