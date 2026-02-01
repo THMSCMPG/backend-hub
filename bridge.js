@@ -42,7 +42,14 @@
                     ...options,
                     signal: controller.signal
                 });
-                
+                // Inside Backend Bridge fetchWithRetry
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}`);
+                }
                 clearTimeout(timeoutId);
                 
                 if (!response.ok) {
