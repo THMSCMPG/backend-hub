@@ -1,0 +1,627 @@
+/* ============================================
+   AURA-MF PROJECT-SPECIFIC STYLES
+   Layers on top of compiled style.css (shared SCSS base).
+   Contains only rules that are unique to AURA-MF or that
+   override shared defaults to match the original site.
+   ============================================ */
+
+/* ============================================
+   HEADING OVERRIDES
+   AURA-MF applies its own heading hierarchy with
+   colored text, borders, and spacing not in shared core.
+   ============================================ */
+h1 {
+    color: var(--primary);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 0.5rem;
+}
+
+h2 {
+    color: var(--dark);
+    font-size: 1.8rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 15px;
+}
+
+h3 {
+    color: var(--text);
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+h4 {
+    color: var(--text);
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+}
+
+p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+/* ============================================
+   PEEK-NAV — Hover-reveal left sidebar
+   Unique to AURA-MF. Slides in from the left edge
+   when the user hovers a 15–20 px trigger zone.
+   ============================================ */
+.peek-nav {
+    position: fixed;
+    left: -280px;
+    top: 30px;
+    width: 260px;
+    height: calc(100vh - 30px);
+    background: var(--dark-muted);
+    border-right: 5px solid var(--primary);
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 990;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+}
+
+/* The invisible trigger zone on the left edge */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 15px;
+    height: 100vh;
+    z-index: 989;
+}
+
+/* Show nav when hovering trigger zone OR nav itself (:has version) */
+body:has(.peek-nav:hover)::after,
+.peek-nav:hover,
+body::after:hover + .peek-nav {
+    left: 0;
+}
+
+/* Fallback trigger-zone element for browsers without :has */
+.trigger-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 100vh;
+    z-index: 998;
+    display: block;
+}
+
+.trigger-zone:hover ~ .peek-nav,
+.peek-nav:hover {
+    left: 0;
+}
+
+/* Peek-nav internals */
+.peek-nav h2 {
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+    border-left: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+.peek-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.peek-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.peek-nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: block;
+    padding: 0.5rem 0;
+    transition: all 0.2s ease;
+}
+
+.peek-nav a:hover,
+.peek-nav a.active {
+    color: var(--primary);
+    padding-left: 10px;
+}
+
+.peek-nav ul ul {
+    margin-left: 15px;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 10px;
+    margin-top: 5px;
+}
+
+/* ============================================
+   HERO BANNER — Purple gradient banner
+   Distinct from the shared .hero (which is dark slate).
+   Used on AURA-MF doc pages for section intros.
+   ============================================ */
+.hero-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.hero-banner h2 {
+    color: white;
+    border: none;
+    margin-top: 0;
+    padding-left: 0;
+    font-size: 2rem;
+}
+
+.hero-banner p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   HERO OVERRIDE — Card-style hero
+   AURA-MF's .hero is a white bordered card, not the
+   shared dark-gradient full-width banner.
+   ============================================ */
+.hero {
+    background: white;
+    padding: 60px 40px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    color: var(--text);
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    color: var(--dark);
+    margin: 0 0 16px 0;
+    letter-spacing: -0.025em;
+    border-left: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   CONTENT BOXES — AURA-MF palette
+   These differ from CircuitNotes: theory is green-tinted,
+   warning is amber, info is blue.
+   ============================================ */
+.theory-box {
+    background: #f0fdf4;
+    border-left: 4px solid var(--primary);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 4px;
+}
+
+.warning-box {
+    background: #fef3c7;
+    border-left: 4px solid var(--accent);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 4px;
+}
+
+.info-box {
+    background: #eff6ff;
+    border-left: 4px solid var(--info);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 4px;
+}
+
+/* Second .theory-box declaration in original (publication-ready version) —
+   this one uses the blue/info palette and matches the later rule in the source. */
+.theory-box {
+    background: #e8f4f8;
+    padding: 20px;
+    border-left: 4px solid var(--info);
+    margin: 40px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+/* ============================================
+   FEATURE GRID & CARDS
+   Used on AURA-MF overview/feature pages.
+   ============================================ */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.feature-card h4 {
+    color: var(--primary);
+    margin-top: 0;
+}
+
+/* ============================================
+   PROJECT GRID & CARDS — AURA-MF variant
+   Uses 250px minmax (shared grid classes use 300/250 but
+   .project-grid/.project-card are not in shared SCSS).
+   ============================================ */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.project-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+}
+
+/* ============================================
+   METRIC CARDS — card-label / card-value / card-desc
+   Used on AURA-MF stats/metrics sections.
+   ============================================ */
+.card-label {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 10px 0;
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+/* ============================================
+   DOWNLOAD BUTTON — AURA-MF bordered-card style
+   This is a large bordered card link, completely different
+   from the shared .btn or the pill-style used by the other sites.
+   ============================================ */
+.download-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+    transition: 0.3s;
+}
+
+.download-btn:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.download-btn .icon {
+    font-size: 1.5rem;
+}
+
+.download-btn div strong {
+    display: block;
+    color: var(--dark);
+    font-size: 1.1rem;
+}
+
+.download-btn div span {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* ============================================
+   MOBILE SIDEBAR — AURA-MF slides from RIGHT
+   The shared _theme.scss .sidebar-mobile slides from the LEFT.
+   AURA-MF's original used right: 0 instead.
+   ============================================ */
+.sidebar-mobile {
+    right: 0;
+    left: auto;
+}
+
+.sidebar-mobile.open {
+    width: 250px;
+}
+
+/* ============================================
+   MAIN CONTENT LAYOUT
+   ============================================ */
+main {
+    margin-left: 0;
+    padding: 2rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+    transition: margin-left 0.4s ease;
+}
+
+/* ============================================
+   DASHBOARD COMPONENTS
+   Used by the interactive dashboard page.
+   ============================================ */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dashboard-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.status-bar {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 15px 30px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.status-label {
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.card-badge {
+    background: #667eea;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+#temperatureHeatmap {
+    width: 100%;
+    max-width: 500px;
+    height: 500px;
+    margin: 0 auto;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.metric-box {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.fidelity-indicator {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.fidelity-level {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.fidelity-history-box {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.fidelity-history-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+#fidelityHistory {
+    font-family: monospace;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    line-height: 1.5;
+}
+
+/* ============================================
+   FOOTER OVERRIDE — .footer class variant
+   The shared theme styles the <footer> element.
+   AURA-MF also uses a .footer class with identical intent
+   but slightly different selector specificity needs.
+   ============================================ */
+.footer {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--dark-muted);
+    color: #94a3b8;
+    margin-top: 60px;
+    border-top: 3px solid var(--primary);
+}
+
+.footer p {
+    margin-bottom: 4px;
+    color: inherit;
+}
+
+.footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+/* ============================================
+   RESPONSIVE — AURA-MF SPECIFIC
+   ============================================ */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .status-bar {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #temperatureHeatmap {
+        max-width: 100%;
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Disable peek nav on mobile */
+    .trigger-zone {
+        display: none;
+    }
+
+    .peek-nav {
+        display: none;
+    }
+
+    main {
+        padding: 2rem 20px;
+    }
+}
