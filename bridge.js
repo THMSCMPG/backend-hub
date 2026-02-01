@@ -91,7 +91,11 @@
                 body: JSON.stringify(payload)
             }
         );
-        
+
+        res.status(200).json({ 
+            status: 'verified_by_render',
+            timestamp: Date.now()
+        });
         return response;
     }
     
