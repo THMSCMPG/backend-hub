@@ -108,15 +108,24 @@
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 100%;
-    right: 0;
+    top: 90%;
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--dark);
     min-width: 200px;
     box-shadow: var(--shadow-lg);
     z-index: var(--z-dropdown);
     border-radius: var(--radius-md);
     overflow: hidden;
-    margin-top: 5px; 
+}
+
+.dropdown-content::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    height: 20px;
 }
 
 .dropdown-content.show {
