@@ -1,0 +1,19 @@
+name: Sync Frontends
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ['The-T', 'The-M', 'The-H'] # Your frontend repo names
+    steps:
+      - name: Trigger Frontend Update
+        run: |
+          curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.MY_SYNC_TOKEN }}" \
+          https://api.github.com/repos/THMSCMPG/${{ matrix.repo }}/dispatches \
+          -d '{"event_type": "hub_update"}'
