@@ -16,7 +16,7 @@ plugins:
   - jekyll-seo-tag
   - jekyll-remote-theme
 
-remote_theme: THMSCMPG/backend-hub
+theme: jekyll-theme-primer
 sass:
   sass_dir: _sass
 
