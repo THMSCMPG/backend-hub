@@ -1,6 +1,35 @@
 /* ============================================
    AURA-MF PROJECT-SPECIFIC STYLES
    ============================================ */
+.page-header {
+    background: var(--dark-muted) 100%;
+    color: white;
+    padding: 0;
+    margin-top: 10px !important;
+    border-bottom: 3px solid var(--primary);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.page-header .container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.page-header h1 {
+    margin: 0;
+    margin-top: 10px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        padding: 40px 0;
+        font-size: 1.8rem;
+    }
 
 h1 {
     color: var(--primary);
@@ -617,3 +646,4 @@ main {
         padding: 2rem 20px;
     }
 }
+
