@@ -5,7 +5,7 @@
 /* --- NAVBAR - DESKTOP --- */
 .navbar {
     background: var(--dark-muted);
-    border-bottom: 3px solid var(--dark-muted);
+    border-bottom: 3px solid var(--primary);
     width: 100%;
     position: fixed !important;
     top: 0;
@@ -116,7 +116,7 @@
     z-index: var(--z-dropdown);
     border-radius: var(--radius-md);
     overflow: hidden;
-    margin-top: 10px;
+    margin-top: 5px; 
 }
 
 .dropdown-content.show {

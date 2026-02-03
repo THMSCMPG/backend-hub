@@ -6,7 +6,7 @@
     background: var(--dark-muted);
     color: white;
     padding: 0;
-    margin-top: 10px !important;
+    margin-top: 8px !important;
     border-bottom: 3px solid var(--primary);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     text-align: center;
@@ -128,84 +128,40 @@
    ============================================ */
 .theory-box {
     background: #e8f4f8;
-    padding: 15px;
+    padding: 20px;
     border-left: 4px solid var(--info);
-    margin: 15px 0;
+    margin: 20px 0;
     border-radius: 0 8px 8px 0;
 }
 
 .math-box,
 .formula {
     background: #fef5e7;
-    padding: 15px;
+    padding: 20px;
     border-left: 4px solid var(--accent);
-    margin: 15px 0;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
     font-family: 'Courier New', monospace;
 }
 
 .materials-box,
 .tips-box {
     background: #d5f4e6;
-    padding: 15px;
+    padding: 20px;
     border-left: 4px solid var(--primary);
-    margin: 15px 0;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
 }
 
 .warning-box,
 .warning {
     background: #ffe6e6;
-    padding: 15px;
-    border-left: 4px solid var(--warning);
-    margin: 15px 0;
-}
-
-/* ============================================
-   CODE & CIRCUIT DIAGRAMS
-   ============================================ */
-.circuit-diagram,
-.code-section {
-    background: #2c3e50;
-    color: #ecf0f1;
     padding: 20px;
-    border-radius: 8px;
-    font-family: 'Courier New', monospace;
-    overflow-x: auto;
-    white-space: pre;
-    font-size: 14px;
-    margin: 15px 0;
+    border-left: 4px solid var(--warning);
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
 }
 
-/* ============================================
-   MATRIX KEYPAD GRID
-   ============================================ */
-.key-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 60px);
-    gap: 8px;
-    margin: 15px 0;
-}
-
-.key {
-    background: #34495e;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 8px;
-}
-
-/* ============================================
-   WAVEFORM
-   ============================================ */
-.waveform {
-    background: #fff;
-    border: 2px solid #334155;
-    padding: 15px;
-    font-family: monospace;
-    margin: 10px 0;
-    border-radius: 4px;
-}
 
 /* ============================================
    BTN-LINK — Navigation link cards with arrow
@@ -234,27 +190,6 @@
     content: '→';
 }
 
-/* ============================================
-   DOWNLOAD BUTTON — Green pill style
-   ============================================ */
-.download-btn {
-    display: inline-flex !important;
-    align-items: center;
-    gap: 8px;
-    background: var(--primary) !important;
-    color: white !important;
-    padding: 12px 24px !important;
-    border-radius: 6px !important;
-    text-decoration: none !important;
-    font-weight: bold !important;
-    margin: 20px 0 !important;
-    transition: 0.3s;
-}
-
-.download-btn:hover {
-    background: var(--primary-hover) !important;
-    transform: translateY(-2px);
-}
 
 /* ============================================
    PAGE SELECT DROPDOWN
@@ -377,4 +312,3 @@ h2.circuit-head {
         padding-top: 20px;
     }
 }
-
