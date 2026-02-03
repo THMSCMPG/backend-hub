@@ -108,11 +108,10 @@
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 90%;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 100%;
+    right: 0;
     background: var(--dark);
-    min-width: 200px;
+    min-width: 150px;
     box-shadow: var(--shadow-lg);
     z-index: var(--z-dropdown);
     border-radius: var(--radius-md);
