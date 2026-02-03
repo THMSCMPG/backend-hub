@@ -1,15 +1,7 @@
 /* ============================================
    AURA-MF PROJECT-SPECIFIC STYLES
-   Layers on top of compiled style.css (shared SCSS base).
-   Contains only rules that are unique to AURA-MF or that
-   override shared defaults to match the original site.
    ============================================ */
 
-/* ============================================
-   HEADING OVERRIDES
-   AURA-MF applies its own heading hierarchy with
-   colored text, borders, and spacing not in shared core.
-   ============================================ */
 h1 {
     color: var(--primary);
     font-size: 2.5rem;

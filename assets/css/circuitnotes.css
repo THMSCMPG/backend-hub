@@ -1,15 +1,7 @@
 /* ============================================
    CIRCUITNOTES PROJECT-SPECIFIC STYLES
-   Layers on top of compiled style.css (shared SCSS base).
-   Contains only rules that are unique to CircuitNotes or that
-   override shared defaults to match the original site.
    ============================================ */
 
-/* ============================================
-   PAGE HEADER — Dark title bar
-   Used at the top of every CircuitNotes content page.
-   Not present in the shared SCSS.
-   ============================================ */
 .page-header {
     background: var(--dark-muted) 100%;
     color: white;

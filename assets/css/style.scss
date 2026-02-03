@@ -1,26 +1,16 @@
 ---
-# Jekyll Front Matter - Required for SASS compilation
-# This file compiles to /assets/css/style.css
+// THMSCMPG Multi-Site Theme - Main Stylesheet
+// Used by: thmscmpg.github.io, CircuitNotes, AURA-MF
 ---
 
-// =============================================================================
-// THMSCMPG Multi-Site Theme - Main Stylesheet
-// =============================================================================
-// This stylesheet is compiled per-site with site-specific baseurl
-// Used by: thmscmpg.github.io, CircuitNotes, AURA-MF
-// =============================================================================
-
-// Import order is important - variables first, then base styles, then components
-@import "variables";   // CSS custom properties and SASS variables
+{@import "variables";   // CSS custom properties and SASS variables
 @import "core";        // Base HTML elements, resets, typography
 @import "theme";       // Layout, containers, responsive design
 @import "components";  // Reusable UI components (cards, buttons, etc.)
 
-// =============================================================================
-// Site-Wide Utilities
-// =============================================================================
 
-// Smooth scrolling for all anchor links
+// Site-Wide Utilities
+
 html {
   scroll-behavior: smooth;
 }
@@ -46,9 +36,4 @@ html {
   }
 }
 
-// =============================================================================
-// Responsive Breakpoints
-// =============================================================================
-// Mobile: < 768px
-// Tablet: 768px - 1024px
-// Desktop: > 1024px
+}

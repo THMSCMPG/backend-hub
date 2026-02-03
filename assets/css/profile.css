@@ -1,14 +1,7 @@
 /* ============================================
    PROFILE (THMSCMPG) PROJECT-SPECIFIC STYLES
-   Layers on top of compiled style.css (shared SCSS base).
-   Contains only rules that are unique to the Profile site or that
-   override shared defaults to match the original site.
    ============================================ */
 
-/* ============================================
-   PAGE HEADER — Dark title bar
-   Same pattern as CircuitNotes; used by the Profile layout.
-   ============================================ */
 .page-header {
     background: var(--dark-muted);
     color: white;
