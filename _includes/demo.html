@@ -1,404 +1,507 @@
-<section class="demo-section" id="physics-sim">
+
+<section class="demo-section">
     <div class="container">
-        <h3>⚛️ Multi-Fidelity Physics Simulator</h3>
-        <p class="section-description">
-            Interactive particle physics simulation with three fidelity modes optimized for different devices and performance requirements.
-        </p>
+        <div class="header">
+            <h1>⚡ AURA-MF Interactive Demo</h1>
+            <p>Adaptive Unified Radiative Analysis - Multi-Fidelity Framework</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">
+                Low-Fidelity 25×25 Resolution Demo
+            </p>
+        </div>
         
-        <div class="category-card">
-            <!-- Fidelity Mode Selector -->
-            <div class="fidelity-controls">
-                <label for="fidelity-mode"><strong>Fidelity Mode:</strong></label>
-                <select id="fidelity-mode" class="form-input">
-                    <option value="high">High - Sub-stepping, 60Hz+, Complex Interactions</option>
-                    <option value="medium" selected>Medium - Standard RAF, Basic Collisions</option>
-                    <option value="low">Low - Optimized Math, Reduced Particles, Mobile-Friendly</option>
-                </select>
+        <div class="content">
+            <div class="controls">
+                <h2 style="color: #2c3e50; margin-bottom: 25px;">Simulation Parameters</h2>
+                
+                <div class="parameter-group">
+                    <label>
+                        Solar Irradiance
+                        <span class="parameter-value" id="solar-value">1000</span> W/m²
+                    </label>
+                    <input type="range" id="solar-irradiance" min="800" max="1200" value="1000" step="10">
+                    <div class="param-info">Incident solar radiation on panel surface</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Ambient Temperature
+                        <span class="parameter-value" id="temp-value">27</span> °C
+                    </label>
+                    <input type="range" id="ambient-temperature" min="280" max="330" value="300" step="1">
+                    <div class="param-info">Surrounding air temperature</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Wind Speed
+                        <span class="parameter-value" id="wind-value">1.0</span> m/s
+                    </label>
+                    <input type="range" id="wind-speed" min="0" max="10" value="1" step="0.1">
+                    <div class="param-info">Affects convective cooling rate</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Cell Efficiency
+                        <span class="parameter-value" id="efficiency-value">20</span> %
+                    </label>
+                    <input type="range" id="cell-efficiency" min="0.10" max="0.30" value="0.20" step="0.01">
+                    <div class="param-info">Base electrical conversion efficiency</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Thermal Conductivity
+                        <span class="parameter-value" id="conductivity-value">130</span> W/(m·K)
+                    </label>
+                    <input type="range" id="thermal-conductivity" min="100" max="200" value="130" step="5">
+                    <div class="param-info">In-plane heat conduction</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Absorptivity
+                        <span class="parameter-value" id="absorptivity-value">0.95</span>
+                    </label>
+                    <input type="range" id="absorptivity" min="0.85" max="0.98" value="0.95" step="0.01">
+                    <div class="param-info">Fraction of incident solar radiation absorbed</div>
+                </div>
+                
+                <div class="parameter-group">
+                    <label>
+                        Emissivity
+                        <span class="parameter-value" id="emissivity-value">0.90</span>
+                    </label>
+                    <input type="range" id="emissivity" min="0.80" max="0.95" value="0.90" step="0.01">
+                    <div class="param-info">Radiative heat loss efficiency</div>
+                </div>
+                
+                <button class="run-button" id="run-button" onclick="runSimulation()">
+                    🚀 Run Simulation
+                </button>
+                
+                <button class="reset-button" onclick="resetParameters()">
+                    ↺ Reset to Defaults
+                </button>
             </div>
-
-            <!-- Canvas Container -->
-            <div class="canvas-container">
-                <canvas id="physics-canvas" width="800" height="600"></canvas>
-            </div>
-
-            <!-- Control Panel -->
-            <div class="physics-controls">
-                <button id="reset-btn" class="btn">Reset Simulation</button>
-                <button id="toggle-play" class="btn btn-secondary">Pause</button>
-                <div class="stats-display">
-                    <span id="fps-counter">FPS: 60</span>
-                    <span id="particle-count">Particles: 50</span>
-                    <span id="mode-display">Mode: Medium</span>
+            
+            <div class="visualization">
+                <div class="error" id="error-message"></div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Running simulation...</p>
+                </div>
+                
+                <div id="results-container" style="display: none; width: 100%;">
+                    <img id="visualization-image" src="" alt="Simulation Results">
+                    
+                    <div class="results">
+                        <h3>📊 Simulation Results</h3>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <label>Mean Temperature</label>
+                                <div class="value" id="temp-mean">-</div>
+                            </div>
+                            <div class="result-item">
+                                <label>Max Temperature</label>
+                                <div class="value" id="temp-max">-</div>
+                            </div>
+                            <div class="result-item">
+                                <label>Total Power Output</label>
+                                <div class="value" id="power-total">-</div>
+                            </div>
+                            <div class="result-item">
+                                <label>Average Efficiency</label>
+                                <div class="value" id="efficiency-avg">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center; color: #6c757d; font-size: 0.9em;">
+                            Computation time: <span id="runtime">-</span> ms
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+<iframe 
+    id="backend-bridge" 
+    src="https://thmscmpg.github.io/backend-hub/" 
+    style="display:none; width:0; height:0; border:0;"
+    title="backend-hub">
+</iframe>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 0;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .visualization {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .parameter-group {
+            margin-bottom: 25px;
+        }
+        
+        .parameter-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .parameter-value {
+            color: #667eea;
+            font-weight: 700;
+            float: right;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .param-info {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        
+        .run-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        .run-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .run-button:active {
+            transform: translateY(0);
+        }
+        
+        .run-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .reset-button {
+            width: 100%;
+            padding: 12px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .reset-button:hover {
+            background: #7f8c8d;
+        }
+        
+        #visualization-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .results h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-item label {
+            display: block;
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .result-item .value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .error.active {
+            display: block;
+        }
+        
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                max-height: none;
+            }
+        }
+    </style>
 </section>
 
-<style>
-/* Physics Simulator Styles */
-.fidelity-controls {
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
 
-.canvas-container {
-    background: #1a1a1a;
-    border-radius: 12px;
-    overflow: hidden;
-    margin: 20px 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-#physics-canvas {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 800px;
-    cursor: crosshair;
-}
-
-.physics-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.stats-display {
-    display: flex;
-    gap: 20px;
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: #666;
-}
-
-@media (max-width: 768px) {
-    .fidelity-controls {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .physics-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .stats-display {
-        flex-direction: column;
-        gap: 5px;
-    }
-}
-</style>
-
-<script>
-(function() {
-    'use strict';
-
-    // ================================================================
-    // MULTI-FIDELITY PHYSICS SIMULATOR
-    // Pure JavaScript with THREE.js-quality math
-    // Supports: High, Medium, Low fidelity modes
-    // ================================================================
-
-    const canvas = document.getElementById('physics-canvas');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    const fidelitySelect = document.getElementById('fidelity-mode');
-    const resetBtn = document.getElementById('reset-btn');
-    const toggleBtn = document.getElementById('toggle-play');
-    const fpsCounter = document.getElementById('fps-counter');
-    const particleCounter = document.getElementById('particle-count');
-    const modeDisplay = document.getElementById('mode-display');
-
-    // ================================================================
-    // CONFIGURATION
-    // ================================================================
-    
-    const CONFIG = {
-        high: {
-            particleCount: 100,
-            updateFrequency: 60,
-            substeps: 4,
-            collisionAccuracy: 'exact',
-            friction: 0.002,
-            gravity: 0.5,
-            bounceDamping: 0.85
-        },
-        medium: {
-            particleCount: 50,
-            updateFrequency: 60,
-            substeps: 1,
-            collisionAccuracy: 'bounding-box',
-            friction: 0.005,
-            gravity: 0.5,
-            bounceDamping: 0.8
-        },
-        low: {
-            particleCount: 25,
-            updateFrequency: 30,
-            substeps: 1,
-            collisionAccuracy: 'simple',
-            friction: 0.01,
-            gravity: 0.5,
-            bounceDamping: 0.75
-        }
-    };
-
-    // ================================================================
-    // STATE
-    // ================================================================
-    
-    let state = {
-        fidelity: 'medium',
-        particles: [],
-        isPaused: false,
-        lastTime: 0,
-        frameCount: 0,
-        fps: 60
-    };
-
-    // ================================================================
-    // PARTICLE CLASS
-    // ================================================================
-    
-    class Particle {
-        constructor(x, y, radius, mass) {
-            this.x = x;
-            this.y = y;
-            this.vx = (Math.random() - 0.5) * 4;
-            this.vy = (Math.random() - 0.5) * 4;
-            this.radius = radius;
-            this.mass = mass;
-            this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-        }
-
-        update(config, dt) {
-            // Apply gravity
-            this.vy += config.gravity * dt;
-
-            // Apply friction
-            this.vx *= (1 - config.friction);
-            this.vy *= (1 - config.friction);
-
-            // Update position
-            this.x += this.vx * dt;
-            this.y += this.vy * dt;
-
-            // Boundary collisions with damping
-            if (this.x - this.radius < 0) {
-                this.x = this.radius;
-                this.vx = -this.vx * config.bounceDamping;
-            }
-            if (this.x + this.radius > canvas.width) {
-                this.x = canvas.width - this.radius;
-                this.vx = -this.vx * config.bounceDamping;
-            }
-            if (this.y - this.radius < 0) {
-                this.y = this.radius;
-                this.vy = -this.vy * config.bounceDamping;
-            }
-            if (this.y + this.radius > canvas.height) {
-                this.y = canvas.height - this.radius;
-                this.vy = -this.vy * config.bounceDamping;
-            }
-        }
-
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-    }
-
-    // ================================================================
-    // COLLISION DETECTION & RESOLUTION
-    // ================================================================
-    
-    function checkCollisions(particles, accuracy) {
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const p1 = particles[i];
-                const p2 = particles[j];
-
-                const dx = p2.x - p1.x;
-                const dy = p2.y - p1.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const minDist = p1.radius + p2.radius;
-
-                if (distance < minDist) {
-                    if (accuracy === 'exact' || accuracy === 'bounding-box') {
-                        resolveCollision(p1, p2, dx, dy, distance);
-                    } else if (accuracy === 'simple') {
-                        simpleCollisionResponse(p1, p2, dx, dy, distance);
-                    }
-                }
-            }
-        }
-    }
-
-    function resolveCollision(p1, p2, dx, dy, distance) {
-        // Normalize collision vector
-        const nx = dx / distance;
-        const ny = dy / distance;
-
-        // Separate overlapping particles
-        const overlap = (p1.radius + p2.radius - distance) / 2;
-        p1.x -= nx * overlap;
-        p1.y -= ny * overlap;
-        p2.x += nx * overlap;
-        p2.y += ny * overlap;
-
-        // Relative velocity
-        const dvx = p2.vx - p1.vx;
-        const dvy = p2.vy - p1.vy;
-
-        // Relative velocity in collision normal direction
-        const dvn = dvx * nx + dvy * ny;
-
-        // Do not resolve if velocities are separating
-        if (dvn > 0) return;
-
-        // Coefficient of restitution (bounciness)
-        const restitution = 0.8;
-
-        // Impulse scalar
-        const impulse = -(1 + restitution) * dvn / (1/p1.mass + 1/p2.mass);
-
-        // Apply impulse
-        p1.vx -= impulse * nx / p1.mass;
-        p1.vy -= impulse * ny / p1.mass;
-        p2.vx += impulse * nx / p2.mass;
-        p2.vy += impulse * ny / p2.mass;
-    }
-
-    function simpleCollisionResponse(p1, p2, dx, dy, distance) {
-        // Simple velocity swap for low-fidelity mode
-        const tempVx = p1.vx;
-        const tempVy = p1.vy;
-        p1.vx = p2.vx * 0.9;
-        p1.vy = p2.vy * 0.9;
-        p2.vx = tempVx * 0.9;
-        p2.vy = tempVy * 0.9;
-    }
-
-    // ================================================================
-    // INITIALIZATION
-    // ================================================================
-    
-    function initParticles(fidelity) {
-        const config = CONFIG[fidelity];
-        state.particles = [];
-
-        for (let i = 0; i < config.particleCount; i++) {
-            const radius = 10 + Math.random() * 15;
-            const mass = radius * radius; // Mass proportional to area
-            const x = radius + Math.random() * (canvas.width - 2 * radius);
-            const y = radius + Math.random() * (canvas.height - 2 * radius);
-            state.particles.push(new Particle(x, y, radius, mass));
-        }
-
-        if (particleCounter) {
-            particleCounter.textContent = `Particles: ${state.particles.length}`;
-        }
-    }
-
-    // ================================================================
-    // ANIMATION LOOP
-    // ================================================================
-    
-    function animate(timestamp) {
-        if (!state.isPaused) {
-            const config = CONFIG[state.fidelity];
-            const dt = 1 / config.updateFrequency;
-
-            // Clear canvas
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Substep physics for high fidelity
-            for (let step = 0; step < config.substeps; step++) {
-                const subDt = dt / config.substeps;
+    <script>
+        // Update slider value displays
+        const sliders = [
+            {id: 'solar-irradiance', display: 'solar-value', format: v => v},
+            {id: 'ambient-temperature', display: 'temp-value', format: v => (v - 273.15).toFixed(1)},
+            {id: 'wind-speed', display: 'wind-value', format: v => parseFloat(v).toFixed(1)},
+            {id: 'cell-efficiency', display: 'efficiency-value', format: v => (v * 100).toFixed(0)},
+            {id: 'thermal-conductivity', display: 'conductivity-value', format: v => v},
+            {id: 'absorptivity', display: 'absorptivity-value', format: v => parseFloat(v).toFixed(2)},
+            {id: 'emissivity', display: 'emissivity-value', format: v => parseFloat(v).toFixed(2)}
+        ];
+        
+        sliders.forEach(slider => {
+            const element = document.getElementById(slider.id);
+            const display = document.getElementById(slider.display);
+            
+            element.addEventListener('input', function() {
+                display.textContent = slider.format(this.value);
+            });
+        });
+        
+        async function runSimulation() {
+            // Collect parameters
+            const params = {
+                solar_irradiance: parseFloat(document.getElementById('solar-irradiance').value),
+                ambient_temperature: parseFloat(document.getElementById('ambient-temperature').value),
+                wind_speed: parseFloat(document.getElementById('wind-speed').value),
+                cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
+                thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+                absorptivity: parseFloat(document.getElementById('absorptivity').value),
+                emissivity: parseFloat(document.getElementById('emissivity').value)
+            };
+            
+            // Show loading, hide results and errors
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results-container').style.display = 'none';
+            document.getElementById('error-message').classList.remove('active');
+            document.getElementById('run-button').disabled = true;
+            
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                });
                 
-                // Update particles
-                state.particles.forEach(p => p.update(config, subDt));
-
-                // Check collisions
-                checkCollisions(state.particles, config.collisionAccuracy);
-            }
-
-            // Draw particles
-            state.particles.forEach(p => p.draw(ctx));
-
-            // FPS Counter
-            state.frameCount++;
-            if (timestamp - state.lastTime >= 1000) {
-                state.fps = state.frameCount;
-                state.frameCount = 0;
-                state.lastTime = timestamp;
-                if (fpsCounter) {
-                    fpsCounter.textContent = `FPS: ${state.fps}`;
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Simulation failed');
                 }
+                
+                // Display results
+                displayResults(data);
+                
+            } catch (error) {
+                document.getElementById('error-message').textContent = 
+                    '❌ Error: ' + error.message;
+                document.getElementById('error-message').classList.add('active');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('run-button').disabled = false;
             }
         }
-
-        requestAnimationFrame(animate);
-    }
-
-    // ================================================================
-    // EVENT HANDLERS
-    // ================================================================
-    
-    if (fidelitySelect) {
-        fidelitySelect.addEventListener('change', (e) => {
-            state.fidelity = e.target.value;
-            initParticles(state.fidelity);
-            if (modeDisplay) {
-                modeDisplay.textContent = `Mode: ${state.fidelity.charAt(0).toUpperCase() + state.fidelity.slice(1)}`;
-            }
-        });
-    }
-
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            initParticles(state.fidelity);
-        });
-    }
-
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            state.isPaused = !state.isPaused;
-            toggleBtn.textContent = state.isPaused ? 'Play' : 'Pause';
-        });
-    }
-
-    // Click to add particles
-    canvas.addEventListener('click', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const radius = 15;
-        const mass = radius * radius;
-        state.particles.push(new Particle(x, y, radius, mass));
-        if (particleCounter) {
-            particleCounter.textContent = `Particles: ${state.particles.length}`;
+        
+        function displayResults(data) {
+            const results = data.results;
+            
+            // Show visualization
+            document.getElementById('visualization-image').src = 
+                'data:image/png;base64,' + data.visualization;
+            
+            // Update result values
+            document.getElementById('temp-mean').textContent = 
+                (results.temperature_mean - 273.15).toFixed(1) + ' °C';
+            document.getElementById('temp-max').textContent = 
+                (results.temperature_max - 273.15).toFixed(1) + ' °C';
+            document.getElementById('power-total').textContent = 
+                results.power_total.toFixed(2) + ' W';
+            document.getElementById('efficiency-avg').textContent = 
+                (results.efficiency_avg * 100).toFixed(1) + ' %';
+            document.getElementById('runtime').textContent = 
+                results.runtime_ms.toFixed(1);
+            
+            // Show results
+            document.getElementById('results-container').style.display = 'block';
         }
-    });
-
-    // ================================================================
-    // START SIMULATION
-    // ================================================================
-    
-    initParticles(state.fidelity);
-    requestAnimationFrame(animate);
-
-    console.log('✓ Multi-Fidelity Physics Simulator initialized');
-})();
-</script>
+        
+        function resetParameters() {
+            document.getElementById('solar-irradiance').value = 1000;
+            document.getElementById('ambient-temperature').value = 300;
+            document.getElementById('wind-speed').value = 1;
+            document.getElementById('cell-efficiency').value = 0.20;
+            document.getElementById('thermal-conductivity').value = 130;
+            document.getElementById('absorptivity').value = 0.95;
+            document.getElementById('emissivity').value = 0.90;
+            
+            // Trigger input events to update displays
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider.id);
+                element.dispatchEvent(new Event('input'));
+            });
+        }
+        
+        // Initialize displays
+        window.addEventListener('load', () => {
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider.id);
+                element.dispatchEvent(new Event('input'));
+            });
+        });
+    </script>
