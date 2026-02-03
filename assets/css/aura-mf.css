@@ -2,10 +2,11 @@
    AURA-MF PROJECT-SPECIFIC STYLES
    ============================================ */
 .page-header {
-    background: var(--dark-muted) 100%;
+    background: var(--dark-muted);
     color: white;
     padding: 0;
-    margin-top: 10px !important;
+    margin-top: 8px !important;
+    margin-bottom: 20px;
     border-bottom: 3px solid var(--primary);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     text-align: center;
@@ -66,105 +67,6 @@ h4 {
 p {
     margin-bottom: 1rem;
     line-height: 1.8;
-}
-
-/* ============================================
-   PEEK-NAV — Hover-reveal left sidebar
-   Unique to AURA-MF. Slides in from the left edge
-   when the user hovers a 15–20 px trigger zone.
-   ============================================ */
-.peek-nav {
-    position: fixed;
-    left: -280px;
-    top: 30px;
-    width: 260px;
-    height: calc(100vh - 30px);
-    background: var(--dark-muted);
-    border-right: 5px solid var(--primary);
-    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 990;
-    padding: 2rem 1.5rem;
-    overflow-y: auto;
-    box-shadow: 4px 0 10px rgba(0,0,0,0.3);
-}
-
-/* The invisible trigger zone on the left edge */
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 15px;
-    height: 100vh;
-    z-index: 989;
-}
-
-/* Show nav when hovering trigger zone OR nav itself (:has version) */
-body:has(.peek-nav:hover)::after,
-.peek-nav:hover,
-body::after:hover + .peek-nav {
-    left: 0;
-}
-
-/* Fallback trigger-zone element for browsers without :has */
-.trigger-zone {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 20px;
-    height: 100vh;
-    z-index: 998;
-    display: block;
-}
-
-.trigger-zone:hover ~ .peek-nav,
-.peek-nav:hover {
-    left: 0;
-}
-
-/* Peek-nav internals */
-.peek-nav h2 {
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 10px;
-    border-left: none;
-    padding-left: 0;
-    margin-top: 0;
-}
-
-.peek-nav ul {
-    list-style: none;
-    padding: 0;
-}
-
-.peek-nav li {
-    margin-bottom: 0.5rem;
-}
-
-.peek-nav a {
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 0.95rem;
-    display: block;
-    padding: 0.5rem 0;
-    transition: all 0.2s ease;
-}
-
-.peek-nav a:hover,
-.peek-nav a.active {
-    color: var(--primary);
-    padding-left: 10px;
-}
-
-.peek-nav ul ul {
-    margin-left: 15px;
-    border-left: 1px solid rgba(255,255,255,0.1);
-    padding-left: 10px;
-    margin-top: 5px;
 }
 
 /* ============================================
@@ -625,6 +527,18 @@ main {
 }
 
 @media (max-width: 768px) {
+    .navbar {
+        display: none !important;
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    body {
+        padding-top: 20px;
+    }
+    
     .dashboard-header h1 {
         font-size: 1.8rem;
     }

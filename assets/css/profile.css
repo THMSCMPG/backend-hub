@@ -2,7 +2,7 @@
    PROFILE (THMSCMPG) PROJECT-SPECIFIC STYLES
    ============================================ */
 
-   .page-header {
+.page-header {
     background: var(--dark-muted);
     color: white;
     padding: 0;
