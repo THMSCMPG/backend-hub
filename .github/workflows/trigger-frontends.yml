@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: ['The-T', 'The-M', 'The-H'] # Your frontend repo names
+        repo: ['THMSCMPG.github.io', 'CircuitNotes', 'AURA-MF']
     steps:
       - name: Trigger Frontend Update
         run: |
