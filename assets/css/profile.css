@@ -224,6 +224,32 @@ h2.circuit-head {
     border-left: 5px solid var(--primary);
 }
 
+.content-area {
+    margin-bottom: 60px;
+}
+
+.content-area h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 10px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.content-area h2 {
+    color: #34495e;
+    margin-top: 40px;
+    background: #ecf0f1;
+    padding: 15px;
+    border-left: 5px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+}
+
+.content-area h3 {
+    color: #16a085;
+    margin-top: 30px;
+}
+
 /* ============================================
    CONTACT FORM
    Custom form styling specific to Profile.
