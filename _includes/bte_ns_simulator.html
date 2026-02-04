@@ -293,6 +293,85 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Real-time toggle button */
+        .realtime-toggle-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .realtime-toggle-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .realtime-toggle-button.active {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .realtime-status {
+            background: rgba(40, 167, 69, 0.1);
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .update-counter, .next-update {
+            font-size: 0.9em;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        /* Scrolling visualization container */
+        .scrolling-canvas-wrapper {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .scrolling-canvas {
+            transition: transform 0.5s ease-out;
+        }
     </style>
 <body>
     <div class="container">
@@ -389,6 +468,19 @@
                 <button class="run-button" id="run-button" onclick="runSimulation()">
                     🚀 Run BTE-NS Simulation
                 </button>
+
+                <button class="realtime-toggle-button" id="realtime-toggle" onclick="toggleRealtime()">
+                    🔴 Start Real-Time Updates
+                </button>
+
+                <div class="realtime-status" id="realtime-status" style="display: none;">
+                    <div class="status-indicator">
+                        <span class="pulse-dot"></span>
+                        <span id="realtime-text">Live updating...</span>
+                    </div>
+                    <div class="update-counter">Updates: <span id="update-count">0</span></div>
+                    <div class="next-update">Next: <span id="countdown">5</span>s</div>
+                </div>
 
                 <div class="info-panel" id="fidelity-info">
                     <h4>Low Fidelity Mode</h4>
@@ -1180,6 +1272,435 @@ function updateStats(stats) {
     document.getElementById('stat-ns-iter').textContent = stats.ns_iterations;
     document.getElementById('stat-runtime').textContent = stats.runtime_ms.toFixed(1) + ' ms';
     document.getElementById('stat-error').textContent = 'N/A';
+}
+
+// ============================================================================
+// REAL-TIME UPDATE SYSTEM
+// ============================================================================
+
+// Real-time state
+const realtimeState = {
+    active: false,
+    intervalId: null,
+    countdownId: null,
+    updateCount: 0,
+    countdown: 5,
+    historyBuffers: {
+        temperature: [],
+        power: [],
+        phonon: [],
+        velocity: []
+    },
+    maxHistoryColumns: 50  // Keep last 50 updates
+};
+
+/**
+ * Toggle real-time updates on/off
+ */
+function toggleRealtime() {
+    realtimeState.active = !realtimeState.active;
+    
+    const button = document.getElementById('realtime-toggle');
+    const status = document.getElementById('realtime-status');
+    
+    if (realtimeState.active) {
+        // Start real-time updates
+        button.classList.add('active');
+        button.innerHTML = '🟢 Stop Real-Time Updates';
+        status.style.display = 'block';
+        
+        // Reset state
+        realtimeState.updateCount = 0;
+        realtimeState.countdown = 5;
+        document.getElementById('update-count').textContent = '0';
+        
+        // Clear history buffers
+        realtimeState.historyBuffers = {
+            temperature: [],
+            power: [],
+            phonon: [],
+            velocity: []
+        };
+        
+        // Start update cycle
+        startRealtimeUpdates();
+        
+        console.log('🟢 Real-time updates STARTED');
+    } else {
+        // Stop real-time updates
+        button.classList.remove('active');
+        button.innerHTML = '🔴 Start Real-Time Updates';
+        status.style.display = 'none';
+        
+        stopRealtimeUpdates();
+        
+        console.log('🔴 Real-time updates STOPPED');
+    }
+}
+
+/**
+ * Start the real-time update cycle
+ */
+function startRealtimeUpdates() {
+    // Immediate first update
+    performRealtimeUpdate();
+    
+    // Set up 5-second interval for updates
+    realtimeState.intervalId = setInterval(performRealtimeUpdate, 5000);
+    
+    // Set up countdown timer
+    realtimeState.countdown = 5;
+    realtimeState.countdownId = setInterval(() => {
+        realtimeState.countdown--;
+        document.getElementById('countdown').textContent = realtimeState.countdown;
+        
+        if (realtimeState.countdown <= 0) {
+            realtimeState.countdown = 5;
+        }
+    }, 1000);
+}
+
+/**
+ * Stop the real-time update cycle
+ */
+function stopRealtimeUpdates() {
+    if (realtimeState.intervalId) {
+        clearInterval(realtimeState.intervalId);
+        realtimeState.intervalId = null;
+    }
+    
+    if (realtimeState.countdownId) {
+        clearInterval(realtimeState.countdownId);
+        realtimeState.countdownId = null;
+    }
+}
+
+/**
+ * Perform a single real-time update (backend call + visualization)
+ */
+async function performRealtimeUpdate() {
+    if (!realtimeState.active) return;
+    
+    try {
+        // Collect current parameters
+        const params = {
+            fidelity_level: parseInt(document.querySelector('.fidelity-btn.active')?.dataset.fidelity || 0),
+            solar_irradiance: parseFloat(document.getElementById('solar-irradiance').value),
+            ambient_temperature: parseFloat(document.getElementById('ambient-temperature').value),
+            wind_speed: parseFloat(document.getElementById('wind-speed').value),
+            cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
+            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+            absorptivity: parseFloat(document.getElementById('absorptivity').value),
+            emissivity: parseFloat(document.getElementById('emissivity').value),
+            config: {
+                bte_iterations: 100,
+                ns_iterations: 50,
+                coupling_iterations: 10,
+                time_step: 0.01
+            }
+        };
+        
+        // Call backend (adjust URL as needed)
+        const BACKEND_URL = 'https://aura-mf-backend.onrender.com';
+        const response = await fetch(`${BACKEND_URL}/api/simulate/bte-ns`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Extract rightmost column from each field
+        const N = data.results.temperature_field.length;
+        const rightmostColumn = {
+            temperature: data.results.temperature_field.map(row => row[N - 1]),
+            power: data.results.power_density.map(row => row[N - 1]),
+            phonon: data.results.heat_flux.map(row => row[N - 1]),
+            velocity: data.results.velocity_field.map(row => row[N - 1])
+        };
+        
+        // Add to history buffers
+        Object.keys(rightmostColumn).forEach(key => {
+            realtimeState.historyBuffers[key].push(rightmostColumn[key]);
+            
+            // Limit history length
+            if (realtimeState.historyBuffers[key].length > realtimeState.maxHistoryColumns) {
+                realtimeState.historyBuffers[key].shift();
+            }
+        });
+        
+        // Update visualizations with scrolling effect
+        updateScrollingVisualizations();
+        
+        // Update statistics
+        updateRealtimeStatistics(data.statistics);
+        
+        // Increment counter
+        realtimeState.updateCount++;
+        document.getElementById('update-count').textContent = realtimeState.updateCount;
+        
+        console.log(`✓ Real-time update #${realtimeState.updateCount} completed`);
+        
+    } catch (error) {
+        console.error('Real-time update failed:', error);
+        document.getElementById('realtime-text').textContent = `Error: ${error.message}`;
+        document.querySelector('.pulse-dot').style.background = '#dc3545';
+    }
+}
+
+/**
+ * Update scrolling visualizations with new column data
+ */
+function updateScrollingVisualizations() {
+    // Update each canvas with scrolling column animation
+    updateScrollingCanvas('temp-canvas', realtimeState.historyBuffers.temperature, 'temperature');
+    updateScrollingCanvas('power-canvas', realtimeState.historyBuffers.power, 'power');
+    updateScrollingCanvas('phonon-canvas', realtimeState.historyBuffers.phonon, 'viridis');
+    updateScrollingCanvas('velocity-canvas', realtimeState.historyBuffers.velocity, 'velocity');
+}
+
+/**
+ * Update a single canvas with scrolling column effect
+ * 
+ * @param {string} canvasId - Canvas element ID
+ * @param {Array<Array<number>>} historyBuffer - Array of column data [column1, column2, ...]
+ * @param {string} colorScheme - Color scheme name
+ */
+function updateScrollingCanvas(canvasId, historyBuffer, colorScheme) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    const numColumns = historyBuffer.length;
+    if (numColumns === 0) return;
+    
+    const columnWidth = width / numColumns;
+    const numRows = historyBuffer[0].length;
+    const rowHeight = height / numRows;
+    
+    // Get global min/max for consistent scaling
+    let globalMin = Infinity;
+    let globalMax = -Infinity;
+    historyBuffer.forEach(column => {
+        column.forEach(value => {
+            globalMin = Math.min(globalMin, value);
+            globalMax = Math.max(globalMax, value);
+        });
+    });
+    
+    // Draw columns from left (oldest) to right (newest)
+    for (let colIdx = 0; colIdx < numColumns; colIdx++) {
+        const column = historyBuffer[colIdx];
+        const x = colIdx * columnWidth;
+        
+        // Draw each pixel in the column
+        for (let rowIdx = 0; rowIdx < numRows; rowIdx++) {
+            const value = column[rowIdx];
+            const y = rowIdx * rowHeight;
+            
+            // Normalize value to [0, 1]
+            const normalized = (value - globalMin) / (globalMax - globalMin + 1e-10);
+            
+            // Get color based on scheme
+            const color = getColorForValue(normalized, colorScheme);
+            
+            // Draw pixel
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, columnWidth + 1, rowHeight + 1);  // +1 to avoid gaps
+        }
+    }
+    
+    // Optional: Draw newest column highlight
+    if (numColumns > 0) {
+        const newestX = (numColumns - 1) * columnWidth;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(newestX, 0, columnWidth, height);
+    }
+}
+
+/**
+ * Get color for normalized value based on color scheme
+ * 
+ * @param {number} value - Normalized value [0, 1]
+ * @param {string} scheme - Color scheme name
+ * @returns {string} - RGB color string
+ */
+function getColorForValue(value, scheme) {
+    value = Math.max(0, Math.min(1, value));  // Clamp to [0, 1]
+    
+    switch (scheme) {
+        case 'temperature':
+        case 'hot':
+            // Black -> Red -> Yellow -> White
+            if (value < 0.33) {
+                const t = value / 0.33;
+                return `rgb(${Math.floor(255 * t)}, 0, 0)`;
+            } else if (value < 0.66) {
+                const t = (value - 0.33) / 0.33;
+                return `rgb(255, ${Math.floor(255 * t)}, 0)`;
+            } else {
+                const t = (value - 0.66) / 0.34;
+                return `rgb(255, 255, ${Math.floor(255 * t)})`;
+            }
+        
+        case 'power':
+        case 'plasma':
+            // Blue -> Purple -> Yellow
+            if (value < 0.5) {
+                const t = value / 0.5;
+                return `rgb(${Math.floor(130 * t)}, ${Math.floor(50 * t)}, ${Math.floor(150 + 105 * t)})`;
+            } else {
+                const t = (value - 0.5) / 0.5;
+                return `rgb(${Math.floor(130 + 125 * t)}, ${Math.floor(50 + 205 * t)}, ${Math.floor(255 - 255 * t)})`;
+            }
+        
+        case 'viridis':
+        case 'phonon':
+            // Viridis colormap approximation
+            const r = Math.floor(68 + (253 - 68) * value);
+            const g = Math.floor(1 + (231 - 1) * value);
+            const b = Math.floor(84 + (37 - 84) * value);
+            return `rgb(${r}, ${g}, ${b})`;
+        
+        case 'velocity':
+        case 'coolwarm':
+            // Blue -> White -> Red
+            if (value < 0.5) {
+                const t = value / 0.5;
+                return `rgb(${Math.floor(59 + 196 * t)}, ${Math.floor(76 + 179 * t)}, ${Math.floor(192 + 63 * t)})`;
+            } else {
+                const t = (value - 0.5) / 0.5;
+                return `rgb(${Math.floor(255)}, ${Math.floor(255 - 112 * t)}, ${Math.floor(255 - 121 * t)})`;
+            }
+        
+        default:
+            // Grayscale
+            const gray = Math.floor(255 * value);
+            return `rgb(${gray}, ${gray}, ${gray})`;
+    }
+}
+
+/**
+ * Update statistics panel with real-time data
+ */
+function updateRealtimeStatistics(stats) {
+    document.getElementById('stat-temp-avg').textContent = (stats.temp_avg - 273.15).toFixed(1) + '°C';
+    document.getElementById('stat-temp-max').textContent = (stats.temp_max - 273.15).toFixed(1) + '°C';
+    document.getElementById('stat-power-total').textContent = stats.power_total.toFixed(1) + ' W';
+    document.getElementById('stat-efficiency').textContent = (stats.efficiency * 100).toFixed(2) + '%';
+    document.getElementById('stat-runtime').textContent = stats.runtime_ms.toFixed(1) + ' ms';
+}
+
+// ============================================================================
+// ENHANCED runSimulation() TO RESET REAL-TIME MODE
+// ============================================================================
+
+// Store original runSimulation if it exists
+const originalRunSimulation = typeof runSimulation !== 'undefined' ? runSimulation : null;
+
+// Override runSimulation to stop real-time mode
+function runSimulation() {
+    // Stop real-time if active
+    if (realtimeState.active) {
+        toggleRealtime();
+    }
+    
+    // Call original if it exists
+    if (originalRunSimulation) {
+        originalRunSimulation();
+    } else {
+        console.warn('Original runSimulation not found - manual simulation not implemented');
+    }
+}
+
+/**
+ * Alternative: Smooth scrolling version with animation
+ */
+ function updateScrollingCanvasSmooth(canvasId, historyBuffer, colorScheme) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    const numColumns = historyBuffer.length;
+    if (numColumns === 0) return;
+    
+    // Create temporary canvas with existing data
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = width;
+    tempCanvas.height = height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(canvas, 0, 0);
+    
+    // Clear main canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    const columnWidth = width / realtimeState.maxHistoryColumns;
+    const numRows = historyBuffer[0].length;
+    const rowHeight = height / numRows;
+    
+    // Draw old data shifted left by one column
+    ctx.drawImage(tempCanvas, -columnWidth, 0);
+    
+    // Draw new column at the right edge
+    const newColumn = historyBuffer[numColumns - 1];
+    const x = width - columnWidth;
+    
+    // Get global min/max
+    let globalMin = Infinity;
+    let globalMax = -Infinity;
+    historyBuffer.forEach(column => {
+        column.forEach(value => {
+            globalMin = Math.min(globalMin, value);
+            globalMax = Math.max(globalMax, value);
+        });
+    });
+    
+    // Draw new column
+    for (let rowIdx = 0; rowIdx < numRows; rowIdx++) {
+        const value = newColumn[rowIdx];
+        const y = rowIdx * rowHeight;
+        const normalized = (value - globalMin) / (globalMax - globalMin + 1e-10);
+        const color = getColorForValue(normalized, colorScheme);
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, columnWidth + 1, rowHeight + 1);
+    }
+    
+    // Animate smooth slide
+    let animationProgress = 0;
+    const animationDuration = 500; // ms
+    const startTime = Date.now();
+    
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        animationProgress = Math.min(elapsed / animationDuration, 1);
+        
+        // Easing function (ease-out)
+        const eased = 1 - Math.pow(1 - animationProgress, 3);
+        
+        // Apply transform (you'd need to wrap canvas in a container for CSS transform)
+        // Or redraw with interpolation
+        
+        if (animationProgress < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+    
+    animate();
 }
 
 // ============================================================================
