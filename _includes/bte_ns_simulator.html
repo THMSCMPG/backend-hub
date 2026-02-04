@@ -1,0 +1,1232 @@
+<section class="bte-ns-simulator-section">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .fidelity-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .fidelity-btn {
+            padding: 15px 30px;
+            border: 3px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .fidelity-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .fidelity-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .fidelity-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff6b6b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 0;
+            min-height: 800px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 2px solid #dee2e6;
+            overflow-y: auto;
+            max-height: 900px;
+        }
+
+        .controls h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .parameter-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .parameter-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .parameter-value {
+            color: #667eea;
+            font-weight: 700;
+            float: right;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .param-info {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .run-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .run-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .run-button:active {
+            transform: translateY(0);
+        }
+
+        .run-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .visualization {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .viz-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+        }
+
+        .viz-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-panel h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-panel ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .info-panel li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .viz-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚛️ BTE-NS Multi-Fidelity Solar Cell Simulator</h1>
+            <p>Coupled Boltzmann Transport Equation & Navier-Stokes Thermal Analysis</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">
+                Silicon PV Cell Under Ideal Weather Conditions
+            </p>
+        </div>
+
+        <div class="fidelity-selector">
+            <button class="fidelity-btn active" data-fidelity="low" onclick="selectFidelity('low')">
+                ⚡ Low Fidelity
+                <span class="fidelity-badge">25×25</span>
+            </button>
+            <button class="fidelity-btn" data-fidelity="medium" onclick="selectFidelity('medium')">
+                ⚙️ Medium Fidelity
+                <span class="fidelity-badge">50×50</span>
+            </button>
+            <button class="fidelity-btn" data-fidelity="high" onclick="selectFidelity('high')">
+                🔥 High Fidelity
+                <span class="fidelity-badge">100×100</span>
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="controls">
+                <h2>Simulation Parameters</h2>
+
+                <div class="parameter-group">
+                    <label>
+                        Solar Irradiance
+                        <span class="parameter-value" id="solar-value">1000</span> W/m²
+                    </label>
+                    <input type="range" id="solar-irradiance" min="200" max="1400" value="1000" step="10" title="solar-irradiance">
+                    <div class="param-info">Direct normal irradiance (DNI)</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Ambient Temperature
+                        <span class="parameter-value" id="temp-value">25.0</span> °C
+                    </label>
+                    <input type="range" id="ambient-temperature" min="280" max="330" value="298.15" step="0.5" title="ambient-temperature">
+                    <div class="param-info">Environmental air temperature</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Wind Speed
+                        <span class="parameter-value" id="wind-value">2.0</span> m/s
+                    </label>
+                    <input type="range" id="wind-speed" min="0" max="15" value="2.0" step="0.1" title="wind-speed">
+                    <div class="param-info">Affects convective heat transfer</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Cell Efficiency (η₀)
+                        <span class="parameter-value" id="efficiency-value">20</span> %
+                    </label>
+                    <input type="range" id="cell-efficiency" min="0.10" max="0.30" value="0.20" step="0.01" title="cell-efficiency">
+                    <div class="param-info">Base electrical conversion efficiency</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Thermal Conductivity (k)
+                        <span class="parameter-value" id="conductivity-value">130</span> W/(m·K)
+                    </label>
+                    <input type="range" id="thermal-conductivity" min="80" max="200" value="130" step="5" title="thermal-conductivity">
+                    <div class="param-info">Silicon in-plane thermal conductivity</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Absorptivity (α)
+                        <span class="parameter-value" id="absorptivity-value">0.95</span>
+                    </label>
+                    <input type="range" id="absorptivity" min="0.80" max="0.98" value="0.95" step="0.01" title="absorptivity">
+                    <div class="param-info">Solar radiation absorption fraction</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label>
+                        Emissivity (ε)
+                        <span class="parameter-value" id="emissivity-value">0.90</span>
+                    </label>
+                    <input type="range" id="emissivity" min="0.70" max="0.95" value="0.90" step="0.01" title="emissivity">
+                    <div class="param-info">Infrared radiative emission efficiency</div>
+                </div>
+
+                <button class="run-button" id="run-button" onclick="runSimulation()">
+                    🚀 Run BTE-NS Simulation
+                </button>
+
+                <div class="info-panel" id="fidelity-info">
+                    <h4>Low Fidelity Mode</h4>
+                    <ul>
+                        <li>Grid: 25×25 cells</li>
+                        <li>BTE: Relaxation time approximation</li>
+                        <li>NS: Simplified convection</li>
+                        <li>Time: ~10-50ms</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="visualization">
+                <div class="viz-grid">
+                    <div class="viz-panel">
+                        <h3>🌡️ Temperature Distribution</h3>
+                        <div class="canvas-container">
+                            <canvas id="temperature-canvas" width="400" height="400"></canvas>
+                            <div class="loading-overlay" id="temp-loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <span id="temp-min">20.0°C</span>
+                            <span style="color: #667eea; font-weight: 600;">Temperature Field</span>
+                            <span id="temp-max">80.0°C</span>
+                        </div>
+                    </div>
+
+                    <div class="viz-panel">
+                        <h3>⚡ Power Density Map</h3>
+                        <div class="canvas-container">
+                            <canvas id="power-canvas" width="400" height="400"></canvas>
+                            <div class="loading-overlay" id="power-loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <span id="power-min">0 W/m²</span>
+                            <span style="color: #667eea; font-weight: 600;">Electrical Output</span>
+                            <span id="power-max">200 W/m²</span>
+                        </div>
+                    </div>
+
+                    <div class="viz-panel">
+                        <h3>🌊 Phonon Transport (BTE)</h3>
+                        <div class="canvas-container">
+                            <canvas id="phonon-canvas" width="400" height="400"></canvas>
+                            <div class="loading-overlay" id="phonon-loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <span id="phonon-min">Low</span>
+                            <span style="color: #667eea; font-weight: 600;">Heat Flux Magnitude</span>
+                            <span id="phonon-max">High</span>
+                        </div>
+                    </div>
+
+                    <div class="viz-panel">
+                        <h3>💨 Velocity Field (NS)</h3>
+                        <div class="canvas-container">
+                            <canvas id="velocity-canvas" width="400" height="400"></canvas>
+                            <div class="loading-overlay" id="velocity-loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <span id="velocity-min">0 m/s</span>
+                            <span style="color: #667eea; font-weight: 600;">Air Flow</span>
+                            <span id="velocity-max">5 m/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="viz-panel">
+                    <h3>📊 Performance Metrics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Average Temperature</div>
+                            <div class="stat-value" id="stat-temp-avg">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Max Temperature</div>
+                            <div class="stat-value" id="stat-temp-max">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Power Output</div>
+                            <div class="stat-value" id="stat-power-total">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Effective Efficiency</div>
+                            <div class="stat-value" id="stat-efficiency">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">BTE Iterations</div>
+                            <div class="stat-value" id="stat-bte-iter">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">NS Iterations</div>
+                            <div class="stat-value" id="stat-ns-iter">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Computation Time</div>
+                            <div class="stat-value" id="stat-runtime">--</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Convergence Error</div>
+                            <div class="stat-value" id="stat-error">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/**
+ * BTE-NS Multi-Fidelity Solar Cell Thermal Simulator
+ * ===================================================
+ * 
+ * Physics Implementation:
+ * - Boltzmann Transport Equation (BTE) for phonon transport
+ * - Navier-Stokes (NS) equations for air convection
+ * - Coupled heat transfer with radiative exchange
+ * - Temperature-dependent material properties
+ */
+
+// ============================================================================
+// CONFIGURATION & CONSTANTS
+// ============================================================================
+
+const PHYSICS_CONSTANTS = {
+    STEFAN_BOLTZMANN: 5.670374419e-8,  // W/(m²·K⁴)
+    T_AMBIENT_DEFAULT: 298.15,          // K
+    SOLAR_CONSTANT: 1361,               // W/m² (space)
+    AIR_DENSITY: 1.184,                 // kg/m³ at 25°C
+    AIR_VISCOSITY: 1.849e-5,            // kg/(m·s) at 25°C
+    AIR_CP: 1005,                       // J/(kg·K)
+    AIR_THERMAL_COND: 0.0262,           // W/(m·K)
+    SILICON_DENSITY: 2329,              // kg/m³
+    SILICON_CP: 700,                    // J/(kg·K)
+    GRAVITY: 9.81                       // m/s²
+};
+
+const FIDELITY_CONFIG = {
+    low: {
+        gridSize: 25,
+        bteIterations: 20,
+        nsIterations: 10,
+        couplingIterations: 3,
+        timeStep: 0.1,
+        relaxationTime: 1e-11,
+        description: "Relaxation time approximation"
+    },
+    medium: {
+        gridSize: 50,
+        bteIterations: 50,
+        nsIterations: 25,
+        couplingIterations: 5,
+        timeStep: 0.05,
+        relaxationTime: 5e-12,
+        description: "Gray medium approximation"
+    },
+    high: {
+        gridSize: 100,
+        bteIterations: 100,
+        nsIterations: 50,
+        couplingIterations: 8,
+        timeStep: 0.01,
+        relaxationTime: 1e-12,
+        description: "Full dispersion relation"
+    }
+};
+
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
+
+let currentFidelity = 'low';
+let simulationRunning = false;
+let lastResults = null;
+
+// ============================================================================
+// UI SLIDER HANDLERS
+// ============================================================================
+
+const sliderConfigs = [
+    {id: 'solar-irradiance', display: 'solar-value', format: v => parseFloat(v).toFixed(0)},
+    {id: 'ambient-temperature', display: 'temp-value', format: v => (parseFloat(v) - 273.15).toFixed(1)},
+    {id: 'wind-speed', display: 'wind-value', format: v => parseFloat(v).toFixed(1)},
+    {id: 'cell-efficiency', display: 'efficiency-value', format: v => (parseFloat(v) * 100).toFixed(0)},
+    {id: 'thermal-conductivity', display: 'conductivity-value', format: v => parseFloat(v).toFixed(0)},
+    {id: 'absorptivity', display: 'absorptivity-value', format: v => parseFloat(v).toFixed(2)},
+    {id: 'emissivity', display: 'emissivity-value', format: v => parseFloat(v).toFixed(2)}
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+    sliderConfigs.forEach(s => {
+        const el = document.getElementById(s.id);
+        const disp = document.getElementById(s.display);
+        if (el && disp) {
+            el.addEventListener('input', () => disp.textContent = s.format(el.value));
+            disp.textContent = s.format(el.value);
+        }
+    });
+});
+
+// ============================================================================
+// FIDELITY SELECTION
+// ============================================================================
+
+function selectFidelity(fidelity) {
+    currentFidelity = fidelity;
+    
+    // Update button states
+    document.querySelectorAll('.fidelity-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.fidelity === fidelity) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update info panel
+    const config = FIDELITY_CONFIG[fidelity];
+    const infoPanel = document.getElementById('fidelity-info');
+    const titles = {low: 'Low Fidelity', medium: 'Medium Fidelity', high: 'High Fidelity'};
+    
+    infoPanel.innerHTML = `
+        <h4>${titles[fidelity]} Mode</h4>
+        <ul>
+            <li>Grid: ${config.gridSize}×${config.gridSize} cells</li>
+            <li>BTE: ${config.description}</li>
+            <li>BTE Iterations: ${config.bteIterations}</li>
+            <li>NS Iterations: ${config.nsIterations}</li>
+            <li>Coupling: ${config.couplingIterations} cycles</li>
+        </ul>
+    `;
+    
+    console.log(`✓ Switched to ${fidelity} fidelity (${config.gridSize}×${config.gridSize})`);
+}
+
+// ============================================================================
+// PHYSICS ENGINE: BOLTZMANN TRANSPORT EQUATION
+// ============================================================================
+
+class BTESolver {
+    constructor(gridSize, config) {
+        this.N = gridSize;
+        this.config = config;
+        this.tau = config.relaxationTime;
+        
+        // Temperature field (K)
+        this.T = this.createMatrix(this.N, this.N, PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT);
+        
+        // Heat flux vectors (W/m²)
+        this.qx = this.createMatrix(this.N, this.N, 0);
+        this.qy = this.createMatrix(this.N, this.N, 0);
+    }
+    
+    createMatrix(rows, cols, value) {
+        return Array(rows).fill().map(() => Array(cols).fill(value));
+    }
+    
+    /**
+     * Solve BTE using relaxation time approximation:
+     * ∂f/∂t + v·∇f = (f₀ - f)/τ
+     * 
+     * Heat flux: q = -k∇T
+     */
+    solve(heatSource, thermalCond) {
+        const dx = 1.0 / this.N;
+        const dt = this.config.timeStep;
+        
+        for (let iter = 0; iter < this.config.bteIterations; iter++) {
+            const T_new = this.createMatrix(this.N, this.N, 0);
+            
+            for (let i = 1; i < this.N - 1; i++) {
+                for (let j = 1; j < this.N - 1; j++) {
+                    // Temperature gradients
+                    const dTdx = (this.T[i+1][j] - this.T[i-1][j]) / (2 * dx);
+                    const dTdy = (this.T[i][j+1] - this.T[i][j-1]) / (2 * dx);
+                    
+                    // Heat flux (Fourier's law modified by BTE)
+                    this.qx[i][j] = -thermalCond[i][j] * dTdx;
+                    this.qy[i][j] = -thermalCond[i][j] * dTdy;
+                    
+                    // Heat flux divergence
+                    const div_q = (this.qx[i+1][j] - this.qx[i-1][j]) / (2 * dx) +
+                                  (this.qy[i][j+1] - this.qy[i][j-1]) / (2 * dx);
+                    
+                    // Energy balance: ρCp ∂T/∂t = -∇·q + Q
+                    const rho_cp = PHYSICS_CONSTANTS.SILICON_DENSITY * PHYSICS_CONSTANTS.SILICON_CP;
+                    const dTdt = (-div_q + heatSource[i][j]) / rho_cp;
+                    
+                    T_new[i][j] = this.T[i][j] + dt * dTdt;
+                    
+                    // Relaxation toward equilibrium
+                    const relaxation = (PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT - this.T[i][j]) / this.tau * dt * 1e-6;
+                    T_new[i][j] += relaxation;
+                }
+            }
+            
+            // Boundary conditions (Dirichlet at edges)
+            for (let i = 0; i < this.N; i++) {
+                T_new[i][0] = T_new[i][1];
+                T_new[i][this.N-1] = T_new[i][this.N-2];
+                T_new[0][i] = T_new[1][i];
+                T_new[this.N-1][i] = T_new[this.N-2][i];
+            }
+            
+            this.T = T_new;
+        }
+        
+        return this.T;
+    }
+    
+    getHeatFlux() {
+        const magnitude = this.createMatrix(this.N, this.N, 0);
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                magnitude[i][j] = Math.sqrt(this.qx[i][j]**2 + this.qy[i][j]**2);
+            }
+        }
+        return magnitude;
+    }
+}
+
+// ============================================================================
+// PHYSICS ENGINE: NAVIER-STOKES EQUATIONS
+// ============================================================================
+
+class NSSolver {
+    constructor(gridSize, config) {
+        this.N = gridSize;
+        this.config = config;
+        
+        // Velocity field (m/s)
+        this.u = this.createMatrix(this.N, this.N, 0);  // x-velocity
+        this.v = this.createMatrix(this.N, this.N, 0);  // y-velocity
+        
+        // Pressure field (Pa)
+        this.p = this.createMatrix(this.N, this.N, 101325);
+    }
+    
+    createMatrix(rows, cols, value) {
+        return Array(rows).fill().map(() => Array(cols).fill(value));
+    }
+    
+    /**
+     * Solve incompressible Navier-Stokes:
+     * ∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u + g
+     * ∇·u = 0 (continuity)
+     */
+    solve(windSpeed, tempField) {
+        const dx = 1.0 / this.N;
+        const dt = this.config.timeStep;
+        const nu = PHYSICS_CONSTANTS.AIR_VISCOSITY / PHYSICS_CONSTANTS.AIR_DENSITY;
+        
+        for (let iter = 0; iter < this.config.nsIterations; iter++) {
+            const u_new = this.createMatrix(this.N, this.N, 0);
+            const v_new = this.createMatrix(this.N, this.N, 0);
+            
+            for (let i = 1; i < this.N - 1; i++) {
+                for (let j = 1; j < this.N - 1; j++) {
+                    // Pressure gradient
+                    const dpdx = (this.p[i+1][j] - this.p[i-1][j]) / (2 * dx);
+                    const dpdy = (this.p[i][j+1] - this.p[i][j-1]) / (2 * dx);
+                    
+                    // Viscous diffusion (Laplacian)
+                    const lap_u = (this.u[i+1][j] + this.u[i-1][j] + 
+                                   this.u[i][j+1] + this.u[i][j-1] - 4*this.u[i][j]) / (dx*dx);
+                    const lap_v = (this.v[i+1][j] + this.v[i-1][j] + 
+                                   this.v[i][j+1] + this.v[i][j-1] - 4*this.v[i][j]) / (dx*dx);
+                    
+                    // Buoyancy force (temperature-driven)
+                    const beta = 1.0 / PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT;  // Thermal expansion
+                    const buoyancy = PHYSICS_CONSTANTS.GRAVITY * beta * 
+                                    (tempField[i][j] - PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT);
+                    
+                    // Update velocities
+                    u_new[i][j] = this.u[i][j] + dt * (
+                        -dpdx / PHYSICS_CONSTANTS.AIR_DENSITY + 
+                        nu * lap_u
+                    );
+                    
+                    v_new[i][j] = this.v[i][j] + dt * (
+                        -dpdy / PHYSICS_CONSTANTS.AIR_DENSITY + 
+                        nu * lap_v + 
+                        buoyancy
+                    );
+                }
+            }
+            
+            // Boundary conditions (wind at inlet)
+            for (let j = 0; j < this.N; j++) {
+                u_new[0][j] = windSpeed;
+                u_new[this.N-1][j] = u_new[this.N-2][j];
+                v_new[0][j] = 0;
+                v_new[this.N-1][j] = 0;
+            }
+            
+            for (let i = 0; i < this.N; i++) {
+                u_new[i][0] = 0;
+                u_new[i][this.N-1] = 0;
+                v_new[i][0] = 0;
+                v_new[i][this.N-1] = 0;
+            }
+            
+            this.u = u_new;
+            this.v = v_new;
+        }
+        
+        return {u: this.u, v: this.v};
+    }
+    
+    getVelocityMagnitude() {
+        const magnitude = this.createMatrix(this.N, this.N, 0);
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                magnitude[i][j] = Math.sqrt(this.u[i][j]**2 + this.v[i][j]**2);
+            }
+        }
+        return magnitude;
+    }
+}
+
+// ============================================================================
+// COUPLED BTE-NS SOLVER
+// ============================================================================
+
+class CoupledSolver {
+    constructor(params, config) {
+        this.params = params;
+        this.config = config;
+        this.N = config.gridSize;
+        
+        this.bte = new BTESolver(this.N, config);
+        this.ns = new NSSolver(this.N, config);
+        
+        this.converged = false;
+        this.error = 1.0;
+    }
+    
+    createMatrix(rows, cols, value) {
+        return Array(rows).fill().map(() => Array(cols).fill(value));
+    }
+    
+    /**
+     * Main coupling loop: BTE → temperature → NS → convection → BTE
+     */
+    solve() {
+        const startTime = performance.now();
+        
+        // Material properties
+        const thermalCond = this.createMatrix(this.N, this.N, this.params.thermal_conductivity);
+        
+        // Heat source from solar radiation
+        const heatSource = this.createMatrix(this.N, this.N, 0);
+        
+        for (let coupling = 0; coupling < this.config.couplingIterations; coupling++) {
+            // 1. Calculate heat generation from solar radiation
+            for (let i = 0; i < this.N; i++) {
+                for (let j = 0; j < this.N; j++) {
+                    const absorbed = this.params.absorptivity * this.params.solar_irradiance;
+                    const electrical = absorbed * this.params.cell_efficiency;
+                    const waste_heat = absorbed - electrical;
+                    
+                    // Temperature-dependent efficiency loss
+                    const T = this.bte.T[i][j];
+                    const temp_coeff = -0.004;  // -0.4%/K
+                    const eff_loss = this.params.cell_efficiency * temp_coeff * 
+                                    (T - PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT);
+                    
+                    heatSource[i][j] = waste_heat + Math.abs(eff_loss) * absorbed;
+                }
+            }
+            
+            // 2. Solve BTE for temperature distribution
+            const T_old = JSON.parse(JSON.stringify(this.bte.T));
+            this.bte.solve(heatSource, thermalCond);
+            
+            // 3. Solve NS for air flow
+            this.ns.solve(this.params.wind_speed, this.bte.T);
+            
+            // 4. Apply convective cooling
+            this.applyConvection();
+            
+            // 5. Apply radiative cooling
+            this.applyRadiation();
+            
+            // 6. Check convergence
+            this.error = this.calculateError(T_old, this.bte.T);
+            if (this.error < 1e-3) {
+                this.converged = true;
+                console.log(`✓ Converged at coupling iteration ${coupling+1}`);
+                break;
+            }
+        }
+        
+        const runtime = performance.now() - startTime;
+        
+        return {
+            temperature: this.bte.T,
+            heatFlux: this.bte.getHeatFlux(),
+            velocity: this.ns.getVelocityMagnitude(),
+            powerDensity: this.calculatePowerDensity(),
+            stats: this.calculateStats(runtime),
+            converged: this.converged,
+            error: this.error
+        };
+    }
+    
+    applyConvection() {
+        const h = this.calculateConvectionCoeff();
+        const dt = this.config.timeStep;
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                const Q_conv = h[i][j] * (this.bte.T[i][j] - this.params.ambient_temperature);
+                const dT = -Q_conv * dt / 
+                          (PHYSICS_CONSTANTS.SILICON_DENSITY * PHYSICS_CONSTANTS.SILICON_CP * 0.001);
+                this.bte.T[i][j] += dT;
+            }
+        }
+    }
+    
+    applyRadiation() {
+        const sigma = PHYSICS_CONSTANTS.STEFAN_BOLTZMANN;
+        const dt = this.config.timeStep;
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                const T = this.bte.T[i][j];
+                const T_amb = this.params.ambient_temperature;
+                const Q_rad = this.params.emissivity * sigma * (T**4 - T_amb**4);
+                const dT = -Q_rad * dt / 
+                          (PHYSICS_CONSTANTS.SILICON_DENSITY * PHYSICS_CONSTANTS.SILICON_CP * 0.001);
+                this.bte.T[i][j] += dT;
+            }
+        }
+    }
+    
+    calculateConvectionCoeff() {
+        const h = this.createMatrix(this.N, this.N, 0);
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                const v_mag = this.ns.getVelocityMagnitude()[i][j];
+                const Re = PHYSICS_CONSTANTS.AIR_DENSITY * v_mag * 1.0 / 
+                          PHYSICS_CONSTANTS.AIR_VISCOSITY;
+                const Pr = PHYSICS_CONSTANTS.AIR_VISCOSITY * PHYSICS_CONSTANTS.AIR_CP / 
+                          PHYSICS_CONSTANTS.AIR_THERMAL_COND;
+                const Nu = 0.664 * Math.pow(Re, 0.5) * Math.pow(Pr, 1/3);
+                h[i][j] = Nu * PHYSICS_CONSTANTS.AIR_THERMAL_COND / 1.0;
+                
+                // Minimum natural convection
+                h[i][j] = Math.max(h[i][j], 5.0);
+            }
+        }
+        
+        return h;
+    }
+    
+    calculatePowerDensity() {
+        const power = this.createMatrix(this.N, this.N, 0);
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                const T = this.bte.T[i][j];
+                const temp_coeff = -0.004;
+                const eff = this.params.cell_efficiency * 
+                           (1 + temp_coeff * (T - PHYSICS_CONSTANTS.T_AMBIENT_DEFAULT));
+                power[i][j] = this.params.absorptivity * this.params.solar_irradiance * 
+                             Math.max(eff, 0.05);
+            }
+        }
+        
+        return power;
+    }
+    
+    calculateError(T_old, T_new) {
+        let sum = 0;
+        let count = 0;
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                sum += Math.abs(T_new[i][j] - T_old[i][j]);
+                count++;
+            }
+        }
+        
+        return sum / count;
+    }
+    
+    calculateStats(runtime) {
+        const T = this.bte.T;
+        const P = this.calculatePowerDensity();
+        
+        let T_sum = 0, T_min = Infinity, T_max = -Infinity;
+        let P_sum = 0, P_min = Infinity, P_max = -Infinity;
+        
+        for (let i = 0; i < this.N; i++) {
+            for (let j = 0; j < this.N; j++) {
+                T_sum += T[i][j];
+                T_min = Math.min(T_min, T[i][j]);
+                T_max = Math.max(T_max, T[i][j]);
+                
+                P_sum += P[i][j];
+                P_min = Math.min(P_min, P[i][j]);
+                P_max = Math.max(P_max, P[i][j]);
+            }
+        }
+        
+        const cellArea = (1.0 / this.N) ** 2;
+        const totalArea = 1.0;
+        
+        return {
+            temp_avg: T_sum / (this.N * this.N),
+            temp_min: T_min,
+            temp_max: T_max,
+            power_total: P_sum * cellArea * totalArea,
+            power_avg: P_sum / (this.N * this.N),
+            power_min: P_min,
+            power_max: P_max,
+            efficiency: (P_sum * cellArea * totalArea) / 
+                       (this.params.solar_irradiance * totalArea),
+            runtime_ms: runtime,
+            bte_iterations: this.config.bteIterations,
+            ns_iterations: this.config.nsIterations
+        };
+    }
+}
+
+// ============================================================================
+// VISUALIZATION
+// ============================================================================
+
+function drawHeatmap(canvasId, data, colorScheme = 'thermal') {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const N = data.length;
+    const cellW = canvas.width / N;
+    const cellH = canvas.height / N;
+    
+    // Find min/max
+    let min = Infinity, max = -Infinity;
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            min = Math.min(min, data[i][j]);
+            max = Math.max(max, data[i][j]);
+        }
+    }
+    
+    const range = max - min || 1;
+    
+    // Draw
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            const norm = (data[i][j] - min) / range;
+            ctx.fillStyle = getColor(norm, colorScheme);
+            ctx.fillRect(j * cellW, i * cellH, Math.ceil(cellW + 1), Math.ceil(cellH + 1));
+        }
+    }
+    
+    return {min, max};
+}
+
+function getColor(t, scheme) {
+    t = Math.max(0, Math.min(1, t));
+    
+    if (scheme === 'thermal') {
+        if (t < 0.25) {
+            const local = t * 4;
+            return `rgb(0, ${Math.round(local * 255)}, 255)`;
+        } else if (t < 0.5) {
+            const local = (t - 0.25) * 4;
+            return `rgb(0, 255, ${Math.round((1 - local) * 255)})`;
+        } else if (t < 0.75) {
+            const local = (t - 0.5) * 4;
+            return `rgb(${Math.round(local * 255)}, 255, 0)`;
+        } else {
+            const local = (t - 0.75) * 4;
+            return `rgb(255, ${Math.round((1 - local) * 255)}, 0)`;
+        }
+    } else if (scheme === 'viridis') {
+        const hue = (1 - t) * 280;
+        return `hsl(${hue}, 80%, 50%)`;
+    } else {
+        // Power density (yellow-orange-red)
+        const r = 255;
+        const g = Math.round(255 * (1 - t * 0.7));
+        const b = Math.round(50 * (1 - t));
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+}
+
+// ============================================================================
+// MAIN SIMULATION RUNNER
+// ============================================================================
+
+async function runSimulation() {
+    if (simulationRunning) return;
+    simulationRunning = true;
+    
+    const runBtn = document.getElementById('run-button');
+    runBtn.disabled = true;
+    runBtn.textContent = '⏳ Running BTE-NS Simulation...';
+    
+    // Show loading overlays
+    ['temp-loading', 'power-loading', 'phonon-loading', 'velocity-loading'].forEach(id => {
+        document.getElementById(id).classList.add('active');
+    });
+    
+    try {
+        // Collect parameters
+        const params = {
+            solar_irradiance: parseFloat(document.getElementById('solar-irradiance').value),
+            ambient_temperature: parseFloat(document.getElementById('ambient-temperature').value),
+            wind_speed: parseFloat(document.getElementById('wind-speed').value),
+            cell_efficiency: parseFloat(document.getElementById('cell-efficiency').value),
+            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity').value),
+            absorptivity: parseFloat(document.getElementById('absorptivity').value),
+            emissivity: parseFloat(document.getElementById('emissivity').value)
+        };
+        
+        console.log('🚀 Starting simulation with params:', params);
+        console.log(`📊 Fidelity: ${currentFidelity} (${FIDELITY_CONFIG[currentFidelity].gridSize}×${FIDELITY_CONFIG[currentFidelity].gridSize})`);
+        
+        // Run simulation (async to not block UI)
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        const solver = new CoupledSolver(params, FIDELITY_CONFIG[currentFidelity]);
+        const results = solver.solve();
+        
+        console.log('✓ Simulation completed:', results.stats);
+        
+        // Update visualizations
+        updateVisualizations(results);
+        updateStats(results.stats);
+        
+        lastResults = results;
+        
+    } catch (error) {
+        console.error('❌ Simulation error:', error);
+        alert('Simulation failed: ' + error.message);
+    } finally {
+        // Hide loading overlays
+        ['temp-loading', 'power-loading', 'phonon-loading', 'velocity-loading'].forEach(id => {
+            document.getElementById(id).classList.remove('active');
+        });
+        
+        runBtn.disabled = false;
+        runBtn.textContent = '🚀 Run BTE-NS Simulation';
+        simulationRunning = false;
+    }
+}
+
+function updateVisualizations(results) {
+    // Temperature field
+    const tempRange = drawHeatmap('temperature-canvas', results.temperature, 'thermal');
+    document.getElementById('temp-min').textContent = (tempRange.min - 273.15).toFixed(1) + '°C';
+    document.getElementById('temp-max').textContent = (tempRange.max - 273.15).toFixed(1) + '°C';
+    
+    // Power density
+    const powerRange = drawHeatmap('power-canvas', results.powerDensity, 'power');
+    document.getElementById('power-min').textContent = powerRange.min.toFixed(0) + ' W/m²';
+    document.getElementById('power-max').textContent = powerRange.max.toFixed(0) + ' W/m²';
+    
+    // Phonon heat flux (BTE)
+    const phononRange = drawHeatmap('phonon-canvas', results.heatFlux, 'viridis');
+    document.getElementById('phonon-min').textContent = 'Low';
+    document.getElementById('phonon-max').textContent = 'High';
+    
+    // Velocity field (NS)
+    const velRange = drawHeatmap('velocity-canvas', results.velocity, 'viridis');
+    document.getElementById('velocity-min').textContent = velRange.min.toFixed(2) + ' m/s';
+    document.getElementById('velocity-max').textContent = velRange.max.toFixed(2) + ' m/s';
+}
+
+function updateStats(stats) {
+    document.getElementById('stat-temp-avg').textContent = (stats.temp_avg - 273.15).toFixed(1) + '°C';
+    document.getElementById('stat-temp-max').textContent = (stats.temp_max - 273.15).toFixed(1) + '°C';
+    document.getElementById('stat-power-total').textContent = stats.power_total.toFixed(1) + ' W';
+    document.getElementById('stat-efficiency').textContent = (stats.efficiency * 100).toFixed(2) + '%';
+    document.getElementById('stat-bte-iter').textContent = stats.bte_iterations;
+    document.getElementById('stat-ns-iter').textContent = stats.ns_iterations;
+    document.getElementById('stat-runtime').textContent = stats.runtime_ms.toFixed(1) + ' ms';
+    document.getElementById('stat-error').textContent = 'N/A';
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+console.log('⚛️ BTE-NS Solar Cell Simulator v2.0.0 loaded');
+console.log('📚 Physics: Boltzmann Transport Equation + Navier-Stokes');
+console.log('🔧 Fidelity levels: Low (25×25), Medium (50×50), High (100×100)');
+    </script>
+</section>
