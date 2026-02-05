@@ -123,15 +123,16 @@
     
     <!-- Backend Bridge iframe - DO NOT REMOVE -->
     <!-- Critical for contact form and physics API communication -->
-    <iframe 
+    <iframe
         id="backend-bridge" 
         src="https://thmscmpg.github.io/backend-hub" 
         style="display:none; width:0; height:0; border:0;"
         aria-hidden="true"
-        title="Backend communication bridge">
-    </iframe>
+        title="Backend communication bridge"
+    ></iframe>
 
     <!-- Scripts -->
+    <script src="https://thmscmpg.github.io/backend-hub/bte_ns_backend_integration.js"></script>
     <script>
         // Mobile sidebar toggle
         function toggleSidebar() {
