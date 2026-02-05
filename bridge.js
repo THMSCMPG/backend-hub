@@ -1,13 +1,12 @@
 /**
- * Backend Bridge v3.0 - Enhanced Communication Hub with Terminal Tracker
+ * Backend Bridge v3.1 - Enhanced Communication Hub with BTE-NS Support
  * Routes messages from GitHub Pages frontends to Render backend
- * Supports: Contact forms, Physics simulations, Terminal Tracking
+ * Supports: Contact forms, Thermal simulations, BTE-NS simulations, Terminal Tracking
  * 
- * NEW in v3.0:
- * - Terminal Tracker: Intercepts and logs all postMessage events
- * - Email Request tracking (Contact Form)
- * - Physics Sim API call tracking
- * - Visual telemetry log for debugging
+ * NEW in v3.1:
+ * - BTE-NS Coupled Solver support (/api/simulate/bte-ns)
+ * - Maintains backward compatibility with thermal simulation
+ * - Enhanced visualization data handling
  */
 
 (function() {
@@ -32,6 +31,7 @@
         requests: new Map(),  // requestId -> {type, status, timestamp, payload}
         emailRequests: new Map(),
         physicsRequests: new Map(),
+        btensRequests: new Map(),  // NEW: Track BTE-NS simulations
         totalMessages: 0,
         successCount: 0,
         errorCount: 0
@@ -51,7 +51,7 @@
         };
 
         // Console log
-        const prefix = `[Bridge v3.0 | ${timestamp}]`;
+        const prefix = `[Bridge v3.1 | ${timestamp}]`;
         switch(type) {
             case 'success':
                 console.log(`%c${prefix} ✓ ${message}`, 'color: #4CAF50', data || '');
@@ -99,6 +99,8 @@
             TRACKER.emailRequests.set(id, request);
         } else if (type === 'RUN_SIMULATION') {
             TRACKER.physicsRequests.set(id, request);
+        } else if (type === 'RUN_BTE_NS_SIMULATION') {
+            TRACKER.btensRequests.set(id, request);
         }
 
         terminalLog('traffic', `New ${type} request`, { id, payloadSize: JSON.stringify(payload).length });
@@ -127,6 +129,9 @@
         if (TRACKER.physicsRequests.has(id)) {
             TRACKER.physicsRequests.get(id).status = status;
         }
+        if (TRACKER.btensRequests.has(id)) {
+            TRACKER.btensRequests.get(id).status = status;
+        }
 
         // Dispatch update event
         window.dispatchEvent(new CustomEvent('bridge-status-update', {
@@ -141,7 +146,8 @@
             error: TRACKER.errorCount,
             pending: TRACKER.totalMessages - TRACKER.successCount - TRACKER.errorCount,
             emailRequests: Array.from(TRACKER.emailRequests.values()),
-            physicsRequests: Array.from(TRACKER.physicsRequests.values())
+            physicsRequests: Array.from(TRACKER.physicsRequests.values()),
+            btensRequests: Array.from(TRACKER.btensRequests.values())
         };
     }
 
@@ -150,7 +156,8 @@
         getStats: getTrackerStats,
         getRequests: () => Array.from(TRACKER.requests.values()),
         getEmailRequests: () => Array.from(TRACKER.emailRequests.values()),
-        getPhysicsRequests: () => Array.from(TRACKER.physicsRequests.values())
+        getPhysicsRequests: () => Array.from(TRACKER.physicsRequests.values()),
+        getBTENSRequests: () => Array.from(TRACKER.btensRequests.values())
     };
 
     // ========================================================================
@@ -231,7 +238,7 @@
     }
 
     async function handleSimulation(payload) {
-        log('Processing physics simulation request', payload);
+        log('Processing thermal physics simulation request', payload);
 
         const response = await fetchWithRetry(
             `${CONFIG.BACKEND_URL}/api/simulate`,
@@ -242,7 +249,30 @@
             }
         );
 
-        log('Simulation completed', response);
+        log('Thermal simulation completed', response);
+        return response;
+    }
+
+    /**
+     * NEW: Handle BTE-NS coupled simulation
+     */
+    async function handleBTENSSimulation(payload) {
+        log('Processing BTE-NS coupled simulation request', payload);
+
+        const response = await fetchWithRetry(
+            `${CONFIG.BACKEND_URL}/api/simulate/bte-ns`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        log('BTE-NS simulation completed', {
+            fidelity: response.fidelity_name,
+            runtime: response.runtime_ms + 'ms',
+            hasVisualizations: !!response.visualizations
+        });
         return response;
     }
 
@@ -270,6 +300,8 @@
                 return await handleContactSubmission(payload);
             case 'RUN_SIMULATION':
                 return await handleSimulation(payload);
+            case 'RUN_BTE_NS_SIMULATION':  // NEW
+                return await handleBTENSSimulation(payload);
             case 'HEALTH_CHECK':
                 return await handleHealthCheck();
             default:
@@ -335,16 +367,22 @@
     // INITIALIZATION
     // ========================================================================
 
-    log('Backend Bridge v3.0 with Terminal Tracker initialized', {
+    log('Backend Bridge v3.1 with BTE-NS support initialized', {
         backendUrl: CONFIG.BACKEND_URL,
         timeout: CONFIG.TIMEOUT,
-        retryAttempts: CONFIG.RETRY_ATTEMPTS
+        retryAttempts: CONFIG.RETRY_ATTEMPTS,
+        endpoints: [
+            '/api/contact',
+            '/api/simulate (thermal)',
+            '/api/simulate/bte-ns (coupled)',
+            '/api/health'
+        ]
     });
 
     // Initial health check
     handleHealthCheck()
-        .then(() => {
-            log('Backend is healthy and ready');
+        .then((data) => {
+            log('Backend is healthy and ready', data);
             window.dispatchEvent(new CustomEvent('bridge-ready'));
         })
         .catch(error => logError('Backend health check failed (cold start expected)', error));
