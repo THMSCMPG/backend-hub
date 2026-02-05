@@ -611,11 +611,11 @@
                         </div>
                     </div>
 
-                    <!-- Navigation Arrows -->
+                    <!-- Navigation Arrows 
                     <div class="nav-arrows">
                         <button class="nav-arrow" id="prev-arrow" onclick="navigateViz(-1)">❮</button>
                         <button class="nav-arrow" id="next-arrow" onclick="navigateViz(1)">❯</button>
-                    </div>
+                    </div>-->
                 </div>
 
                 <!-- Visualization Indicators -->
@@ -1470,5 +1470,413 @@ console.log('⚛️ BTE-NS Solar Cell Simulator v2.0.0 loaded');
 console.log('📚 Physics: Boltzmann Transport Equation + Navier-Stokes');
 console.log('🔧 Fidelity levels: Low (25×25), Medium (50×50), High (100×100)');
 console.log('⌨️  Use arrow keys or buttons to navigate visualizations');
+
+/**
+ * BTE-NS Mobile Swipe Navigation
+ * ===============================
+ * Instagram-style horizontal swipe between visualization panels
+ * Smooth, snappy animations with momentum scrolling
+ * 
+ * Usage: Include this script on mobile BTE-NS simulator page
+ */
+
+ (function() {
+    'use strict';
+
+    console.log('📱 BTE-NS Swipe Navigation Loading...');
+
+    // ========================================================================
+    // CONFIGURATION
+    // ========================================================================
+
+    const SWIPE_CONFIG = {
+        threshold: 50,           // Minimum swipe distance (px)
+        velocityThreshold: 0.3,  // Minimum swipe velocity
+        animationDuration: 300,  // Transition duration (ms)
+        resistance: 0.3,         // Edge resistance factor
+        snapPoint: 0.5          // Snap to next panel if dragged > 50%
+    };
+
+    // ========================================================================
+    // STATE
+    // ========================================================================
+
+    const state = {
+        currentPanel: 0,
+        totalPanels: 4,
+        isDragging: false,
+        startX: 0,
+        currentX: 0,
+        startTime: 0,
+        translateX: 0,
+        panels: []
+    };
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    function init() {
+        // Find visualization panels
+        const container = document.querySelector('.viz-panels-container') || 
+                         createPanelsContainer();
+        
+        if (!container) {
+            console.error('❌ Cannot find or create panels container');
+            return;
+        }
+
+        state.panels = Array.from(container.querySelectorAll('.viz-panel'));
+        state.totalPanels = state.panels.length;
+
+        if (state.totalPanels === 0) {
+            console.error('❌ No visualization panels found');
+            return;
+        }
+
+        console.log(`✅ Found ${state.totalPanels} panels`);
+
+        setupSwipeHandlers(container);
+        setupPagination();
+        updatePanelPositions(0, true);
+
+        console.log('✅ Swipe navigation initialized');
+    }
+
+    // ========================================================================
+    // CREATE CONTAINER (if needed)
+    // ========================================================================
+
+    function createPanelsContainer() {
+        // Look for existing canvases and wrap them
+        const canvases = document.querySelectorAll('.canvas-container');
+        if (canvases.length === 0) return null;
+
+        // Create wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'viz-panels-wrapper';
+        wrapper.style.cssText = `
+            overflow: hidden;
+            width: 100%;
+            position: relative;
+        `;
+
+        // Create scrolling container
+        const container = document.createElement('div');
+        container.className = 'viz-panels-container';
+        container.style.cssText = `
+            display: flex;
+            transition: transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        `;
+
+        // Wrap each canvas in a panel
+        canvases.forEach((canvas, index) => {
+            const panel = document.createElement('div');
+            panel.className = 'viz-panel';
+            panel.style.cssText = `
+                min-width: 100%;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            `;
+            
+            // Move canvas into panel
+            const parent = canvas.parentNode;
+            panel.appendChild(canvas);
+            
+            // Add label
+            const label = document.createElement('div');
+            label.className = 'panel-label';
+            label.style.cssText = `
+                margin-top: 15px;
+                font-size: 16px;
+                font-weight: 600;
+                color: #2c3e50;
+                text-align: center;
+            `;
+            const labels = ['Temperature', 'Current Density', 'Velocity Field', 'Phonon Flux'];
+            label.textContent = labels[index] || `Panel ${index + 1}`;
+            panel.appendChild(label);
+            
+            container.appendChild(panel);
+            
+            if (index === 0) {
+                parent.parentNode.insertBefore(wrapper, parent);
+            }
+            parent.remove();
+        });
+
+        wrapper.appendChild(container);
+        return container;
+    }
+
+    // ========================================================================
+    // SWIPE HANDLERS
+    // ========================================================================
+
+    function setupSwipeHandlers(container) {
+        // Touch events
+        container.addEventListener('touchstart', handleTouchStart, { passive: true });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+        container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        // Mouse events (for testing on desktop)
+        container.addEventListener('mousedown', handleMouseDown);
+        container.addEventListener('mousemove', handleMouseMove);
+        container.addEventListener('mouseup', handleMouseEnd);
+        container.addEventListener('mouseleave', handleMouseEnd);
+
+        console.log('✅ Swipe handlers attached');
+    }
+
+    function handleTouchStart(e) {
+        startDrag(e.touches[0].clientX);
+    }
+
+    function handleTouchMove(e) {
+        if (!state.isDragging) return;
+        e.preventDefault();
+        drag(e.touches[0].clientX);
+    }
+
+    function handleTouchEnd(e) {
+        endDrag();
+    }
+
+    function handleMouseDown(e) {
+        e.preventDefault();
+        startDrag(e.clientX);
+    }
+
+    function handleMouseMove(e) {
+        if (!state.isDragging) return;
+        e.preventDefault();
+        drag(e.clientX);
+    }
+
+    function handleMouseEnd(e) {
+        endDrag();
+    }
+
+    // ========================================================================
+    // DRAG LOGIC
+    // ========================================================================
+
+    function startDrag(clientX) {
+        state.isDragging = true;
+        state.startX = clientX;
+        state.currentX = clientX;
+        state.startTime = Date.now();
+
+        const container = document.querySelector('.viz-panels-container');
+        container.style.transition = 'none';
+    }
+
+    function drag(clientX) {
+        if (!state.isDragging) return;
+
+        state.currentX = clientX;
+        const deltaX = clientX - state.startX;
+        
+        // Calculate translate with edge resistance
+        let translate = state.translateX + deltaX;
+        
+        // Apply resistance at edges
+        const maxTranslate = 0;
+        const minTranslate = -(state.totalPanels - 1) * window.innerWidth;
+        
+        if (translate > maxTranslate) {
+            const overflow = translate - maxTranslate;
+            translate = maxTranslate + overflow * SWIPE_CONFIG.resistance;
+        } else if (translate < minTranslate) {
+            const overflow = minTranslate - translate;
+            translate = minTranslate - overflow * SWIPE_CONFIG.resistance;
+        }
+
+        const container = document.querySelector('.viz-panels-container');
+        container.style.transform = `translateX(${translate}px)`;
+        
+        state.startX = clientX;
+        state.translateX = translate;
+    }
+
+    function endDrag() {
+        if (!state.isDragging) return;
+
+        state.isDragging = false;
+
+        const container = document.querySelector('.viz-panels-container');
+        container.style.transition = `transform ${SWIPE_CONFIG.animationDuration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+
+        // Calculate velocity
+        const deltaTime = Date.now() - state.startTime;
+        const deltaX = state.currentX - state.startX;
+        const velocity = deltaX / deltaTime;
+
+        // Determine target panel
+        let targetPanel = state.currentPanel;
+        const panelWidth = window.innerWidth;
+        const currentOffset = -state.currentPanel * panelWidth;
+        const dragDistance = state.translateX - currentOffset;
+        const dragPercent = Math.abs(dragDistance) / panelWidth;
+
+        // Fast swipe (velocity-based)
+        if (Math.abs(velocity) > SWIPE_CONFIG.velocityThreshold) {
+            targetPanel += velocity > 0 ? -1 : 1;
+        }
+        // Slow drag (distance-based)
+        else if (dragPercent > SWIPE_CONFIG.snapPoint) {
+            targetPanel += dragDistance > 0 ? -1 : 1;
+        }
+
+        // Clamp to valid range
+        targetPanel = Math.max(0, Math.min(state.totalPanels - 1, targetPanel));
+
+        goToPanel(targetPanel);
+    }
+
+    // ========================================================================
+    // PANEL NAVIGATION
+    // ========================================================================
+
+    function goToPanel(panelIndex, immediate = false) {
+        if (panelIndex < 0 || panelIndex >= state.totalPanels) return;
+
+        state.currentPanel = panelIndex;
+        updatePanelPositions(panelIndex, immediate);
+        updatePagination();
+
+        // Dispatch event
+        window.dispatchEvent(new CustomEvent('bte-ns-panel-change', {
+            detail: { panel: panelIndex }
+        }));
+    }
+
+    function updatePanelPositions(panelIndex, immediate = false) {
+        const container = document.querySelector('.viz-panels-container');
+        if (!container) return;
+
+        const translateX = -panelIndex * window.innerWidth;
+        state.translateX = translateX;
+
+        if (immediate) {
+            container.style.transition = 'none';
+        } else {
+            container.style.transition = `transform ${SWIPE_CONFIG.animationDuration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+        }
+
+        container.style.transform = `translateX(${translateX}px)`;
+
+        // Force reflow if immediate
+        if (immediate) {
+            void container.offsetHeight;
+        }
+    }
+
+    // ========================================================================
+    // PAGINATION DOTS
+    // ========================================================================
+
+    function setupPagination() {
+        let pagination = document.querySelector('.swipe-pagination');
+        
+        if (!pagination) {
+            pagination = document.createElement('div');
+            pagination.className = 'swipe-pagination';
+            pagination.style.cssText = `
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                padding: 20px;
+                position: relative;
+                z-index: 10;
+            `;
+
+            const wrapper = document.querySelector('.viz-panels-wrapper');
+            if (wrapper && wrapper.parentNode) {
+                wrapper.parentNode.insertBefore(pagination, wrapper.nextSibling);
+            }
+        }
+
+        // Create dots
+        pagination.innerHTML = '';
+        for (let i = 0; i < state.totalPanels; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'pagination-dot';
+            dot.style.cssText = `
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #cbd5e0;
+                transition: all 200ms ease;
+                cursor: pointer;
+            `;
+            
+            if (i === state.currentPanel) {
+                dot.style.background = '#667eea';
+                dot.style.width = '24px';
+                dot.style.borderRadius = '4px';
+            }
+
+            dot.addEventListener('click', () => goToPanel(i));
+            pagination.appendChild(dot);
+        }
+    }
+
+    function updatePagination() {
+        const dots = document.querySelectorAll('.pagination-dot');
+        dots.forEach((dot, index) => {
+            if (index === state.currentPanel) {
+                dot.style.background = '#667eea';
+                dot.style.width = '24px';
+                dot.style.borderRadius = '4px';
+            } else {
+                dot.style.background = '#cbd5e0';
+                dot.style.width = '8px';
+                dot.style.borderRadius = '50%';
+            }
+        });
+    }
+
+    // ========================================================================
+    // WINDOW RESIZE HANDLER
+    // ========================================================================
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            updatePanelPositions(state.currentPanel, true);
+        }, 100);
+    });
+
+    // ========================================================================
+    // GLOBAL API
+    // ========================================================================
+
+    window.BTENSSwipe = {
+        goToPanel,
+        next: () => goToPanel(state.currentPanel + 1),
+        prev: () => goToPanel(state.currentPanel - 1),
+        getCurrentPanel: () => state.currentPanel,
+        getTotalPanels: () => state.totalPanels
+    };
+
+    // ========================================================================
+    // INIT ON LOAD
+    // ========================================================================
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    console.log('✅ BTE-NS Swipe Navigation Loaded');
+
+})();
     </script>
 </section>
