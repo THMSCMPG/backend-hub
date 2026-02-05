@@ -67,9 +67,9 @@
             return;
         }
 
-        const runBtn = document.getElementById('run-simulation-btn');
-        const statusDiv = document.getElementById('simulation-status');
-        const resultsDiv = document.getElementById('results-panel');
+        const runBtn = document.getElementById('run-button');
+        const statusDiv = document.getElementById('realtime-status');
+        const resultsDiv = document.getElementById('viz-panel');
         
         try {
             btensState.isRunning = true;
@@ -174,13 +174,13 @@
 
         return {
             fidelity_level: fidelityLevel,
-            solar_irradiance: parseFloat(document.getElementById('solar-irradiance')?.value || 1000),
-            ambient_temperature: parseFloat(document.getElementById('ambient-temperature')?.value || 298.15),
-            wind_speed: parseFloat(document.getElementById('wind-speed')?.value || 2.0),
-            cell_efficiency: parseFloat(document.getElementById('cell-efficiency')?.value || 0.20),
-            thermal_conductivity: parseFloat(document.getElementById('thermal-conductivity')?.value || 130),
-            absorptivity: parseFloat(document.getElementById('absorptivity')?.value || 0.95),
-            emissivity: parseFloat(document.getElementById('emissivity')?.value || 0.90)
+            solar_irradiance: parseFloat(document.getElementById('solar-value')?.value || 1000),
+            ambient_temperature: parseFloat(document.getElementById('temp-value')?.value || 298.15),
+            wind_speed: parseFloat(document.getElementById('wind-value')?.value || 2.0),
+            cell_efficiency: parseFloat(document.getElementById('efficiency-value')?.value || 0.20),
+            thermal_conductivity: parseFloat(document.getElementById('conductivity-value')?.value || 130),
+            absorptivity: parseFloat(document.getElementById('absorptivity-value')?.value || 0.95),
+            emissivity: parseFloat(document.getElementById('emissivity-value')?.value || 0.90)
         };
     }
 
@@ -310,12 +310,12 @@
         console.log('📍 API Endpoint:', BTENS_CONFIG.API_BASE_URL + BTENS_CONFIG.ENDPOINT);
 
         // Attach to run button
-        const runBtn = document.getElementById('run-simulation-btn');
+        const runBtn = document.getElementById('run-button');
         if (runBtn) {
             runBtn.addEventListener('click', runBTENSSimulation);
             console.log('✅ Run button attached');
         } else {
-            console.warn('⚠️ Run button (#run-simulation-btn) not found');
+            console.warn('⚠️ Run button (#run-button) not found');
         }
 
         // Check backend health
