@@ -89,6 +89,14 @@
         if (sidebar) {
             const isOpen = sidebar.classList.contains('open');
             
+            // Attach event listener after DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.querySelector('.menu-btn');
+            if (menuBtn) {
+                menuBtn.addEventListener('click', toggleSidebar);
+            }
+            })
+
             // Toggle sidebar with class
             if (isOpen) {
                 sidebar.classList.remove('open');
@@ -151,5 +159,6 @@
                 }
             });
         }
+
     });
 </script>
