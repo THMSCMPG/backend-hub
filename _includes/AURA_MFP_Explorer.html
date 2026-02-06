@@ -395,13 +395,6 @@
             border-radius: 4px;
         }
 
-        .architecture-diagram {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-
         .layer-box {
             border: 2px solid;
             border-radius: 10px;
@@ -458,88 +451,11 @@
 
         <div class="tab-container">
             <div class="tabs">
-                <button class="tab active" data-tab="overview">📊 Overview</button>
-                <button class="tab" data-tab="architecture">🏗️ Architecture</button>
+                <button class="tab active" data-tab="architecture">📊 Architecture</button>
                 <button class="tab" data-tab="modules">📦 Modules</button>
                 <button class="tab" data-tab="dependencies">🔗 Dependencies</button>
                 <button class="tab" data-tab="roadmap">🗺️ Roadmap</button>
                 <button class="tab" data-tab="simulations">🚀 Simulations</button>
-            </div>
-
-            <div id="overview" class="tab-content active">
-                <h2 style="margin-bottom: 20px;">System Overview</h2>
-                
-                <div class="architecture-diagram">
-                    <h3 style="margin-bottom: 20px; color: #667eea;">Multi-Fidelity Simulation Hierarchy</h3>
-                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
-                        Sim4: ML Orchestrator (Intelligent Model Selection)
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #f57f17; background: rgba(245, 127, 23, 0.05);">
-                        Sim3: Goldilocks (Lo-Fi → Med-Fi → Hi-Fi Cascade)
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <div class="layer-box" style="border-color: #e65100; background: rgba(230, 81, 0, 0.05);">
-                            Sim1: Rigorous<br>(Full Physics)
-                        </div>
-                        <div class="layer-box" style="border-color: #1b5e20; background: rgba(27, 94, 32, 0.05);">
-                            Sim2: Adaptive<br>(Mixed Fidelity)
-                        </div>
-                        <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
-                            Lo-Fi BTE<br>(Fast Diffusion)
-                        </div>
-                    </div>
-                </div>
-
-                <div class="layer-section">
-                    <div class="layer-header">📚 Component Status</div>
-                    <div style="display: grid; gap: 15px;">
-                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4caf50;">
-                            <strong>✅ Production-Ready (85-95%)</strong>
-                            <p style="margin-top: 10px; color: #666;">Core infrastructure, High-fidelity solvers, Material models, Solar algorithms, Sim1, Python wrappers</p>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #ff9800;">
-                            <strong>⚠️ In Progress (60-75%)</strong>
-                            <p style="margin-top: 10px; color: #666;">BTE diffusion validation, Navier-Stokes turbulence, Sim2 adaptive, Sim3 cascade, Bayesian optimization</p>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #f44336;">
-                            <strong>🔬 Experimental (40-50%)</strong>
-                            <p style="margin-top: 10px; color: #666;">Sim4 ML orchestration, RL interface, Decision tree selection</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e1f5ff;"></div>
-                        <span>Core Infrastructure</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #fff3e0;"></div>
-                        <span>Physics Solvers</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #f3e5f5;"></div>
-                        <span>Materials</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e8f5e9;"></div>
-                        <span>Environment</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #fce4ec;"></div>
-                        <span>Machine Learning</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #fff9c4;"></div>
-                        <span>Optimization</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #ffebee;"></div>
-                        <span>Commands</span>
-                    </div>
-                </div>
             </div>
 
             <div id="architecture" class="tab-content">
@@ -571,119 +487,6 @@
                     <div class="arrow-down">↓</div>
                     <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
                         Layer 1: Core Infrastructure (precision, types, data)
-                    </div>
-                </div>
-
-                <div id="dependency-graph">
-                    <h3 style="margin-bottom: 20px; color: #667eea;">Module Dependency Graph</h3>
-                    <div class="mermaid">
-graph TB
-    precision[precision_module]
-    constants[constants_module]
-    types[types_module]
-    error[error_module]
-    data[data_module]
-    
-    constants --> precision
-    types --> precision
-    data --> types
-    data --> precision
-
-    bte_mc[bte_monte_carlo]
-    bte_diff[bte_diffusion]
-    ns[navier_stokes]
-    hifi[hifi_solver]
-    mefi[mefi_solver]
-    lofi[lofi_solver]
-
-    bte_mc --> types
-    bte_mc --> precision
-    bte_mc --> constants
-    bte_diff --> types
-    ns --> types
-    ns --> constants
-    hifi --> bte_mc
-    hifi --> ns
-    mefi --> bte_diff
-    lofi --> bte_diff
-
-    silicon[silicon_module]
-    optical[optical_module]
-    thermal[thermal_module]
-    material[material_module]
-
-    silicon --> constants
-    optical --> constants
-    thermal --> constants
-    material --> silicon
-    material --> optical
-    material --> thermal
-    bte_mc --> silicon
-
-    solar[solar_module]
-    atmos[atmospheric_module]
-    weather[weather_module]
-    env[environmental_module]
-
-    solar --> constants
-    atmos --> constants
-    env --> solar
-    env --> atmos
-    env --> weather
-
-    ml_orch[ml_orchestrator]
-    state_feat[state_features]
-    decision_tree[decision_tree]
-
-    ml_orch --> state_feat
-    ml_orch --> decision_tree
-    state_feat --> types
-
-    opt[optimization_module]
-    pso[pso_module]
-    bayes[bayesian_module]
-    adjoint[adjoint_module]
-
-    opt --> pso
-    opt --> bayes
-    opt --> adjoint
-    pso --> constants
-    bayes --> constants
-    adjoint --> types
-
-    sim1[Sim1: Rigorous]
-    sim2[Sim2: Adaptive]
-    sim3[Sim3: Goldilocks]
-    sim4[Sim4: ML-Orchestrated]
-
-    sim1 --> hifi
-    sim1 --> adjoint
-    sim2 --> lofi
-    sim2 --> hifi
-    sim3 --> lofi
-    sim3 --> mefi
-    sim3 --> hifi
-    sim3 --> pso
-    sim4 --> lofi
-    sim4 --> mefi
-    sim4 --> hifi
-    sim4 --> ml_orch
-
-    classDef core fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    classDef solver fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef material fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef env fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    classDef ml fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    classDef opt fill:#fff9c4,stroke:#f57f17,stroke-width:2px
-    classDef cmd fill:#ffebee,stroke:#b71c1c,stroke-width:3px
-
-    class precision,constants,types,error,data core
-    class bte_mc,bte_diff,ns,hifi,mefi,lofi solver
-    class silicon,optical,thermal,material material
-    class solar,atmos,weather,env env
-    class ml_orch,state_feat,decision_tree ml
-    class opt,pso,bayes,adjoint opt
-    class sim1,sim2,sim3,sim4 cmd
                     </div>
                 </div>
             </div>
