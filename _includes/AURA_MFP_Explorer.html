@@ -1,0 +1,1217 @@
+<section class="AURA-MFP Architecture Explorer"></section>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .tab-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 20px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab.active {
+            color: #667eea;
+            background: white;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .module-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--accent-color, #667eea);
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent-color, #667eea);
+        }
+
+        .module-card.core { --accent-color: #01579b; }
+        .module-card.solver { --accent-color: #e65100; }
+        .module-card.material { --accent-color: #4a148c; }
+        .module-card.environment { --accent-color: #1b5e20; }
+        .module-card.ml { --accent-color: #880e4f; }
+        .module-card.optimization { --accent-color: #f57f17; }
+        .module-card.command { --accent-color: #b71c1c; }
+        .module-card.utility { --accent-color: #37474f; }
+        .module-card.python { --accent-color: #004d40; }
+
+        .module-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .module-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+
+        .badge.complete { background: #c8e6c9; color: #2e7d32; }
+        .badge.progress { background: #fff9c4; color: #f57f17; }
+        .badge.experimental { background: #ffccbc; color: #d84315; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        #dependency-graph {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .layer-section {
+            margin-bottom: 30px;
+        }
+
+        .layer-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+        }
+
+        .timeline-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .dependency-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .dependency-list li {
+            padding: 8px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            background: #f8f9fa;
+            border-radius: 0 5px 5px 0;
+        }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            background: rgba(255, 235, 59, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .module-grid { grid-template-columns: 1fr; }
+            .tabs { flex-direction: column; }
+            .tab { text-align: left; }
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .architecture-diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .layer-box {
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .layer-box:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow-down {
+            text-align: center;
+            font-size: 2em;
+            color: #667eea;
+            margin: 10px 0;
+        }
+    </style>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 AURA-MFP Architecture Explorer</h1>
+            <div class="subtitle">Atmosphere-Unified Radiation Assessment with Multi-Fidelity for Photovoltaics</div>
+            <div class="subtitle">Version 1.0.0-beta | Beta Production</div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">52</div>
+                    <div class="stat-label">Total Files</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">44</div>
+                    <div class="stat-label">Fortran Modules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Python Files</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">~16K</div>
+                    <div class="stat-label">Lines of Code</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">75%</div>
+                    <div class="stat-label">Overall Progress</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" data-tab="overview">📊 Overview</button>
+                <button class="tab" data-tab="architecture">🏗️ Architecture</button>
+                <button class="tab" data-tab="modules">📦 Modules</button>
+                <button class="tab" data-tab="dependencies">🔗 Dependencies</button>
+                <button class="tab" data-tab="roadmap">🗺️ Roadmap</button>
+                <button class="tab" data-tab="simulations">🚀 Simulations</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">System Overview</h2>
+                
+                <div class="architecture-diagram">
+                    <h3 style="margin-bottom: 20px; color: #667eea;">Multi-Fidelity Simulation Hierarchy</h3>
+                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
+                        Sim4: ML Orchestrator (Intelligent Model Selection)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #f57f17; background: rgba(245, 127, 23, 0.05);">
+                        Sim3: Goldilocks (Lo-Fi → Med-Fi → Hi-Fi Cascade)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <div class="layer-box" style="border-color: #e65100; background: rgba(230, 81, 0, 0.05);">
+                            Sim1: Rigorous<br>(Full Physics)
+                        </div>
+                        <div class="layer-box" style="border-color: #1b5e20; background: rgba(27, 94, 32, 0.05);">
+                            Sim2: Adaptive<br>(Mixed Fidelity)
+                        </div>
+                        <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
+                            Lo-Fi BTE<br>(Fast Diffusion)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layer-section">
+                    <div class="layer-header">📚 Component Status</div>
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4caf50;">
+                            <strong>✅ Production-Ready (85-95%)</strong>
+                            <p style="margin-top: 10px; color: #666;">Core infrastructure, High-fidelity solvers, Material models, Solar algorithms, Sim1, Python wrappers</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                            <strong>⚠️ In Progress (60-75%)</strong>
+                            <p style="margin-top: 10px; color: #666;">BTE diffusion validation, Navier-Stokes turbulence, Sim2 adaptive, Sim3 cascade, Bayesian optimization</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #f44336;">
+                            <strong>🔬 Experimental (40-50%)</strong>
+                            <p style="margin-top: 10px; color: #666;">Sim4 ML orchestration, RL interface, Decision tree selection</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e1f5ff;"></div>
+                        <span>Core Infrastructure</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fff3e0;"></div>
+                        <span>Physics Solvers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f3e5f5;"></div>
+                        <span>Materials</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e8f5e9;"></div>
+                        <span>Environment</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fce4ec;"></div>
+                        <span>Machine Learning</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fff9c4;"></div>
+                        <span>Optimization</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffebee;"></div>
+                        <span>Commands</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="architecture" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Layered Architecture</h2>
+                <div class="architecture-diagram">
+                    <div class="layer-box" style="border-color: #004d40; background: rgba(0, 77, 64, 0.05);">
+                        Layer 7: Python API (simv1-4_wrapper.py)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
+                        Layer 6: Simulation Commands (sim1-4_command_module)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #880e4f; background: rgba(136, 14, 79, 0.05);">
+                        Layer 5a: ML & Optimization | Layer 5b: Environment Models
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #e65100; background: rgba(230, 81, 0, 0.05);">
+                        Layer 4: Physics Solvers (BTE, Navier-Stokes)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #4a148c; background: rgba(74, 20, 140, 0.05);">
+                        Layer 3: Material Models (silicon, optical, thermal)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #37474f; background: rgba(55, 71, 79, 0.05);">
+                        Layer 2: Utilities (I/O, timers, validation)
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
+                        Layer 1: Core Infrastructure (precision, types, data)
+                    </div>
+                </div>
+
+                <div id="dependency-graph">
+                    <h3 style="margin-bottom: 20px; color: #667eea;">Module Dependency Graph</h3>
+                    <div class="mermaid">
+graph TB
+    precision[precision_module]
+    constants[constants_module]
+    types[types_module]
+    error[error_module]
+    data[data_module]
+    
+    constants --> precision
+    types --> precision
+    data --> types
+    data --> precision
+
+    bte_mc[bte_monte_carlo]
+    bte_diff[bte_diffusion]
+    ns[navier_stokes]
+    hifi[hifi_solver]
+    mefi[mefi_solver]
+    lofi[lofi_solver]
+
+    bte_mc --> types
+    bte_mc --> precision
+    bte_mc --> constants
+    bte_diff --> types
+    ns --> types
+    ns --> constants
+    hifi --> bte_mc
+    hifi --> ns
+    mefi --> bte_diff
+    lofi --> bte_diff
+
+    silicon[silicon_module]
+    optical[optical_module]
+    thermal[thermal_module]
+    material[material_module]
+
+    silicon --> constants
+    optical --> constants
+    thermal --> constants
+    material --> silicon
+    material --> optical
+    material --> thermal
+    bte_mc --> silicon
+
+    solar[solar_module]
+    atmos[atmospheric_module]
+    weather[weather_module]
+    env[environmental_module]
+
+    solar --> constants
+    atmos --> constants
+    env --> solar
+    env --> atmos
+    env --> weather
+
+    ml_orch[ml_orchestrator]
+    state_feat[state_features]
+    decision_tree[decision_tree]
+
+    ml_orch --> state_feat
+    ml_orch --> decision_tree
+    state_feat --> types
+
+    opt[optimization_module]
+    pso[pso_module]
+    bayes[bayesian_module]
+    adjoint[adjoint_module]
+
+    opt --> pso
+    opt --> bayes
+    opt --> adjoint
+    pso --> constants
+    bayes --> constants
+    adjoint --> types
+
+    sim1[Sim1: Rigorous]
+    sim2[Sim2: Adaptive]
+    sim3[Sim3: Goldilocks]
+    sim4[Sim4: ML-Orchestrated]
+
+    sim1 --> hifi
+    sim1 --> adjoint
+    sim2 --> lofi
+    sim2 --> hifi
+    sim3 --> lofi
+    sim3 --> mefi
+    sim3 --> hifi
+    sim3 --> pso
+    sim4 --> lofi
+    sim4 --> mefi
+    sim4 --> hifi
+    sim4 --> ml_orch
+
+    classDef core fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef solver fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef material fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef env fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef ml fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef opt fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef cmd fill:#ffebee,stroke:#b71c1c,stroke-width:3px
+
+    class precision,constants,types,error,data core
+    class bte_mc,bte_diff,ns,hifi,mefi,lofi solver
+    class silicon,optical,thermal,material material
+    class solar,atmos,weather,env env
+    class ml_orch,state_feat,decision_tree ml
+    class opt,pso,bayes,adjoint opt
+    class sim1,sim2,sim3,sim4 cmd
+                    </div>
+                </div>
+            </div>
+
+            <div id="modules" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Module Explorer</h2>
+                
+                <input type="text" id="module-search" class="search-box" placeholder="🔍 Search modules by name, function, or description...">
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Modules</button>
+                    <button class="filter-btn" data-filter="core">Core</button>
+                    <button class="filter-btn" data-filter="solver">Solvers</button>
+                    <button class="filter-btn" data-filter="material">Materials</button>
+                    <button class="filter-btn" data-filter="environment">Environment</button>
+                    <button class="filter-btn" data-filter="ml">ML</button>
+                    <button class="filter-btn" data-filter="optimization">Optimization</button>
+                    <button class="filter-btn" data-filter="command">Commands</button>
+                    <button class="filter-btn" data-filter="python">Python</button>
+                </div>
+
+                <div id="module-list" class="module-grid"></div>
+            </div>
+
+            <div id="dependencies" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Dependency Analysis</h2>
+                
+                <div class="layer-section">
+                    <div class="layer-header">🔝 Most Depended-On Modules</div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <ol style="padding-left: 20px; line-height: 2;">
+                            <li><strong>precision_module</strong> - Used by <span class="highlight">40 modules</span></li>
+                            <li><strong>types_module</strong> - Used by <span class="highlight">35 modules</span></li>
+                            <li><strong>constants_module</strong> - Used by <span class="highlight">28 modules</span></li>
+                            <li><strong>error_module</strong> - Used by <span class="highlight">15 modules</span></li>
+                            <li><strong>silicon_module</strong> - Used by <span class="highlight">8 modules</span></li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="layer-section">
+                    <div class="layer-header">🔄 Longest Dependency Chains</div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <p style="margin-bottom: 15px;"><strong>Chain 1 (9 levels):</strong></p>
+                        <code style="display: block; padding: 15px; background: #f8f9fa; border-radius: 5px; overflow-x: auto;">
+                            main.f90 → sim4_command → ml_orchestrator → state_features → types → precision
+                        </code>
+                        
+                        <p style="margin: 20px 0 15px;"><strong>Chain 2 (8 levels):</strong></p>
+                        <code style="display: block; padding: 15px; background: #f8f9fa; border-radius: 5px; overflow-x: auto;">
+                            main.f90 → sim1_command → hifi_solver → bte_monte_carlo → silicon → constants → precision
+                        </code>
+                    </div>
+                </div>
+
+                <div class="layer-section">
+                    <div class="layer-header">📊 Dependency Levels</div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 0 (Foundation):</strong>
+                            <p style="color: #666; margin-top: 5px;">precision_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 1:</strong>
+                            <p style="color: #666; margin-top: 5px;">constants_module, error_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 2:</strong>
+                            <p style="color: #666; margin-top: 5px;">types_module, timer_module, validation_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 3-5:</strong>
+                            <p style="color: #666; margin-top: 5px;">Material models, Environment models, Solvers, ML modules</p>
+                        </div>
+                        <div>
+                            <strong>Level 6-8:</strong>
+                            <p style="color: #666; margin-top: 5px;">High-level solvers, Simulation commands, Python wrappers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="roadmap" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Development Roadmap</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-title">✅ Completed</div>
+                        <div class="timeline-content">
+                            <ul style="list-style: none; padding: 0;">
+                                <li>✓ Core infrastructure (types, precision, constants)</li>
+                                <li>✓ Physics solvers (BTE MC, basic NS)</li>
+                                <li>✓ Material models (silicon properties)</li>
+                                <li>✓ Solar position algorithms</li>
+                                <li>✓ Sim1 high-fidelity command</li>
+                                <li>✓ Sim2 adaptive fidelity</li>
+                                <li>✓ PSO optimization</li>
+                                <li>✓ Python wrappers for Sim1, Sim2, Sim4</li>
+                                <li>✓ Basic test suite</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-title">⚠️ In Progress</div>
+                        <div class="timeline-content">
+                            <ul style="list-style: none; padding: 0;">
+                                <li>⚙️ BTE diffusion validation</li>
+                                <li>⚙️ Navier-Stokes turbulence models</li>
+                                <li>⚙️ Bayesian optimization (GP fitting)</li>
+                                <li>⚙️ Sim3 cascade logic</li>
+                                <li>⚙️ Sim4 RL training</li>
+                                <li>⚙️ Medium-fidelity solver refinement</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-title">📅 Planned (2026-2027)</div>
+                        <div class="timeline-content">
+                            <ul style="list-style: none; padding: 0;">
+                                <li>🎯 Multi-GPU support (CUDA/OpenACC)</li>
+                                <li>🎯 MPI parallelization</li>
+                                <li>🎯 NetCDF I/O for large datasets</li>
+                                <li>🎯 Real-time visualization interface</li>
+                                <li>🎯 Web-based dashboard</li>
+                                <li>🎯 Automated hyperparameter tuning</li>
+                                <li>🎯 Experimental validation with hardware</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-title">🔬 Research Phase (2027+)</div>
+                        <div class="timeline-content">
+                            <ul style="list-style: none; padding: 0;">
+                                <li>🔬 Neural network surrogates (physics-informed NNs)</li>
+                                <li>🔬 Transfer learning across PV geometries</li>
+                                <li>🔬 Uncertainty quantification framework</li>
+                                <li>🔬 Multi-objective optimization (Pareto fronts)</li>
+                                <li>🔬 Integration with climate models (WRF, CESM)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layer-section" style="margin-top: 40px;">
+                    <div class="layer-header">🎯 Development Priorities</div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <ol style="padding-left: 20px; line-height: 2.5;">
+                            <li><strong>Complete Sim3 cascade</strong> - Highest ROI for capstone</li>
+                            <li><strong>Validate BTE diffusion</strong> - Critical for accuracy</li>
+                            <li><strong>Finish Bayesian optimization</strong> - Needed for design studies</li>
+                            <li><strong>Add GPU acceleration</strong> - 10-100x speedup for BTE MC</li>
+                            <li><strong>Implement comprehensive UQ</strong> - For publication credibility</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div id="simulations" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Simulation Modes</h2>
+                
+                <div class="module-grid">
+                    <div class="module-card command">
+                        <div class="module-title">Sim1: Rigorous</div>
+                        <div class="module-info">Full physics simulation (BTE MC + Navier-Stokes)</div>
+                        <div class="module-info">Status: <span class="badge complete">85% Complete</span></div>
+                        <div class="module-info">Runtime: 15-45 minutes</div>
+                        <div class="module-info">Use case: Highest accuracy needed</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Features:</strong>
+                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
+                                <li>BTE Monte Carlo (10^6 particles)</li>
+                                <li>Full Navier-Stokes coupling</li>
+                                <li>Conjugate heat transfer</li>
+                                <li>Optional adjoint gradients</li>
+                                <li>Optimization loop support</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="module-card command">
+                        <div class="module-title">Sim2: Adaptive</div>
+                        <div class="module-info">Empirical mixed-fidelity (lo-fi → hi-fi switching)</div>
+                        <div class="module-info">Status: <span class="badge progress">70% Complete</span></div>
+                        <div class="module-info">Runtime: 10-100x faster than Sim1</div>
+                        <div class="module-info">Use case: Parameter screening</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 70%;"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Features:</strong>
+                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
+                                <li>Error-driven fidelity switching</li>
+                                <li>Batch lo-fi screening</li>
+                                <li>Selective hi-fi refinement</li>
+                                <li>Uncertainty quantification</li>
+                                <li>Surrogate model building</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="module-card command">
+                        <div class="module-title">Sim3: Goldilocks</div>
+                        <div class="module-info">Three-tier cascade (lo → med → hi fidelity)</div>
+                        <div class="module-info">Status: <span class="badge progress">65% Complete</span></div>
+                        <div class="module-info">Runtime: Optimal accuracy/cost ratio</div>
+                        <div class="module-info">Use case: Design optimization</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Features:</strong>
+                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
+                                <li>Lo-fi screening (1000s of designs)</li>
+                                <li>Med-fi refinement (top 10%)</li>
+                                <li>Hi-fi validation (top 1%)</li>
+                                <li>Multi-fidelity co-kriging</li>
+                                <li>PSO optimization integration</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="module-card command">
+                        <div class="module-title">Sim4: ML-Orchestrated</div>
+                        <div class="module-info">Intelligent fidelity selection via reinforcement learning</div>
+                        <div class="module-info">Status: <span class="badge experimental">50% Complete</span></div>
+                        <div class="module-info">Runtime: Adaptive (learns optimal strategy)</div>
+                        <div class="module-info">Use case: Research/exploration</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 50%;"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Features:</strong>
+                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
+                                <li>State feature extraction</li>
+                                <li>Q-learning fidelity policy</li>
+                                <li>Decision tree fallback</li>
+                                <li>Reward-based learning</li>
+                                <li>ε-greedy exploration</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layer-section" style="margin-top: 30px;">
+                    <div class="layer-header">📈 Performance Comparison</div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0;">Mode</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0;">Accuracy</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0;">Speed</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0;">Best For</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Sim1</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⭐⭐⭐⭐⭐</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⚡</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Final validation</td>
+                                </tr>
+                                <tr style="background: #f8f9fa;">
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Sim2</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⭐⭐⭐⭐</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⚡⚡⚡</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Parameter sweeps</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Sim3</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⭐⭐⭐⭐</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⚡⚡⚡⚡</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">Design optimization</td>
+                                </tr>
+                                <tr style="background: #f8f9fa;">
+                                    <td style="padding: 12px;">Sim4</td>
+                                    <td style="padding: 12px;">⭐⭐⭐⭐ (adaptive)</td>
+                                    <td style="padding: 12px;">⚡⚡⚡⚡ (learns)</td>
+                                    <td style="padding: 12px;">Exploration/research</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                curve: 'basis',
+                padding: 20
+            }
+        });
+
+        // Module data
+        const modules = {
+            core: [
+                { name: 'precision_module', file: 'precision_module.f90', lines: 80, complete: 100, functions: ['sp', 'dp', 'qp precision kinds'], deps: [], description: 'Defines numerical precision standards for entire system' },
+                { name: 'constants_module', file: 'constants_module.f90', lines: 306, complete: 95, functions: ['Physical constants', 'Unit conversions', 'celsius_to_kelvin', 'watts_to_photon_flux'], deps: ['precision_module'], description: 'Physical constants and conversion functions' },
+                { name: 'types_module', file: 'types_module.f90', lines: 450, complete: 95, functions: ['SimulationDomain', 'MaterialProperties', 'AtmosphericState', 'SolarConditions'], deps: ['precision_module'], description: 'Structured data types for system' },
+                { name: 'error_module', file: 'error_module.f90', lines: 231, complete: 90, functions: ['error_fatal', 'error_warning', 'error_check_allocation'], deps: [], description: 'Centralized error handling' },
+                { name: 'data_module', file: 'data_module.f90', lines: 278, complete: 85, functions: ['allocate_simulation_arrays', 'load_atmospheric_lut', 'save_simulation_state'], deps: ['types_module', 'precision_module'], description: 'Global data management' }
+            ],
+            solver: [
+                { name: 'bte_monte_carlo', file: 'bte_monte_carlo.f90', lines: 441, complete: 85, functions: ['bte_mc_init', 'bte_mc_run', 'bte_mc_scatter_phonon'], deps: ['types_module', 'precision_module', 'constants_module', 'silicon_module'], description: 'Stochastic Monte Carlo BTE solver (hi-fi)' },
+                { name: 'bte_diffusion', file: 'bte_diffusion.f90', lines: 106, complete: 70, functions: ['bte_diffusion_solve'], deps: ['types_module', 'precision_module'], description: 'Diffusion approximation of BTE (lo-fi)' },
+                { name: 'navier_stokes', file: 'navier_stokes.f90', lines: 477, complete: 75, functions: ['ns_init', 'ns_solve_velocity', 'ns_solve_pressure', 'ns_apply_buoyancy'], deps: ['types_module', 'precision_module', 'constants_module'], description: 'Incompressible Navier-Stokes solver' },
+                { name: 'hifi_solver_module', file: 'hifi_solver_module.f90', lines: 575, complete: 85, functions: ['hifi_init', 'hifi_run_coupled', 'hifi_check_convergence'], deps: ['types_module', 'bte_monte_carlo', 'navier_stokes'], description: 'High-fidelity solver orchestration' },
+                { name: 'mefi_solver_module', file: 'mefi_solver_module.f90', lines: 795, complete: 70, functions: ['mefi_init', 'mefi_run', 'mefi_adaptive_refinement'], deps: ['types_module', 'bte_diffusion'], description: 'Medium-fidelity solver' },
+                { name: 'lofi_solver_module', file: 'lofi_solver_module.f90', lines: 70, complete: 65, functions: ['lofi_init', 'lofi_run'], deps: ['types_module', 'bte_diffusion'], description: 'Low-fidelity fast solver' }
+            ],
+            material: [
+                { name: 'silicon_module', file: 'silicon_module.f90', lines: 392, complete: 80, functions: ['silicon_refractive_index', 'silicon_absorption_coefficient', 'silicon_thermal_conductivity', 'silicon_phonon_scattering_rate'], deps: ['precision_module', 'constants_module'], description: 'Silicon material properties for PV' },
+                { name: 'optical_module', file: 'optical_module.f90', lines: 132, complete: 75, functions: ['optical_fresnel_coefficients', 'optical_beer_lambert', 'optical_snells_law'], deps: ['precision_module', 'constants_module'], description: 'Optical property calculations' },
+                { name: 'thermal_module', file: 'thermal_module.f90', lines: 320, complete: 75, functions: ['thermal_load_database', 'thermal_conductivity_air', 'thermal_convection_coefficient'], deps: ['precision_module', 'constants_module'], description: 'Thermal property database' },
+                { name: 'material_module', file: 'material_module.f90', lines: 56, complete: 80, functions: ['material_init_all', 'material_get_properties'], deps: ['silicon_module', 'optical_module', 'thermal_module'], description: 'High-level material interface' }
+            ],
+            environment: [
+                { name: 'solar_module', file: 'solar_module.f90', lines: 546, complete: 85, functions: ['solar_position', 'solar_extraterrestrial_irradiance', 'solar_am15_spectrum', 'solar_air_mass'], deps: ['precision_module', 'constants_module'], description: 'Solar position and spectral models' },
+                { name: 'atmospheric_module', file: 'atmospheric_module.f90', lines: 100, complete: 75, functions: ['atmos_rayleigh_scattering', 'atmos_optical_depth', 'atmos_transmittance'], deps: ['precision_module', 'constants_module'], description: 'Atmospheric scattering/absorption' },
+                { name: 'weather_module', file: 'weather_module.f90', lines: 61, complete: 70, functions: ['weather_load_data', 'weather_interpolate', 'weather_dewpoint'], deps: ['precision_module'], description: 'Weather data interface' },
+                { name: 'environmental_module', file: 'environmental_module.f90', lines: 50, complete: 75, functions: ['env_init', 'env_get_conditions'], deps: ['solar_module', 'atmospheric_module', 'weather_module'], description: 'Unified environmental conditions' }
+            ],
+            ml: [
+                { name: 'ml_orchestrator_module', file: 'ml_orchestrator_module.f90', lines: 98, complete: 50, functions: ['ml_init', 'ml_select_fidelity', 'ml_update_model'], deps: ['state_feature_module', 'decision_tree_module', 'rl_interface_module'], description: 'ML-driven fidelity selection' },
+                { name: 'state_feature_module', file: 'state_feature_module.f90', lines: 153, complete: 60, functions: ['extract_features', 'feature_temperature_gradient', 'feature_complexity_score'], deps: ['types_module', 'precision_module'], description: 'ML feature extraction' },
+                { name: 'decision_tree_module', file: 'decision_tree_module.f90', lines: 82, complete: 55, functions: ['dt_train', 'dt_predict'], deps: ['precision_module'], description: 'Decision tree classifier' },
+                { name: 'reward_function_module', file: 'reward_function_module.f90', lines: 322, complete: 60, functions: ['reward_compute', 'reward_accuracy_score', 'reward_multiobjective'], deps: ['precision_module', 'constants_module'], description: 'RL reward computation' }
+            ],
+            optimization: [
+                { name: 'pso_module', file: 'pso_module.f90', lines: 310, complete: 80, functions: ['pso_init', 'pso_run', 'pso_update_velocities'], deps: ['precision_module', 'constants_module'], description: 'Particle Swarm Optimization' },
+                { name: 'bayesian_module', file: 'bayesian_module.f90', lines: 555, complete: 60, functions: ['bayes_init', 'bayes_fit_gp', 'bayes_predict', 'bayes_expected_improvement'], deps: ['precision_module', 'constants_module'], description: 'Bayesian optimization with GP' },
+                { name: 'adjoint_module', file: 'adjoint_module.f90', lines: 482, complete: 75, functions: ['adjoint_init', 'adjoint_solve_backward', 'adjoint_compute_sensitivity'], deps: ['types_module', 'precision_module'], description: 'Adjoint-based gradients' },
+                { name: 'optimization_module', file: 'optimization_module.f90', lines: 88, complete: 70, functions: ['opt_init', 'opt_run', 'opt_select_method'], deps: ['pso_module', 'bayesian_module', 'adjoint_module'], description: 'High-level optimization interface' }
+            ],
+            command: [
+                { name: 'sim1_command_module', file: 'sim1_command_module.f90', lines: 494, complete: 85, functions: ['sim1_init', 'sim1_run', 'sim1_run_with_optimization'], deps: ['hifi_solver_module', 'adjoint_module', 'timer_module'], description: 'Sim1: Rigorous high-fidelity' },
+                { name: 'sim2_command_module', file: 'sim2_command_module.f90', lines: 609, complete: 70, functions: ['sim2_init', 'sim2_run_adaptive', 'sim2_error_estimation', 'sim2_switch_fidelity'], deps: ['lofi_solver_module', 'hifi_solver_module', 'timer_module'], description: 'Sim2: Adaptive mixed-fidelity' },
+                { name: 'sim3_command_module', file: 'sim3_command_module.f90', lines: 651, complete: 65, functions: ['sim3_init', 'sim3_run_cascade', 'sim3_lofi_screening', 'sim3_mefi_refinement'], deps: ['lofi_solver_module', 'mefi_solver_module', 'hifi_solver_module', 'pso_module'], description: 'Sim3: Goldilocks cascade' },
+                { name: 'sim4_command_module', file: 'sim4_command_module.f90', lines: 1057, complete: 50, functions: ['sim4_init', 'sim4_run_with_learning', 'sim4_select_fidelity_ml', 'sim4_update_ml_model'], deps: ['lofi_solver_module', 'mefi_solver_module', 'hifi_solver_module', 'ml_orchestrator_module'], description: 'Sim4: ML-orchestrated' }
+            ],
+            python: [
+                { name: 'simv1_wrapper.py', file: 'simv1_wrapper.py', lines: 346, complete: 85, functions: ['SimV1Config', 'SimV1Results', 'SimV1Runner'], deps: ['sim1_command_module'], description: 'Python interface to Sim1' },
+                { name: 'simv2_wrapper.py', file: 'simv2_wrapper.py', lines: 493, complete: 80, functions: ['SimV2Config', 'SimV2Results', 'SimV2Runner'], deps: ['sim2_command_module'], description: 'Python interface to Sim2' },
+                { name: 'simv4_wrapper.py', file: 'simv4_wrapper.py', lines: 488, complete: 70, functions: ['SimV4Config', 'SimV4Results', 'SimV4Runner'], deps: ['sim4_command_module'], description: 'Python interface to Sim4' },
+                { name: 'data_acquisition.py', file: 'data_acquisition.py', lines: 180, complete: 75, functions: ['DataAcquisitionManager', 'fetch_sandia_pv_data', 'fetch_nrel_tmy_data'], deps: [], description: 'Download and manage external data' }
+            ]
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Render modules
+        function renderModules(filter = 'all', search = '') {
+            const container = document.getElementById('module-list');
+            container.innerHTML = '';
+            
+            Object.entries(modules).forEach(([category, mods]) => {
+                if (filter !== 'all' && filter !== category) return;
+                
+                mods.forEach(mod => {
+                    const searchStr = `${mod.name} ${mod.description} ${mod.functions.join(' ')}`.toLowerCase();
+                    if (search && !searchStr.includes(search.toLowerCase())) return;
+                    
+                    const card = document.createElement('div');
+                    card.className = `module-card ${category}`;
+                    
+                    let badge = mod.complete >= 85 ? 'complete' : mod.complete >= 60 ? 'progress' : 'experimental';
+                    let badgeText = mod.complete >= 85 ? 'Complete' : mod.complete >= 60 ? 'In Progress' : 'Experimental';
+                    
+                    card.innerHTML = `
+                        <div class="module-title">${mod.name}</div>
+                        <div class="module-info">${mod.file}</div>
+                        <div class="module-info">${mod.lines} lines</div>
+                        <div class="module-info">${mod.description}</div>
+                        <span class="badge ${badge}">${badgeText} (${mod.complete}%)</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${mod.complete}%;"></div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', () => showModuleDetails(mod, category));
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // Show module details
+        function showModuleDetails(mod, category) {
+            const modal = document.getElementById('module-modal');
+            const modalBody = document.getElementById('modal-body');
+            
+            let badge = mod.complete >= 85 ? 'complete' : mod.complete >= 60 ? 'progress' : 'experimental';
+            let badgeText = mod.complete >= 85 ? 'Complete' : mod.complete >= 60 ? 'In Progress' : 'Experimental';
+            
+            modalBody.innerHTML = `
+                <h2 style="color: #667eea; margin-bottom: 20px;">${mod.name}</h2>
+                <div style="margin-bottom: 20px;">
+                    <span class="badge ${badge}">${badgeText}</span>
+                    <span class="badge" style="background: #e0e0e0; color: #333;">${category}</span>
+                </div>
+                
+                <div class="progress-bar" style="margin-bottom: 30px;">
+                    <div class="progress-fill" style="width: ${mod.complete}%;"></div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <strong>File:</strong> <code>${mod.file}</code><br>
+                    <strong>Lines of Code:</strong> ${mod.lines}<br>
+                    <strong>Completion:</strong> ${mod.complete}%
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong style="font-size: 1.1em;">Description</strong>
+                    <p style="margin-top: 10px; color: #666;">${mod.description}</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong style="font-size: 1.1em;">Key Functions/Features</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${mod.functions.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                ${mod.deps.length > 0 ? `
+                <div>
+                    <strong style="font-size: 1.1em;">Dependencies</strong>
+                    <ul class="dependency-list" style="margin-top: 10px;">
+                        ${mod.deps.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : '<p style="color: #666;"><em>No dependencies (foundation module)</em></p>'}
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            document.getElementById('module-modal').classList.remove('active');
+        });
+
+        document.getElementById('module-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'module-modal') {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderModules(btn.dataset.filter, document.getElementById('module-search').value);
+            });
+        });
+
+        // Search
+        document.getElementById('module-search').addEventListener('input', (e) => {
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            renderModules(activeFilter, e.target.value);
+        });
+
+        // Initial render
+        renderModules();
+    </script>
+</body>
+</html>
