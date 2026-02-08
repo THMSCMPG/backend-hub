@@ -31,7 +31,7 @@
     font-size: 0.75rem;
     flex-shrink: 0;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-    cursor: default;
+    cursor: pointer;
     opacity: 1;
     transform: translateX(0);
     transition: opacity 0.25s ease, transform 0.3s ease;
