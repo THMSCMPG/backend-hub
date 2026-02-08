@@ -1,0 +1,145 @@
+/* ============================================
+   SIDE-NAV — Fixed section navigation
+   Scoped entirely under .side-nav to avoid
+   conflicts with .sidebar, .sidebar-mobile,
+   .navbar, or any other existing components.
+   ============================================ */
+
+/* ---------- Container ---------- */
+.side-nav {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 999;              /* Below navbar (1000) so it never covers it */
+    display: flex;
+    align-items: flex-start;
+    pointer-events: none;      /* Allow clicks to pass through the gap */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- Link panel ---------- */
+.side-nav__links {
+    pointer-events: auto;
+    background: var(--dark-muted, #1e293b);
+    border-right: 3px solid var(--primary, #10b981);
+    border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+/* ---------- Section heading ---------- */
+.side-nav__heading {
+    display: block;
+    padding: 8px 20px 10px;
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary, #10b981);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+/* ---------- Individual links ---------- */
+.side-nav__link {
+    display: block;
+    padding: 8px 20px;
+    font-size: var(--font-size-sm, 0.85rem);
+    font-weight: 600;
+    color: var(--light, #f8fafc);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s, padding-left 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.side-nav__link:hover {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--primary, #10b981);
+    padding-left: 24px;
+    border-left-color: var(--primary, #10b981);
+}
+
+.side-nav__link--active {
+    background: rgba(16, 185, 129, 0.18);
+    color: var(--primary, #10b981);
+    border-left-color: var(--primary, #10b981);
+}
+
+/* ---------- Toggle button ---------- */
+.side-nav__toggle {
+    pointer-events: auto;
+    align-self: center;
+    background: var(--dark-muted, #1e293b);
+    color: var(--primary, #10b981);
+    border: 2px solid var(--primary, #10b981);
+    border-left: none;
+    border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+    width: 28px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.side-nav__toggle:hover {
+    background: var(--primary, #10b981);
+    color: var(--dark, #0f172a);
+}
+
+/* ---------- Collapsed state ---------- */
+.side-nav--collapsed .side-nav__links {
+    opacity: 0;
+    transform: translateX(-100%);
+    pointer-events: none;
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.side-nav--collapsed .side-nav__toggle i {
+    transform: rotate(180deg);
+}
+
+/* ---------- Responsive ---------- */
+
+/* On screens < 1024px: start collapsed, show only the toggle tab */
+@media (max-width: 1023px) {
+    .side-nav__links {
+        max-height: 60vh;
+    }
+}
+
+/* On screens < 768px (mobile): hide entirely — mobile sidebar handles nav */
+@media (max-width: 768px) {
+    .side-nav {
+        display: none !important;
+    }
+}
+
+/* ---------- Scrollbar styling for the link panel ---------- */
+.side-nav__links::-webkit-scrollbar {
+    width: 4px;
+}
+
+.side-nav__links::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.side-nav__links::-webkit-scrollbar-thumb {
+    background: var(--primary, #10b981);
+    border-radius: 2px;
+}

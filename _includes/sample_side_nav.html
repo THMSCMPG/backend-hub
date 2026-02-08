@@ -1,2 +1,56 @@
-<!--this will be where a side navigation sample exists.
-it will take take links from the _layouts and format them automagically-->
+<!-- Fixed Side Navigation — auto-selects links based on current layout -->
+<nav class="side-nav" id="sideNav" role="navigation" aria-label="Section navigation">
+    <button class="side-nav__toggle" id="sideNavToggle" 
+            aria-label="Toggle section navigation" 
+            aria-expanded="true" 
+            aria-controls="sideNavLinks">
+        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    </button>
+
+    <div class="side-nav__links" id="sideNavLinks">
+        {% if page.layout == 'CircuitNotes' %}
+            <span class="side-nav__heading">
+                <i class="fas fa-microchip" aria-hidden="true"></i> Circuits
+            </span>
+            {% include nav_circuits.html %}
+        {% elsif page.layout == 'AURA-MF' %}
+            <span class="side-nav__heading">
+                <i class="fas fa-sun" aria-hidden="true"></i> AURA-MF
+            </span>
+            {% include nav_mfp.html %}
+        {% endif %}
+    </div>
+</nav>
+
+<script>
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var toggle = document.getElementById('sideNavToggle');
+        var nav    = document.getElementById('sideNav');
+        var links  = document.getElementById('sideNavLinks');
+        if (!toggle || !nav || !links) return;
+
+        // Collapse by default on small screens
+        if (window.innerWidth < 1024) {
+            nav.classList.add('side-nav--collapsed');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        toggle.addEventListener('click', function() {
+            var isCollapsed = nav.classList.toggle('side-nav--collapsed');
+            toggle.setAttribute('aria-expanded', String(!isCollapsed));
+        });
+
+        // Highlight the current page link
+        var currentPath = window.location.pathname.replace(/\/$/, '');
+        var allLinks = links.querySelectorAll('a');
+        allLinks.forEach(function(link) {
+            var linkPath = new URL(link.href).pathname.replace(/\/$/, '');
+            if (linkPath === currentPath) {
+                link.classList.add('side-nav__link--active');
+                link.setAttribute('aria-current', 'page');
+            }
+        });
+    });
+})();
+</script>
