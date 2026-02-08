@@ -1,11 +1,9 @@
 <!-- Fixed Side Navigation — auto-selects links based on current layout -->
 <nav class="side-nav" id="sideNav" role="navigation" aria-label="Section navigation">
-    <button class="side-nav__toggle" id="sideNavToggle" 
-            aria-label="Toggle section navigation" 
-            aria-expanded="true" 
-            aria-controls="sideNavLinks">
-        <i class="fas fa-chevron-left" aria-hidden="true"></i>
-    </button>
+    <!-- Visual tab indicator (slides away on hover) -->
+    <div class="side-nav__tab" aria-hidden="true">
+        <i class="fas fa-chevron-right"></i>
+    </div>
 
     <div class="side-nav__links" id="sideNavLinks">
         {% if page.layout == 'CircuitNotes' %}
@@ -25,21 +23,8 @@
 <script>
 (function() {
     document.addEventListener('DOMContentLoaded', function() {
-        var toggle = document.getElementById('sideNavToggle');
-        var nav    = document.getElementById('sideNav');
-        var links  = document.getElementById('sideNavLinks');
-        if (!toggle || !nav || !links) return;
-
-        // Collapse by default on small screens
-        if (window.innerWidth < 1024) {
-            nav.classList.add('side-nav--collapsed');
-            toggle.setAttribute('aria-expanded', 'false');
-        }
-
-        toggle.addEventListener('click', function() {
-            var isCollapsed = nav.classList.toggle('side-nav--collapsed');
-            toggle.setAttribute('aria-expanded', String(!isCollapsed));
-        });
+        var links = document.getElementById('sideNavLinks');
+        if (!links) return;
 
         // Highlight the current page link
         var currentPath = window.location.pathname.replace(/\/$/, '');

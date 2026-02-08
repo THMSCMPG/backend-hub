@@ -1,10 +1,9 @@
 /* ============================================
    SIDE-NAV — Fixed section navigation
-   Scoped entirely under .side-nav to avoid
-   conflicts with .sidebar, .sidebar-mobile,
-   .navbar, or any other existing components.
+   Hover-to-open. Starts closed with a > tab.
+   Scoped entirely under .side-nav* to avoid
+   conflicts with existing components.
    ============================================ */
-
 
 /* ---------- Container ---------- */
 .side-nav {
@@ -12,16 +11,36 @@
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    z-index: 999;              /* Below navbar (1000) so it never covers it */
+    z-index: 999;
     display: flex;
-    align-items: flex-start;
-    pointer-events: none;      /* Allow clicks to pass through the gap */
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: center;
 }
 
-/* ---------- Link panel ---------- */
+/* ---------- Arrow tab (visible when closed) ---------- */
+.side-nav__tab {
+    background: var(--dark-muted, #1e293b);
+    color: var(--primary, #10b981);
+    border: 2px solid var(--primary, #10b981);
+    border-left: none;
+    border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+    width: 28px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    cursor: default;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.25s ease, transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------- Link panel (hidden by default) ---------- */
 .side-nav__links {
-    pointer-events: auto;
     background: var(--dark-muted, #1e293b);
     border-right: 3px solid var(--primary, #10b981);
     border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
@@ -32,7 +51,26 @@
     max-height: 70vh;
     overflow-y: auto;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
-    transition: opacity 0.3s, transform 0.3s;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ---------- Hover state: show links, hide tab ---------- */
+.side-nav:hover .side-nav__links {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.side-nav:hover .side-nav__tab {
+    opacity: 0;
+    transform: translateX(-100%);
+    pointer-events: none;
 }
 
 /* ---------- Section heading ---------- */
@@ -75,63 +113,21 @@
     border-left-color: var(--primary, #10b981);
 }
 
-/* ---------- Toggle button ---------- */
-.side-nav__toggle {
-    pointer-events: auto;
-    align-self: center;
-    background: var(--dark-muted, #1e293b);
-    color: var(--primary, #10b981);
-    border: 2px solid var(--primary, #10b981);
-    border-left: none;
-    border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
-    width: 28px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.75rem;
-    transition: background 0.2s, transform 0.2s;
-    flex-shrink: 0;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-}
-
-.side-nav__toggle:hover {
-    background: var(--primary, #10b981);
-    color: var(--dark, #0f172a);
-}
-
-/* ---------- Collapsed state ---------- */
-.side-nav--collapsed .side-nav__links {
-    opacity: 0;
-    transform: translateX(-100%);
-    pointer-events: none;
-    width: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-.side-nav--collapsed .side-nav__toggle i {
-    transform: rotate(180deg);
-}
-
 /* ---------- Responsive ---------- */
-
-/* On screens < 1024px: start collapsed, show only the toggle tab */
 @media (max-width: 1023px) {
     .side-nav__links {
         max-height: 60vh;
     }
 }
 
-/* On screens < 768px (mobile): hide entirely — mobile sidebar handles nav */
+/* Mobile — hide entirely; mobile sidebar in nav_main.html handles nav */
 @media (max-width: 768px) {
     .side-nav {
         display: none !important;
     }
 }
 
-/* ---------- Scrollbar styling for the link panel ---------- */
+/* ---------- Scrollbar styling ---------- */
 .side-nav__links::-webkit-scrollbar {
     width: 4px;
 }
