@@ -16,6 +16,21 @@
                 <i class="fas fa-sun" aria-hidden="true"></i> AURA-MF
             </span>
             {% include nav_mfp.html %}
+        {% elsif page.layout == 'PhysNotes' %}
+            <span class="side-nav__heading">
+                <i class="fas fa-atom" aria-hidden="true"></i> Physics
+            </span>
+            {% include nav_physics.html %}
+        {% elsif page.layout == 'MathNotes' %}
+            <span class="side-nav__heading">
+                <i class="fas fa-square-root-alt" aria-hidden="true"></i> Mathematics
+            </span>
+            {% include nav_math.html %}
+        {% elsif page.layout == 'CompSciNotes' %}
+            <span class="side-nav__heading">
+                <i class="fas fa-laptop-code" aria-hidden="true"></i> Computer Science
+            </span>
+            {% include nav_compsci.html %}
         {% endif %}
     </div>
 </nav>
