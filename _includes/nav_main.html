@@ -1,19 +1,22 @@
-<!-- Mobile Sidebar Toggle Button -->
-<button class="menu-btn" onclick="toggleSidebar()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mySidebar">
-    MENU &#9662;
-</button>
+
 
 <!-- Mobile Sidebar -->
 <div id="mobileSidebar" class="menu-btn" role="navigation" aria-label="Mobile navigation" aria-hidden="true">
     <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" aria-label="Close navigation menu">&times;</a>
     <!-- Hardcoded Main Navigation for Mobile -->
     <li class="dropdown">
-        <a href="https://thmscmpg.github.io/index.html">Home</a>
-        <a href="https://thmscmpg.github.io/projects">Research</a>
-        <a href="https://thmscmpg.github.io/reports">LabReports</a>
-        <a href="https://thmscmpg.github.io/portfolio/Campagna_CV_2025.pdf" target="_blank" rel="noopener noreferrer">CV</a>
-        <a href="https://thmscmpg.github.io/CircuitNotes/index.html" role="menuitem">CircuitNotes</a>
-        <a href="https://thmscmpg.github.io/AURA-MF/index.html" role="menuitem">AURA-MF</a>
+        <!-- Mobile Sidebar Toggle Button -->
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mySidebar">
+             <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-content" role="menu" aria-label="Documentation links">
+            <a href="https://thmscmpg.github.io/index.html">Home</a>
+            <a href="https://thmscmpg.github.io/projects">Research</a>
+            <a href="https://thmscmpg.github.io/reports">LabReports</a>
+            <a href="https://thmscmpg.github.io/portfolio/Campagna_CV_2025.pdf" target="_blank" rel="noopener noreferrer">CV</a>
+            <a href="https://thmscmpg.github.io/CircuitNotes/index.html" role="menuitem">CircuitNotes</a>
+            <a href="https://thmscmpg.github.io/AURA-MF/index.html" role="menuitem">AURA-MF</a>
+        </div>
     </li>
 </div>
 
