@@ -1,0 +1,159 @@
+/* ===========================================
+   PHYSNOTES PROJECT-SPECIFIC STYLES
+   Only overrides/additions to backend-hub base
+   ============================================ */
+
+/* Page Header */
+.page-header {
+    background: var(--dark-muted);
+    color: white;
+    padding: 0;
+    margin-top: 18px !important;
+    margin-bottom: 20px;
+    border-bottom: 3px solid var(--primary);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.page-header .container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.page-header h1 {
+    margin: 0;
+    margin-top: 10px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        padding: 40px 0;
+        font-size: 1.8rem;
+    }
+}
+
+/* Physics-specific content boxes */
+.law-box,
+.principle-box {
+    background: #e8f4f8;
+    padding: 20px;
+    border-left: 4px solid var(--info);
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.derivation-box {
+    background: #fef5e7;
+    padding: 20px;
+    border-left: 4px solid var(--accent);
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    border-radius: 0 8px 8px 0;
+    overflow-x: auto;
+}
+
+.experiment-box {
+    background: #d5f4e6;
+    padding: 20px;
+    border-left: 4px solid var(--primary);
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.formula-box,
+.equation-box {
+    background: #fff9e6;
+    padding: 20px;
+    border-left: 4px solid var(--accent);
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.application-box {
+    background: #f0e6ff;
+    padding: 20px;
+    border-left: 4px solid #9333ea;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.warning-box,
+.misconception-box {
+    background: #ffe6e6;
+    padding: 20px;
+    border-left: 4px solid var(--warning);
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+/* Diagram box for physics diagrams */
+.diagram-box {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+    white-space: pre;
+    font-size: 14px;
+    margin: 20px 0;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--dark-muted);
+    color: #94a3b8;
+    margin-top: 60px;
+    border-top: 3px solid var(--primary);
+}
+
+.footer p {
+    margin-bottom: 4px;
+    color: inherit;
+}
+
+.footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+/* Content Area */
+.content-area {
+    margin-bottom: 60px;
+}
+
+.content-area h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 10px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.content-area h2 {
+    color: #34495e;
+    margin-top: 40px;
+    background: #ecf0f1;
+    padding: 15px;
+    border-left: 5px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+}
+
+.content-area h3 {
+    color: #16a085;
+    margin-top: 30px;
+}
