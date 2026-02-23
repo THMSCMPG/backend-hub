@@ -431,27 +431,27 @@
         <header>
             <h1>🌟 AURA-MFP Architecture Explorer</h1>
             <div class="subtitle">Atmosphere-Unified Radiation Assessment with Multi-Fidelity for Photovoltaics</div>
-            <div class="subtitle">Version 1.0.0-beta | Beta Production</div>
+            <div class="subtitle">Beta v2.0 | February 2026 | Confidential Working Document</div>
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">52</div>
-                    <div class="stat-label">Total Files</div>
+                    <div class="stat-value">101</div>
+                    <div class="stat-label">Total Source Files</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">44</div>
+                    <div class="stat-value">73</div>
                     <div class="stat-label">Fortran Modules</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">8</div>
-                    <div class="stat-label">Python Files</div>
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">Python Modules</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">~16K</div>
+                    <div class="stat-value">55.6K</div>
                     <div class="stat-label">Lines of Code</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">75%</div>
+                    <div class="stat-value">87%</div>
                     <div class="stat-label">Overall Progress</div>
                 </div>
             </div>
@@ -470,31 +470,19 @@
                 <h2>Layered Architecture</h2>
                 <div class="layer-section">
                     <div class="layer-box" style="border-color: #004d40; background: rgba(0, 77, 64, 0.05);">
-                        Layer 7: Python API (simv1-4_wrapper.py)
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
-                        Layer 6: Simulation Commands (sim1-4_command_module)
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #880e4f; background: rgba(136, 14, 79, 0.05);">
-                        Layer 5a: ML & Optimization | Layer 5b: Environment Models
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #e65100; background: rgba(230, 81, 0, 0.05);">
-                        Layer 4: Physics Solvers (BTE, Navier-Stokes)
-                    </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #4a148c; background: rgba(74, 20, 140, 0.05);">
-                        Layer 3: Material Models (silicon, optical, thermal)
+                        Layer 4 (Top): Rust GUI (bin/aura_mfp · egui/eframe) — egui native desktop, live CSV plots, terminal, run_config.json reader
                     </div>
                     <div class="arrow-down">↓</div>
                     <div class="layer-box" style="border-color: #37474f; background: rgba(55, 71, 79, 0.05);">
-                        Layer 2: Utilities (I/O, timers, validation)
+                        Layer 4 (Bridge): C Interpreter (aura_interp.c / .h) — fork/exec process spawning, ring-buffer stdout capture, JSON config serialisation
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
+                        Layer 3: Python Orchestration (run_sim.py + simv1–4_wrapper.py) — Perez POA, Fresnel IAM, Faiman thermal, GP/PSO/RL surrogate management
                     </div>
                     <div class="arrow-down">↓</div>
                     <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
-                        Layer 1: Core Infrastructure (precision, types, data)
+                        Layer 1 (Bottom): Fortran 2018 Physics Kernel (bin/aura_mf) — BTE MC, Crank-Nicolson 3D heat, Navier-Stokes, PSO, co-Kriging BO, Q-learning RL, adjoint
                     </div>
                 </div>
             </div>
@@ -513,6 +501,7 @@
                     <button class="filter-btn" data-filter="ml">ML</button>
                     <button class="filter-btn" data-filter="optimization">Optimization</button>
                     <button class="filter-btn" data-filter="command">Commands</button>
+                    <button class="filter-btn" data-filter="utility">Utilities</button>
                     <button class="filter-btn" data-filter="python">Python</button>
                 </div>
 
@@ -526,11 +515,11 @@
                     <div class="layer-header">🔝 Most Depended-On Modules</div>
                     <div style="background: white; padding: 20px; border-radius: 10px;">
                         <ol style="padding-left: 20px; line-height: 2;">
-                            <li><strong>precision_module</strong> - Used by <span class="highlight">40 modules</span></li>
-                            <li><strong>types_module</strong> - Used by <span class="highlight">35 modules</span></li>
-                            <li><strong>constants_module</strong> - Used by <span class="highlight">28 modules</span></li>
-                            <li><strong>error_module</strong> - Used by <span class="highlight">15 modules</span></li>
-                            <li><strong>silicon_module</strong> - Used by <span class="highlight">8 modules</span></li>
+                            <li><strong>precision_module</strong> - Used by <span class="highlight">all 73 Fortran modules</span> (must compile first)</li>
+                            <li><strong>types_module</strong> - Used by <span class="highlight">~40 modules</span> (all solver and command layers)</li>
+                            <li><strong>constants_module</strong> - Used by <span class="highlight">~28 modules</span></li>
+                            <li><strong>error_module</strong> - Used by <span class="highlight">~15 modules</span></li>
+                            <li><strong>silicon_module</strong> - Used by <span class="highlight">~8 modules</span> (BTE MC, optical, material)</li>
                         </ol>
                     </div>
                 </div>
@@ -538,23 +527,28 @@
                 <div class="layer-section">
                     <div class="layer-header">🔄 Longest Dependency Chains</div>
                     <div style="background: white; padding: 20px; border-radius: 10px;">
-                        <p style="margin-bottom: 15px;"><strong>Chain 1 (9 levels):</strong></p>
+                        <p style="margin-bottom: 15px;"><strong>Chain 1 (deepest — SimV4 RL path):</strong></p>
                         <code style="display: block; padding: 15px; background: #f8f9fa; border-radius: 5px; overflow-x: auto;">
-                            main.f90 → sim4_command → ml_orchestrator → state_features → types → precision
+                            main.f90 → sim4_command → ml_orchestrator → rl_interface → state_feature_module → types_module → precision_module
                         </code>
                         
-                        <p style="margin: 20px 0 15px;"><strong>Chain 2 (8 levels):</strong></p>
+                        <p style="margin: 20px 0 15px;"><strong>Chain 2 (SimV1 HiFi path):</strong></p>
                         <code style="display: block; padding: 15px; background: #f8f9fa; border-radius: 5px; overflow-x: auto;">
-                            main.f90 → sim1_command → hifi_solver → bte_monte_carlo → silicon → constants → precision
+                            main.f90 → sim1_command → hifi_solver → bte_monte_carlo → silicon_module → constants_module → precision_module
+                        </code>
+
+                        <p style="margin: 20px 0 15px;"><strong>Chain 3 (Python → Fortran → Physics):</strong></p>
+                        <code style="display: block; padding: 15px; background: #f8f9fa; border-radius: 5px; overflow-x: auto;">
+                            simv3_wrapper.py → run_sim.py → [subprocess] → sim3_command → bayesian_module → lofi_solver → precision_module
                         </code>
                     </div>
                 </div>
 
                 <div class="layer-section">
-                    <div class="layer-header">📊 Dependency Levels</div>
+                    <div class="layer-header">📊 Fortran Compilation Order (Dependency Levels)</div>
                     <div style="background: white; padding: 20px; border-radius: 10px;">
                         <div style="margin-bottom: 15px;">
-                            <strong>Level 0 (Foundation):</strong>
+                            <strong>Level 0 — Foundation (compile first):</strong>
                             <p style="color: #666; margin-top: 5px;">precision_module</p>
                         </div>
                         <div style="margin-bottom: 15px;">
@@ -566,12 +560,24 @@
                             <p style="color: #666; margin-top: 5px;">types_module, timer_module, validation_module</p>
                         </div>
                         <div style="margin-bottom: 15px;">
-                            <strong>Level 3-5:</strong>
-                            <p style="color: #666; margin-top: 5px;">Material models, Environment models, Solvers, ML modules</p>
+                            <strong>Level 3:</strong>
+                            <p style="color: #666; margin-top: 5px;">data_module, tuning_module, linear_solvers, silicon_module, optical_module, thermal_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 4:</strong>
+                            <p style="color: #666; margin-top: 5px;">material_module, optical_properties_module, solar_module, atmospheric_module, weather_module, bte_diffusion, bte_monte_carlo, boundary_conditions_module, adaptive_timestep_module, tensor_surrogate_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 5:</strong>
+                            <p style="color: #666; margin-top: 5px;">environmental_module, climate_zone_module, weather_data_module, surface_radiation_module, air_layer_module, implicit_heat_solver_module, lofi_solver_module, adjoint_module, mcmc_sampler_module, acquisition_module, state_feature_module, reward_function_module, decision_tree_module</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Level 6:</strong>
+                            <p style="color: #666; margin-top: 5px;">weather_driver_module, mefi_solver_module, solver_selection_module, unified_heat_solver_module, conjugate_ht, navier_stokes, pso_module, bayesian_module, adjoint_gradient_check_module, rl_interface_module, fidelity_manager_module, io_module, sim_utils_module, cleanup_utilities</p>
                         </div>
                         <div>
-                            <strong>Level 6-8:</strong>
-                            <p style="color: #666; margin-top: 5px;">High-level solvers, Simulation commands, Python wrappers</p>
+                            <strong>Level 7–8 — Top layer (compile last):</strong>
+                            <p style="color: #666; margin-top: 5px;">hifi_solver_module, simv2_pso_fitness_module, optimization_module, ml_orchestrator_module, timestep_adjustment → then sim1/2/3/4_command_module → main.f90</p>
                         </div>
                     </div>
                 </div>
@@ -582,47 +588,54 @@
                 
                 <div class="timeline">
                     <div class="timeline-item">
-                        <div class="timeline-title">✅ Completed</div>
+                        <div class="timeline-title">✅ Completed (verified in v2.0 codebase)</div>
                         <div class="timeline-content">
                             <ul style="list-style: none; padding: 0;">
-                                <li>✓ Core infrastructure (types, precision, constants)</li>
-                                <li>✓ Physics solvers (BTE MC, basic NS)</li>
-                                <li>✓ Material models (silicon properties)</li>
-                                <li>✓ Solar position algorithms</li>
-                                <li>✓ Sim1 high-fidelity command</li>
-                                <li>✓ Sim2 adaptive fidelity</li>
-                                <li>✓ PSO optimization</li>
-                                <li>✓ Python wrappers for Sim1, Sim2, Sim4</li>
-                                <li>✓ Basic test suite</li>
+                                <li>✓ Core infrastructure: precision/constants/types/error/data/tuning modules (6 modules, 2,748 LOC)</li>
+                                <li>✓ All physics solvers: BTE MC + BTE diffusion + CN heat + Navier-Stokes + ADI + BC + lofi/mefi/hifi (13 modules, 7,179 LOC)</li>
+                                <li>✓ Full material stack: silicon + optical + thermal + material modules (5 modules, 2,573 LOC)</li>
+                                <li>✓ Complete environment layer: NREL SPA solar, Bird 1984 spectral, atmospheric, weather, AR(1)+Fourier climate driver (9 modules, 6,642 LOC)</li>
+                                <li>✓ All optimisation algorithms: PSO (Clerc), co-Kriging GP (Kennedy-O'Hagan), MCMC (Metropolis-Hastings), adjoint, EI/UCB/PI/PIAF acquisition (9 modules)</li>
+                                <li>✓ RL components: state features, reward function, decision tree fallback, ml_orchestrator (4 of 5 ML modules complete)</li>
+                                <li>✓ Rust egui GUI (bin/aura_mfp): live CSV plots, terminal, params tab, config persistence</li>
+                                <li>✓ C interpreter bridge (aura_interp.c): fork/exec, ring-buffer stdout, JSON config</li>
+                                <li>✓ SimV1 high-fidelity runner: BTE MC + CN heat + NS + adjoint sensitivity</li>
+                                <li>✓ SimV2 multi-fidelity + PSO: LF/MF/HF alternating + Clerc constriction + tensor surrogate</li>
+                                <li>✓ SimV3 Bayesian BO: co-Kriging GP + EI/UCB/PI/PIAF + --fidelity flag (Gap 2 resolved)</li>
+                                <li>✓ Python physics engine (pv_physics_engine.py): Perez POA, Fresnel IAM, Faiman thermal, SAPM, M_spectral</li>
+                                <li>✓ Python wrappers for SimV1/2/3/4, weather bridge, bayesian analysis, build manager</li>
+                                <li>✓ data_acquisition.py wired to build_manager.py prepare-data target (Gap 5 resolved)</li>
+                                <li>✓ Makefile + CMakeLists.txt build system (494 LOC, correct dependency order)</li>
+                                <li>✓ 3 test files written (839 combined LOC) — test_pv_physics_engine, test_simv2_wrapper, test_tuning_module_consistency</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="timeline-item">
-                        <div class="timeline-title">⚠️ In Progress</div>
+                        <div class="timeline-title">⚠️ In Progress — Open Gaps</div>
                         <div class="timeline-content">
                             <ul style="list-style: none; padding: 0;">
-                                <li>⚙️ BTE diffusion validation</li>
-                                <li>⚙️ Navier-Stokes turbulence models</li>
-                                <li>⚙️ Bayesian optimization (GP fitting)</li>
-                                <li>⚙️ Sim3 cascade logic</li>
-                                <li>⚙️ Sim4 RL training</li>
-                                <li>⚙️ Medium-fidelity solver refinement</li>
+                                <li>⚙️ <strong>Gap 1 (Critical ~16h):</strong> Test suite not wired — conftest.py, pytest.ini missing; test_weather_bridge.py in wrong directory; build_manager.py --test does not invoke pytest</li>
+                                <li>⚙️ <strong>Gap 3 (~3h):</strong> M_spectral not propagated to Fortran — hifi_solver_module hardcodes 1.0; ~5% photon energy error under non-STC atmosphere</li>
+                                <li>⚙️ <strong>Gap 4 (~3h):</strong> Adjoint gradient check bypassed — adjoint_gradient_check_module.f90 is complete but call site in sim1_command_module.f90 is commented out (missing forward_eval function pointer)</li>
+                                <li>⚙️ <strong>Gap 6 (~16–32h, design decision):</strong> SimV4 dual RL architecture — Python Q-table (SAPM, 128 states, 0.1ms/eval) and Fortran Q-table (HiFi, ~50s/eval) are completely separate and never communicate</li>
+                                <li>⚙️ <strong>T0-A (Blocker):</strong> data/ directory entirely missing — data/si_nk_table.dat absence causes hard exit at startup; all 7 required data files need to be generated</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="timeline-item">
-                        <div class="timeline-title">📅 Planned (2026-2027)</div>
+                        <div class="timeline-title">📅 Planned (2026)</div>
                         <div class="timeline-content">
                             <ul style="list-style: none; padding: 0;">
-                                <li>🎯 Multi-GPU support (CUDA/OpenACC)</li>
-                                <li>🎯 MPI parallelization</li>
-                                <li>🎯 NetCDF I/O for large datasets</li>
-                                <li>🎯 Real-time visualization interface</li>
-                                <li>🎯 Web-based dashboard</li>
-                                <li>🎯 Automated hyperparameter tuning</li>
-                                <li>🎯 Experimental validation with hardware</li>
+                                <li>🎯 CI/CD pipeline (GitHub Actions): make test + pytest + cargo test on push</li>
+                                <li>🎯 fidelity_manager_module ↔ simv3_wrapper.get_scaling_factor() sync audit + regression test</li>
+                                <li>🎯 SimV4 RL unification (Option A recommended: Python orchestrates, Fortran executes single-step oracle calls)</li>
+                                <li>🎯 Extend Sandia PVMC validation dataset for SimV1 regression suite</li>
+                                <li>🎯 Multi-GPU support (CUDA/OpenACC for BTE MC photon batches)</li>
+                                <li>🎯 MPI parallelisation for large grid runs</li>
+                                <li>🎯 NetCDF I/O for long time-series datasets</li>
+                                <li>🎯 Experimental validation against physical PV hardware</li>
                             </ul>
                         </div>
                     </div>
@@ -631,25 +644,25 @@
                         <div class="timeline-title">🔬 Research Phase (2027+)</div>
                         <div class="timeline-content">
                             <ul style="list-style: none; padding: 0;">
-                                <li>🔬 Neural network surrogates (physics-informed NNs)</li>
-                                <li>🔬 Transfer learning across PV geometries</li>
-                                <li>🔬 Uncertainty quantification framework</li>
-                                <li>🔬 Multi-objective optimization (Pareto fronts)</li>
-                                <li>🔬 Integration with climate models (WRF, CESM)</li>
+                                <li>🔬 Physics-informed neural network surrogates replacing co-Kriging GP</li>
+                                <li>🔬 Transfer learning across PV geometries and materials</li>
+                                <li>🔬 Full Pareto-front multi-objective optimisation (power + degradation + cost)</li>
+                                <li>🔬 Integration with climate models (WRF, CESM) for long-horizon yield simulation</li>
+                                <li>🔬 Uncertainty quantification framework for publication-grade results</li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
                 <div class="layer-section" style="margin-top: 40px;">
-                    <div class="layer-header">🎯 Development Priorities</div>
+                    <div class="layer-header">🎯 Development Priorities (by blocker impact)</div>
                     <div style="background: white; padding: 20px; border-radius: 10px;">
                         <ol style="padding-left: 20px; line-height: 2.5;">
-                            <li><strong>Complete Sim3 cascade</strong> - Highest ROI for capstone</li>
-                            <li><strong>Validate BTE diffusion</strong> - Critical for accuracy</li>
-                            <li><strong>Finish Bayesian optimization</strong> - Needed for design studies</li>
-                            <li><strong>Add GPU acceleration</strong> - 10-100x speedup for BTE MC</li>
-                            <li><strong>Implement comprehensive UQ</strong> - For publication credibility</li>
+                            <li><strong>Generate missing data/ files (T0-A)</strong> — Hard blocker: optical_module.f90 hard-exits without data/si_nk_table.dat at startup</li>
+                            <li><strong>Wire pytest test suite (Gap 1, ~16h)</strong> — Zero automated coverage currently; create conftest.py + pytest.ini; move test_weather_bridge.py</li>
+                            <li><strong>Propagate M_spectral to Fortran (Gap 3, ~3h)</strong> — ~5% photon energy error under non-STC conditions; add --spectral-mismatch CLI flag to main.f90</li>
+                            <li><strong>Re-activate adjoint gradient check (Gap 4, ~3h)</strong> — Module complete; add simv1_forward_eval() wrapper and procedure pointer in sim1_command_module</li>
+                            <li><strong>Unify SimV4 RL architecture (Gap 6, ~16–32h)</strong> — Design decision required; recommended: Python orchestrates, Fortran executes single-step oracle actions</li>
                         </ol>
                     </div>
                 </div>
@@ -660,86 +673,88 @@
                 
                 <div class="module-grid">
                     <div class="module-card command">
-                        <div class="module-title">Sim1: Rigorous</div>
-                        <div class="module-info">Full physics simulation (BTE MC + Navier-Stokes)</div>
-                        <div class="module-info">Status: <span class="badge complete">85% Complete</span></div>
-                        <div class="module-info">Runtime: 15-45 minutes</div>
-                        <div class="module-info">Use case: Highest accuracy needed</div>
+                        <div class="module-title">SimV1: Full High-Fidelity</div>
+                        <div class="module-info">3D BTE Monte Carlo + Crank-Nicolson heat + Navier-Stokes + adjoint sensitivity</div>
+                        <div class="module-info">Status: <span class="badge progress">90% Complete</span></div>
+                        <div class="module-info">Runtime: 15–45 minutes (grid-dependent)</div>
+                        <div class="module-info">Use case: Highest accuracy; adjoint-guided parameter studies</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 85%;"></div>
+                            <div class="progress-fill" style="width: 90%;"></div>
                         </div>
                         <div style="margin-top: 15px;">
-                            <strong>Planned Features:</strong>
+                            <strong>Implemented:</strong>
                             <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
-                                <li>BTE Monte Carlo (10^6 particles)</li>
-                                <li>Full Navier-Stokes coupling</li>
-                                <li>Conjugate heat transfer</li>
-                                <li>Optional adjoint gradients</li>
-                                <li>Optimization loop support</li>
+                                <li>BTE MC (AM1.5G CDF sampling, Beer-Lambert α=1e5 m⁻¹, Fresnel at all interfaces)</li>
+                                <li>Crank-Nicolson θ=0.5 3D heat (ADI splitting, unconditionally stable)</li>
+                                <li>Navier-Stokes with Boussinesq buoyancy, CFL sub-stepping</li>
+                                <li>Lagrange multiplier adjoint: dJ/d[k_thermal, alpha, h_conv]</li>
+                                <li>Perez POA + Fresnel IAM + Faiman thermal (Python Stage 1)</li>
+                            </ul>
+                            <strong style="color: #e65100;">Open: Gap 3</strong> — M_spectral hardcoded 1.0 (~5% photon energy error); <strong>Gap 4</strong> — adjoint gradient check bypassed at call site
+                        </div>
+                    </div>
+
+                    <div class="module-card command">
+                        <div class="module-title">SimV2: Multi-Fidelity + PSO</div>
+                        <div class="module-info">Alternates LF Beer-Lambert and HiFi BTE MC; Particle Swarm Optimization with CP-ALS surrogate</div>
+                        <div class="module-info">Status: <span class="badge complete">95% Complete</span></div>
+                        <div class="module-info">Runtime: ~5–10× faster than SimV1 for equivalent design search</div>
+                        <div class="module-info">Use case: Panel design optimisation; parameter screening</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%;"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Implemented:</strong>
+                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
+                                <li>Clerc constriction PSO (w=0.729, c1=c2=1.49445, theoretically stable)</li>
+                                <li>LF/MF/HF alternating fidelity with T_corrected blending</li>
+                                <li>CP-ALS tensor surrogate for fitness landscape approximation</li>
+                                <li>PSO fitness: J = w_T·RMSE + w_cost·t_cpu + w_unif·uniformity</li>
+                                <li>Latin Hypercube Sampling for initial Python-side sampling</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="module-card command">
-                        <div class="module-title">Sim2: Adaptive</div>
-                        <div class="module-info">Empirical mixed-fidelity (lo-fi → hi-fi switching)</div>
-                        <div class="module-info">Status: <span class="badge progress">70% Complete</span></div>
-                        <div class="module-info">Runtime: 10-100x faster than Sim1</div>
-                        <div class="module-info">Use case: Parameter screening</div>
+                        <div class="module-title">SimV3: Bayesian Optimisation</div>
+                        <div class="module-info">Kennedy-O'Hagan co-Kriging GP surrogate + EI/UCB/PI/PIAF acquisition; --fidelity override resolved</div>
+                        <div class="module-info">Status: <span class="badge complete">90% Complete</span></div>
+                        <div class="module-info">Runtime: Optimal accuracy/cost; GP_MAX_TRAIN capped at 200 points</div>
+                        <div class="module-info">Use case: Global optimum search with uncertainty quantification</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 70%;"></div>
+                            <div class="progress-fill" style="width: 90%;"></div>
                         </div>
                         <div style="margin-top: 15px;">
-                            <strong>Planned Features:</strong>
+                            <strong>Implemented:</strong>
                             <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
-                                <li>Error-driven fidelity switching</li>
-                                <li>Batch lo-fi screening</li>
-                                <li>Selective hi-fi refinement</li>
-                                <li>Uncertainty quantification</li>
-                                <li>Surrogate model building</li>
+                                <li>Kennedy-O'Hagan co-Kriging: f_HF(x) = ρ·f_LF(x) + δ(x), Cholesky solve</li>
+                                <li>Acquisition: EI (Mockus 1974), UCB (κ=2), PI, PIAF (penalises T_cell > 85°C)</li>
+                                <li>MCMC (Adaptive M-H): R-hat + ESS diagnostics, posterior UQ</li>
+                                <li>--fidelity 0/1/2 CLI flag (Gap 2 resolved)</li>
+                                <li>Writes simv3_gp_diagnostics.csv and simv3_summary.csv</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="module-card command">
-                        <div class="module-title">Sim3: Goldilocks</div>
-                        <div class="module-info">Three-tier cascade (lo → med → hi fidelity)</div>
-                        <div class="module-info">Status: <span class="badge progress">65% Complete</span></div>
-                        <div class="module-info">Runtime: Optimal accuracy/cost ratio</div>
-                        <div class="module-info">Use case: Design optimization</div>
+                        <div class="module-title">SimV4: RL-Orchestrated</div>
+                        <div class="module-info">Q-learning agent allocates compute budget across LF/HF evaluations — DUAL ARCHITECTURE UNRESOLVED</div>
+                        <div class="module-info">Status: <span class="badge experimental">60% Complete</span></div>
+                        <div class="module-info">Runtime: Adaptive (learns optimal budget allocation policy)</div>
+                        <div class="module-info">Use case: Research / autonomous multi-fidelity exploration</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 65%;"></div>
+                            <div class="progress-fill" style="width: 60%;"></div>
                         </div>
                         <div style="margin-top: 15px;">
-                            <strong>Planned Features:</strong>
+                            <strong>Implemented (partial):</strong>
                             <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
-                                <li>Lo-fi screening (1000s of designs)</li>
-                                <li>Med-fi refinement (top 10%)</li>
-                                <li>Hi-fi validation (top 1%)</li>
-                                <li>Multi-fidelity co-kriging</li>
-                                <li>PSO optimization integration</li>
+                                <li>State features: T gradient, rate-of-change, remaining budget, Sobol indices</li>
+                                <li>Reward: r = improvement(Pmp) - cost(action) + physics penalty (Ng 1999 shaping)</li>
+                                <li>Decision tree fallback policy (sigma_frac/R2/n_HF heuristics)</li>
+                                <li>Python: ε-greedy Q-table over SAPM surrogate (128 states, ~0.1ms/eval)</li>
+                                <li>Fortran: separate Q-table over HiFi solver (~50s/eval, different state space)</li>
                             </ul>
-                        </div>
-                    </div>
-
-                    <div class="module-card command">
-                        <div class="module-title">Sim4: ML-Orchestrated</div>
-                        <div class="module-info">Intelligent fidelity selection via reinforcement learning</div>
-                        <div class="module-info">Status: <span class="badge experimental">50% Complete</span></div>
-                        <div class="module-info">Runtime: Adaptive (learns optimal strategy)</div>
-                        <div class="module-info">Use case: Research/exploration</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 50%;"></div>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>Planned Features:</strong>
-                            <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.9em;">
-                                <li>State feature extraction</li>
-                                <li>Q-learning fidelity policy</li>
-                                <li>Decision tree fallback</li>
-                                <li>Reward-based learning</li>
-                                <li>ε-greedy exploration</li>
-                            </ul>
+                            <strong style="color: #e65100;">Open: Gap 6</strong> — Two independent Q-tables that never communicate. Must unify (recommended: Python orchestrates, Fortran as single-step oracle).
                         </div>
                     </div>
                 </div>
@@ -765,58 +780,94 @@
             }
         });
 
-        // Module data
+        // Module data — verified against Archive.zip source + Developer Handbook + Analysis Report (Feb 2026)
         const modules = {
             core: [
-                { name: 'precision_module', file: 'precision_module.f90', lines: 80, complete: 100, functions: ['sp', 'dp', 'qp precision kinds'], deps: [], description: 'Defines numerical precision standards for entire system' },
-                { name: 'constants_module', file: 'constants_module.f90', lines: 306, complete: 95, functions: ['Physical constants', 'Unit conversions', 'celsius_to_kelvin', 'watts_to_photon_flux'], deps: ['precision_module'], description: 'Physical constants and conversion functions' },
-                { name: 'types_module', file: 'types_module.f90', lines: 450, complete: 95, functions: ['SimulationDomain', 'MaterialProperties', 'AtmosphericState', 'SolarConditions'], deps: ['precision_module'], description: 'Structured data types for system' },
-                { name: 'error_module', file: 'error_module.f90', lines: 231, complete: 90, functions: ['error_fatal', 'error_warning', 'error_check_allocation'], deps: [], description: 'Centralized error handling' },
-                { name: 'data_module', file: 'data_module.f90', lines: 278, complete: 85, functions: ['allocate_simulation_arrays', 'load_atmospheric_lut', 'save_simulation_state'], deps: ['types_module', 'precision_module'], description: 'Global data management' }
+                { name: 'precision_module', file: 'precision_module.f90', lines: 79, complete: 100, functions: ['WP = REAL64 kind parameter', 'I4 = INT32 kind parameter', 'EPSILON_WP tolerance constant'], deps: [], description: 'Defines WP (REAL64) and I4 (INT32) kind parameters used by all 73 modules. Must compile first.' },
+                { name: 'constants_module', file: 'constants_module.f90', lines: 307, complete: 100, functions: ['PI, k_B, sigma_SB, c_light', 'e_charge, h_Planck', 'PV-specific STC constants', 'AM1.5G reference values'], deps: ['precision_module'], description: 'CODATA 2018 physical constants plus PV-specific values. Single source of truth for all physical constants.' },
+                { name: 'error_module', file: 'error_module.f90', lines: 285, complete: 100, functions: ['set_error(code, message, location)', 'clear_error()', 'print_error()', 'IS_ERROR() macro', 'ERR_SUCCESS = 0'], deps: ['precision_module'], description: 'Structured error propagation. error_type holds code, message, and call-site location. Used by all modules.' },
+                { name: 'types_module', file: 'types_module.f90', lines: 564, complete: 100, functions: ['grid_type', 'material_type', 'boundary_condition_type', 'simulation_config_type', 'simv1/2/3/4 config types', 'simv1/2/3/4 result types'], deps: ['precision_module', 'constants_module'], description: 'All Fortran derived types for the simulation framework. Central schema for data passing between layers.' },
+                { name: 'data_module', file: 'data_module.f90', lines: 373, complete: 100, functions: ['Global grid and field arrays: T, u, v, w, q_abs', 'dt_current timestep', 'n_calls_LF / n_calls_MF / n_calls_HF counters', 'n_timesteps_completed'], deps: ['types_module', 'precision_module'], description: 'Global simulation state: grid, field arrays, and performance counters shared across all solvers.' },
+                { name: 'tuning_module', file: 'tuning_module.f90', lines: 1140, complete: 100, functions: ['tuning_config_type (aggregates env/solver/simv1-4 sub-configs)', 'load_default_tuning()', 'validate_tuning()', 'apply_tuning_simv1/2/3/4()', 'print_tuning_report()'], deps: ['types_module', 'precision_module'], description: 'Central parameter repository — the single source of truth for all tunable constants across the entire framework.' }
             ],
             solver: [
-                { name: 'bte_monte_carlo', file: 'bte_monte_carlo.f90', lines: 441, complete: 85, functions: ['bte_mc_init', 'bte_mc_run', 'bte_mc_scatter_phonon'], deps: ['types_module', 'precision_module', 'constants_module', 'silicon_module'], description: 'Stochastic Monte Carlo BTE solver (hi-fi)' },
-                { name: 'bte_diffusion', file: 'bte_diffusion.f90', lines: 106, complete: 70, functions: ['bte_diffusion_solve'], deps: ['types_module', 'precision_module'], description: 'Diffusion approximation of BTE (lo-fi)' },
-                { name: 'navier_stokes', file: 'navier_stokes.f90', lines: 477, complete: 75, functions: ['ns_init', 'ns_solve_velocity', 'ns_solve_pressure', 'ns_apply_buoyancy'], deps: ['types_module', 'precision_module', 'constants_module'], description: 'Incompressible Navier-Stokes solver' },
-                { name: 'hifi_solver_module', file: 'hifi_solver_module.f90', lines: 575, complete: 85, functions: ['hifi_init', 'hifi_run_coupled', 'hifi_check_convergence'], deps: ['types_module', 'bte_monte_carlo', 'navier_stokes'], description: 'High-fidelity solver orchestration' },
-                { name: 'mefi_solver_module', file: 'mefi_solver_module.f90', lines: 795, complete: 70, functions: ['mefi_init', 'mefi_run', 'mefi_adaptive_refinement'], deps: ['types_module', 'bte_diffusion'], description: 'Medium-fidelity solver' },
-                { name: 'lofi_solver_module', file: 'lofi_solver_module.f90', lines: 70, complete: 65, functions: ['lofi_init', 'lofi_run'], deps: ['types_module', 'bte_diffusion'], description: 'Low-fidelity fast solver' }
+                { name: 'linear_solvers', file: 'linear_solvers.f90', lines: 389, complete: 100, functions: ['TDMA tridiagonal solver', 'SOR iterative solver', 'Convergence monitoring'], deps: ['precision_module'], description: 'TDMA and SOR solvers used by all heat equation modules.' },
+                { name: 'bte_diffusion', file: 'bte_diffusion.f90', lines: 137, complete: 100, functions: ['bte_diffusion_solve()', 'Photon diffusion for albedo > 0.8'], deps: ['precision_module', 'types_module'], description: 'Photon diffusion approximation of BTE. Activated in MedFi mode for high-scattering silicon.' },
+                { name: 'bte_monte_carlo', file: 'bte_monte_carlo.f90', lines: 731, complete: 95, functions: ['run_photon_batch()', 'AM1.5G CDF wavelength sampling', 'Beer-Lambert attenuation (alpha=1e5 m⁻¹ for Si visible)', 'Fresnel reflectance at each interface', 'q_absorbed[nx,ny,nz] energy deposition'], deps: ['types_module', 'precision_module', 'constants_module', 'silicon_module'], description: '95% — Monte Carlo Boltzmann Transport. NOTE: hf_state%M_spectral hardcoded 1.0 (Gap 3 — ~5% photon energy error under non-STC atmosphere).' },
+                { name: 'boundary_conditions_module', file: 'boundary_conditions_module.f90', lines: 550, complete: 100, functions: ['apply_thermal_bc()', 'Dirichlet (fixed T)', 'Neumann (zero flux)', 'Robin: h·dz/k ghost cell (dz=60µm)', 'Convective+radiative linearised Stefan-Boltzmann'], deps: ['types_module', 'precision_module'], description: 'All thermal boundary conditions. Ghost cell spacing dz=60µm correctly set.' },
+                { name: 'implicit_heat_solver_module', file: 'implicit_heat_solver_module.f90', lines: 373, complete: 100, functions: ['solve_heat_implicit_cn()', 'Crank-Nicolson theta=0.5', 'ADI x/y/z sweep splitting', 'TDMA tridiagonal calls', 'Robin BCs on all faces'], deps: ['precision_module', 'types_module', 'linear_solvers'], description: 'Crank-Nicolson 3D heat equation. Unconditionally stable for all dt.' },
+                { name: 'conjugate_ht', file: 'conjugate_ht.f90', lines: 71, complete: 100, functions: ['conjugate_heat_transfer() thin wrapper'], deps: ['precision_module', 'types_module'], description: 'Conjugate heat transfer at fluid-solid interface. Used by navier_stokes.f90 for panel surface consistency.' },
+                { name: 'unified_heat_solver_module', file: 'unified_heat_solver_module.f90', lines: 360, complete: 100, functions: ['solve_heat_unified()', 'CFL-based dispatch: CN implicit vs adaptive explicit'], deps: ['implicit_heat_solver_module', 'solver_selection_module'], description: 'Dispatcher: checks CFL and routes to CN implicit or adaptive explicit solver.' },
+                { name: 'solver_selection_module', file: 'solver_selection_module.f90', lines: 300, complete: 100, functions: ['select_solver()', 'CFL analysis: CFL<=0.4 -> explicit OK, CFL>0.4 -> force CN implicit', 'omega_sor recommendation', 'dt adjustment guidance'], deps: ['precision_module', 'types_module'], description: 'Auto-selects solver based on CFL analysis and recommends timestep adjustments.' },
+                { name: 'adaptive_timestep_module', file: 'adaptive_timestep_module.f90', lines: 307, complete: 100, functions: ['adapt_dt()', 'Increase dt when CFL << threshold', 'Decrease when approaching instability boundary'], deps: ['precision_module'], description: 'Dynamic dt adjustment coordinated with solver_selection_module.' },
+                { name: 'lofi_solver_module', file: 'lofi_solver_module.f90', lines: 554, complete: 100, functions: ['solve_lofi_timestep()', 'Beer-Lambert single-pass volumetric heat deposition', '1D heat diffusion', '~100x faster than HiFi'], deps: ['types_module', 'precision_module'], description: 'Low-fidelity fast solver for initial BO sampling and RL cheap evaluations.' },
+                { name: 'mefi_solver_module', file: 'mefi_solver_module.f90', lines: 844, complete: 100, functions: ['solve_mefi_timestep()', 'BTE diffusion (not full MC)', 'Implicit CN heat', 'T_corrected = (1-0.75)*T_lofi + 0.75*T_hifi blending in SimV2'], deps: ['types_module', 'bte_diffusion', 'implicit_heat_solver_module'], description: 'Medium-fidelity solver: BTE diffusion + implicit CN heat. Intermediate accuracy/cost.' },
+                { name: 'hifi_solver_module', file: 'hifi_solver_module.f90', lines: 1397, complete: 90, functions: ['solve_hifi_timestep()', 'BTE MC photon batch', 'CN 3D heat solve', 'Robin BC update', 'NS velocity update', 'write live_data.csv with FLUSH every progress_interval steps'], deps: ['bte_monte_carlo', 'navier_stokes', 'implicit_heat_solver_module', 'boundary_conditions_module'], description: '90% — High-fidelity solver. NOTE: hf_state%M_spectral stuck at 1.0 until Gap 3 resolved.' },
+                { name: 'navier_stokes', file: 'navier_stokes.f90', lines: 2073, complete: 100, functions: ['update_velocities_hifi()', 'CFL<=0.4 sub-stepping enforcement', 'Boussinesq buoyancy: beta*(T-T_ref)*g', 'Incompressible continuity enforcement'], deps: ['types_module', 'precision_module', 'constants_module'], description: 'Incompressible NS with buoyancy. For 300µm Si panels Ra<<1000 so forced convection dominates.' }
             ],
             material: [
-                { name: 'silicon_module', file: 'silicon_module.f90', lines: 392, complete: 80, functions: ['silicon_refractive_index', 'silicon_absorption_coefficient', 'silicon_thermal_conductivity', 'silicon_phonon_scattering_rate'], deps: ['precision_module', 'constants_module'], description: 'Silicon material properties for PV' },
-                { name: 'optical_module', file: 'optical_module.f90', lines: 132, complete: 75, functions: ['optical_fresnel_coefficients', 'optical_beer_lambert', 'optical_snells_law'], deps: ['precision_module', 'constants_module'], description: 'Optical property calculations' },
-                { name: 'thermal_module', file: 'thermal_module.f90', lines: 320, complete: 75, functions: ['thermal_load_database', 'thermal_conductivity_air', 'thermal_convection_coefficient'], deps: ['precision_module', 'constants_module'], description: 'Thermal property database' },
-                { name: 'material_module', file: 'material_module.f90', lines: 56, complete: 80, functions: ['material_init_all', 'material_get_properties'], deps: ['silicon_module', 'optical_module', 'thermal_module'], description: 'High-level material interface' }
+                { name: 'optical_module', file: 'optical_module.f90', lines: 756, complete: 90, functions: ['initialize_optical_module(path)', 'compute_absorption_coefficient(): alpha=4*pi*k/lambda', 'compute_fresnel_reflectance(): R=((n1-n2)^2+k2^2)/((n1+n2)^2+k2^2)', '50-bin wavelength lookup table (0.3–1.2 µm)'], deps: ['precision_module', 'constants_module'], description: '90% — Reads si_nk_table.dat into n/k lookup table. BLOCKER: requires data/si_nk_table.dat (currently MISSING — must be generated).' },
+                { name: 'optical_properties_module', file: 'optical_properties_module.f90', lines: 388, complete: 100, functions: ['Wavelength-indexed n(lambda), k(lambda), alpha(lambda)', 'Interpolation for arbitrary BTE wavelengths', 'n_wavelengths for BTE sampler'], deps: ['precision_module', 'optical_module'], description: 'Higher-level optical property manager with interpolation interface for the BTE MC sampler.' },
+                { name: 'silicon_module', file: 'silicon_module.f90', lines: 441, complete: 100, functions: ['initialize_silicon(T_init=300K, n_wavelengths=100)', 'Varshni bandgap: E_g(T)=E_g0-a*T^2/(T+b)', 'Glassbrenner-Slack k_thermal(T)', 'Glassbrenner rho*cp(T)'], deps: ['precision_module', 'constants_module'], description: 'Temperature-dependent silicon properties. Franta 300K crystalline silicon n/k source data.' },
+                { name: 'thermal_module', file: 'thermal_module.f90', lines: 499, complete: 100, functions: ['k_thermal(T) for Si/glass/EVA', 'cp(T) specific heat capacity per layer', 'rho(T) density per layer'], deps: ['precision_module', 'constants_module'], description: 'Temperature-dependent thermal properties for all PV stack layers (Si, glass, EVA).' },
+                { name: 'material_module', file: 'material_module.f90', lines: 489, complete: 100, functions: ['PV stack: Si (300µm), EVA (450µm), glass (3.2mm)', 'Layer-aware property lookups', 'BC integration for heat solver interfaces'], deps: ['silicon_module', 'optical_module', 'thermal_module'], description: 'Unified multi-layer PV stack material interface. Provides layer-aware property lookups.' }
             ],
             environment: [
-                { name: 'solar_module', file: 'solar_module.f90', lines: 546, complete: 85, functions: ['solar_position', 'solar_extraterrestrial_irradiance', 'solar_am15_spectrum', 'solar_air_mass'], deps: ['precision_module', 'constants_module'], description: 'Solar position and spectral models' },
-                { name: 'atmospheric_module', file: 'atmospheric_module.f90', lines: 100, complete: 75, functions: ['atmos_rayleigh_scattering', 'atmos_optical_depth', 'atmos_transmittance'], deps: ['precision_module', 'constants_module'], description: 'Atmospheric scattering/absorption' },
-                { name: 'weather_module', file: 'weather_module.f90', lines: 61, complete: 70, functions: ['weather_load_data', 'weather_interpolate', 'weather_dewpoint'], deps: ['precision_module'], description: 'Weather data interface' },
-                { name: 'environmental_module', file: 'environmental_module.f90', lines: 50, complete: 75, functions: ['env_init', 'env_get_conditions'], deps: ['solar_module', 'atmospheric_module', 'weather_module'], description: 'Unified environmental conditions' }
+                { name: 'solar_module', file: 'solar_module.f90', lines: 1219, complete: 100, functions: ['compute_solar_position(): NREL SPA (Reda & Andreas 2004, ±0.0003 deg)', 'compute_solar_irradiance(): Bird 1984 spectral model', 'Rayleigh/aerosol/ozone/water corrections', 'compute_dni_dhi(): direct/diffuse decomposition'], deps: ['precision_module', 'constants_module'], description: 'NREL SPA solar geometry + Bird 1984 spectral irradiance model. Research-grade accuracy.' },
+                { name: 'atmospheric_module', file: 'atmospheric_module.f90', lines: 1008, complete: 100, functions: ['Atmospheric transmittance', 'Rayleigh/Mie scattering coefficients', 'Precipitable water', 'Angstrom turbidity exponent'], deps: ['precision_module', 'constants_module'], description: 'Atmospheric transmittance and scattering. Used by solar_module for spectral irradiance corrections.' },
+                { name: 'weather_module', file: 'weather_module.f90', lines: 1133, complete: 100, functions: ['weather_state_type: T_air, RH, P_atm, wind_speed, cloud_fraction', 'CSV time-series reader', 'query_weather_at(t): linear interpolation between records'], deps: ['precision_module'], description: 'Weather state data types, CSV reader, and interpolation interface.' },
+                { name: 'environmental_module', file: 'environmental_module.f90', lines: 907, complete: 100, functions: ['update_environment(t, lat, lon)', 'Combines solar + weather + atmospheric', 'Outputs: G_beam, G_diffuse, T_sky, h_conv'], deps: ['solar_module', 'atmospheric_module', 'weather_module'], description: 'Top-level environment coordinator. Provides G_beam, G_diffuse, T_sky, h_conv per timestep.' },
+                { name: 'climate_zone_module', file: 'climate_zone_module.f90', lines: 576, complete: 100, functions: ['8-zone classification by latitude band', 'Zone types: Tropical/Subtropical/Arid/Maritime/Continental/Subarctic/Arctic', 'AR(1) daily coefficient phi_day per zone', 'Seasonal amplitude, mean T, mean G_beam'], deps: ['precision_module'], description: 'Climate zone classification. AR(1)+Fourier coefficients burned in from offline R/ML analysis.' },
+                { name: 'weather_driver_module', file: 'weather_driver_module.f90', lines: 556, complete: 100, functions: ['generate_weather_timeseries()', 'Phase 1: Fourier seasonal baseline', 'Phase 2: AR(1) daily anomaly (phi_day from climate_zone_module)', 'Phase 3: Hourly disaggregation'], deps: ['climate_zone_module', 'precision_module'], description: 'Phase 2 weather engine. Activated when t_final > 3600s. Generates synthetic hourly weather.' },
+                { name: 'weather_data_module', file: 'weather_data_module.f90', lines: 377, complete: 100, functions: ['weather_data_series: array of hourly records', 'weather_driver_active flag', 'fill_G_beam_series()', 'query_weather_at(): linear interpolation'], deps: ['weather_module', 'weather_driver_module'], description: 'Runtime weather data storage and per-step query interface.' },
+                { name: 'surface_radiation_module', file: 'surface_radiation_module.f90', lines: 695, complete: 100, functions: ['T_sky: Swinbank correlation', 'Panel-to-sky view factor', 'Grey-body Stefan-Boltzmann (epsilon=0.9 for Si surface)', 'Long-wave radiation exchange'], deps: ['precision_module', 'constants_module'], description: 'Long-wave radiation exchange between panel surface and sky.' },
+                { name: 'air_layer_module', file: 'air_layer_module.f90', lines: 169, complete: 100, functions: ['Thermal resistance from trapped air gap (1–5mm)', 'Natural convection correlation (Nu vs Ra)', 'Panel-to-mounting surface heat path'], deps: ['precision_module', 'constants_module'], description: 'Thin air layer between panel and mounting surface: thermal resistance and natural convection.' }
             ],
             ml: [
-                { name: 'ml_orchestrator_module', file: 'ml_orchestrator_module.f90', lines: 98, complete: 50, functions: ['ml_init', 'ml_select_fidelity', 'ml_update_model'], deps: ['state_feature_module', 'decision_tree_module', 'rl_interface_module'], description: 'ML-driven fidelity selection' },
-                { name: 'state_feature_module', file: 'state_feature_module.f90', lines: 153, complete: 60, functions: ['extract_features', 'feature_temperature_gradient', 'feature_complexity_score'], deps: ['types_module', 'precision_module'], description: 'ML feature extraction' },
-                { name: 'decision_tree_module', file: 'decision_tree_module.f90', lines: 82, complete: 55, functions: ['dt_train', 'dt_predict'], deps: ['precision_module'], description: 'Decision tree classifier' },
-                { name: 'reward_function_module', file: 'reward_function_module.f90', lines: 322, complete: 60, functions: ['reward_compute', 'reward_accuracy_score', 'reward_multiobjective'], deps: ['precision_module', 'constants_module'], description: 'RL reward computation' }
+                { name: 'state_feature_module', file: 'state_feature_module.f90', lines: 727, complete: 100, functions: ['compute_state_features()', 'Temperature gradient feature', 'Rate of change feature', 'Remaining compute budget feature', 'Sobol sensitivity index estimates', 'Iteration count'], deps: ['types_module', 'precision_module'], description: 'Computes RL state features from current simulation state. Feeds ml_orchestrator.' },
+                { name: 'reward_function_module', file: 'reward_function_module.f90', lines: 614, complete: 100, functions: ['compute_reward()', 'r = improvement(Pmp) - cost(action) + r_phys', 'r_phys = -alpha*max(0, delta_Pmp_hf - delta_Pmp_lf)/sigma_lf', 'Ng et al. 1999 reward shaping'], deps: ['precision_module', 'constants_module'], description: 'RL reward computation with physics-consistency penalty for HF/LF discrepancy.' },
+                { name: 'decision_tree_module', file: 'decision_tree_module.f90', lines: 466, complete: 100, functions: ['dt_predict(state)', 'Rule: sigma_frac < 2% => STOP', 'Rule: R2 < 0.85 => REFINE', 'Rule: n_HF < 10 => EVAL_HF', 'Fallback policy when Q-table untrained'], deps: ['precision_module'], description: 'Binary decision tree fallback RL policy. Encodes rule-based heuristics when Q-table is untrained.' },
+                { name: 'rl_interface_module', file: 'rl_interface_module.f90', lines: 308, complete: 65, functions: ['State discretisation', 'Action dispatch: EVAL_LF/EVAL_HF/REFINE/STOP', 'Reward calculation', 'Q-table file I/O (q_table.dat)'], deps: ['state_feature_module', 'reward_function_module', 'decision_tree_module'], description: '65% — SEPARATE Fortran Q-learning implementation from simv4_wrapper.py. Gap 6: two independent Q-tables never communicate. Requires design decision to unify.' },
+                { name: 'ml_orchestrator_module', file: 'ml_orchestrator_module.f90', lines: 326, complete: 100, functions: ['orchestrate_rl_step()', 'Calls state_feature -> reward_function -> rl_interface in sequence', 'Manages Fortran-side RL episode loop'], deps: ['state_feature_module', 'reward_function_module', 'rl_interface_module'], description: 'Coordinates the Fortran-side RL training loop inside sim4_command_module.' }
             ],
             optimization: [
-                { name: 'pso_module', file: 'pso_module.f90', lines: 310, complete: 80, functions: ['pso_init', 'pso_run', 'pso_update_velocities'], deps: ['precision_module', 'constants_module'], description: 'Particle Swarm Optimization' },
-                { name: 'bayesian_module', file: 'bayesian_module.f90', lines: 555, complete: 60, functions: ['bayes_init', 'bayes_fit_gp', 'bayes_predict', 'bayes_expected_improvement'], deps: ['precision_module', 'constants_module'], description: 'Bayesian optimization with GP' },
-                { name: 'adjoint_module', file: 'adjoint_module.f90', lines: 482, complete: 75, functions: ['adjoint_init', 'adjoint_solve_backward', 'adjoint_compute_sensitivity'], deps: ['types_module', 'precision_module'], description: 'Adjoint-based gradients' },
-                { name: 'optimization_module', file: 'optimization_module.f90', lines: 88, complete: 70, functions: ['opt_init', 'opt_run', 'opt_select_method'], deps: ['pso_module', 'bayesian_module', 'adjoint_module'], description: 'High-level optimization interface' }
+                { name: 'timestep_adjustment', file: 'timestep_adjustment.f90', lines: 237, complete: 100, functions: ['adjust_dt()', 'Stability-preserving dt control', 'Minimises total simulation wall time'], deps: ['precision_module'], description: 'Adaptive timestep control coordinated with solver stability constraints.' },
+                { name: 'adjoint_module', file: 'adjoint_module.f90', lines: 794, complete: 100, functions: ['compute_sensitivity_gradient()', 'Backward integration: -rho*cp*d_lambda/dt + k*nabla^2(lambda) - u.nabla(lambda) = dJ/dT', 'dJ/d[k_thermal, alpha, h_convect] analytically'], deps: ['types_module', 'precision_module'], description: 'Lagrange multiplier adjoint sensitivity. Analytically computes gradients — much faster than finite differences.' },
+                { name: 'adjoint_gradient_check_module', file: 'adjoint_gradient_check_module.f90', lines: 571, complete: 85, functions: ['run_gradient_check()', 'Albany Taylor remainder test', 'Verifies O(eps^2) convergence rate', 'gc_result%adjoint_verified flag'], deps: ['adjoint_module', 'precision_module'], description: '85% — Module is complete. Gap 4: call site in sim1_command_module.f90 is bypassed ("requires forward_eval function pointer"). Needs ~3hr fix.' },
+                { name: 'mcmc_sampler_module', file: 'mcmc_sampler_module.f90', lines: 963, complete: 100, functions: ['Adaptive Metropolis-Hastings MCMC', 'R-hat convergence diagnostic', 'ESS (effective sample size)', 'Bayesian posterior sampling over design parameters'], deps: ['precision_module', 'constants_module'], description: 'Adaptive M-H MCMC for Bayesian posterior sampling. Feeds uncertainty quantification in SimV3.' },
+                { name: 'pso_module', file: 'pso_module.f90', lines: 953, complete: 100, functions: ['pso_optimize()', 'Clerc constriction: w=0.729, c1=c2=1.49445 (theoretically stable)', 'Swarm fitness via simv2_pso_fitness_module', 'CP-ALS tensor surrogate approximation'], deps: ['precision_module', 'constants_module', 'tensor_surrogate_module', 'simv2_pso_fitness_module'], description: 'PSO with Clerc constriction factor. Uses tensor surrogate to approximate fitness landscape.' },
+                { name: 'simv2_pso_fitness_module', file: 'simv2_pso_fitness_module.f90', lines: 568, complete: 100, functions: ['fitness_fn(theta)', 'J = w_T*RMSE(T,T_target) + w_cost*t_cpu + w_unif*uniformity_penalty', 'Short LF+HF simulation per design point'], deps: ['lofi_solver_module', 'hifi_solver_module', 'types_module'], description: 'PSO fitness function for SimV2. Evaluates combined LF+HF cost at each design point theta.' },
+                { name: 'bayesian_module', file: 'bayesian_module.f90', lines: 931, complete: 100, functions: ['Kennedy-O\'Hagan co-Kriging: f_HF(x)=rho*f_LF(x)+delta(x)', 'Cholesky K^-1 solve', 'GP hyperparameter marginal likelihood optimisation', 'GP_MAX_TRAIN=200 point cap', 'Mean and variance estimates'], deps: ['precision_module', 'constants_module'], description: 'Kennedy-O\'Hagan multi-fidelity co-Kriging GP. Combines cheap LF and expensive HF evaluations.' },
+                { name: 'acquisition_module', file: 'acquisition_module.f90', lines: 148, complete: 100, functions: ['EI: Expected Improvement (Mockus 1974)', 'UCB: Upper Confidence Bound (kappa=2)', 'PI: Probability of Improvement', 'PIAF: UCB - lambda*C_phys (penalises T_cell > 85°C)'], deps: ['bayesian_module', 'precision_module'], description: 'Acquisition functions for Bayesian optimisation: EI, UCB, PI, and physics-informed PIAF.' },
+                { name: 'optimization_module', file: 'optimization_module.f90', lines: 328, complete: 100, functions: ['Selects algorithm: PSO / BO / MCMC', 'Manages compute budget', 'Tracks best design found', 'Writes optimisation history CSV'], deps: ['pso_module', 'bayesian_module', 'mcmc_sampler_module', 'adjoint_module'], description: 'Top-level optimisation coordinator. Dispatches to PSO, BO, or MCMC based on config.' }
             ],
             command: [
-                { name: 'sim1_command_module', file: 'sim1_command_module.f90', lines: 494, complete: 85, functions: ['sim1_init', 'sim1_run', 'sim1_run_with_optimization'], deps: ['hifi_solver_module', 'adjoint_module', 'timer_module'], description: 'Sim1: Rigorous high-fidelity' },
-                { name: 'sim2_command_module', file: 'sim2_command_module.f90', lines: 609, complete: 70, functions: ['sim2_init', 'sim2_run_adaptive', 'sim2_error_estimation', 'sim2_switch_fidelity'], deps: ['lofi_solver_module', 'hifi_solver_module', 'timer_module'], description: 'Sim2: Adaptive mixed-fidelity' },
-                { name: 'sim3_command_module', file: 'sim3_command_module.f90', lines: 651, complete: 65, functions: ['sim3_init', 'sim3_run_cascade', 'sim3_lofi_screening', 'sim3_mefi_refinement'], deps: ['lofi_solver_module', 'mefi_solver_module', 'hifi_solver_module', 'pso_module'], description: 'Sim3: Goldilocks cascade' },
-                { name: 'sim4_command_module', file: 'sim4_command_module.f90', lines: 1057, complete: 50, functions: ['sim4_init', 'sim4_run_with_learning', 'sim4_select_fidelity_ml', 'sim4_update_ml_model'], deps: ['lofi_solver_module', 'mefi_solver_module', 'hifi_solver_module', 'ml_orchestrator_module'], description: 'Sim4: ML-orchestrated' }
+                { name: 'main', file: 'main.f90', lines: 1273, complete: 100, functions: ['PROGRAM aura_mf entry point', 'Parses all CLI flags: --mode, --grid, --dt, --time, --optical-props, --fidelity, --lat/lon/alt, --location, --pso-particles/iterations, --spectral-mismatch (pending Gap 3)', '--test: runs 8 self-tests'], deps: ['tuning_module', 'types_module', 'error_module', 'all sim command modules'], description: 'Main Fortran entry point. All CLI flags implemented including --fidelity override (Gap 2 resolved).' },
+                { name: 'sim1_command_module', file: 'sim1_command_module.f90', lines: 737, complete: 90, functions: ['execute_simv1()', 'Full BTE MC + CN heat + NS buoyancy', 'Adjoint sensitivity computation', 'Writes simv1_timeseries.csv'], deps: ['hifi_solver_module', 'adjoint_module', 'adjoint_gradient_check_module', 'timer_module'], description: '90% — SimV1 high-fidelity runner. Gap 4: adjoint gradient check call site bypassed (run_gradient_check commented out, ~3hr fix).' },
+                { name: 'sim2_command_module', file: 'sim2_command_module.f90', lines: 938, complete: 95, functions: ['execute_simv2()', 'PSO with Clerc constriction', 'LF+MF+HF alternating fidelity', 'T_corrected blending', 'Writes pso_convergence.csv'], deps: ['lofi_solver_module', 'mefi_solver_module', 'hifi_solver_module', 'pso_module', 'fidelity_manager_module'], description: 'SimV2 multi-fidelity + PSO. Alternates LF Beer-Lambert and HiFi BTE MC solvers.' },
+                { name: 'sim3_command_module', file: 'sim3_command_module.f90', lines: 1389, complete: 90, functions: ['execute_simv3()', 'co-Kriging GP surrogate (Kennedy-O\'Hagan)', 'EI/UCB/PI/PIAF acquisition', 'LF initial sampling then HF refinement', 'Writes simv3_gp_diagnostics.csv'], deps: ['lofi_solver_module', 'hifi_solver_module', 'bayesian_module', 'acquisition_module', 'fidelity_manager_module'], description: '90% — SimV3 Bayesian optimisation. --fidelity flag resolved (Gap 2 fixed). GP_MAX_TRAIN capped at 200 points.' },
+                { name: 'sim4_command_module', file: 'sim4_command_module.f90', lines: 1137, complete: 60, functions: ['execute_simv4()', 'Fortran-side Q-learning over HiFi (~50s/eval)', 'ml_orchestrator RL episode loop', 'Action space: EVAL_LF/EVAL_HF/REFINE/STOP', 'Writes rl_actions.csv'], deps: ['lofi_solver_module', 'hifi_solver_module', 'ml_orchestrator_module', 'rl_interface_module'], description: '60% — SimV4 RL-orchestrated. Gap 6: entirely separate Q-table from Python simv4_wrapper.py (different state space, ~50s vs 0.1ms evals). Requires architecture unification decision.' }
+            ],
+            utility: [
+                { name: 'io_module', file: 'io_module.f90', lines: 581, complete: 100, functions: ['read_input_file()', 'write_live_data(): appends CSV row with FLUSH for real-time Rust GUI polling', 'write_vtk_files(): VTK visualisation export'], deps: ['types_module', 'precision_module', 'error_module'], description: 'File I/O. FLUSH on every live_data.csv write ensures Rust GUI graphs.rs receives real-time updates.' },
+                { name: 'sim_utils_module', file: 'sim_utils_module.f90', lines: 1070, complete: 100, functions: ['Timestep validation', 'Grid interpolation', 'Boundary flux computation', 'Progress reporting', 'Convergence checks'], deps: ['types_module', 'precision_module'], description: 'Shared simulation utilities used by all four sim command modules.' },
+                { name: 'timer_module', file: 'timer_module.f90', lines: 95, complete: 100, functions: ['tic()', 'toc()', 'Wall-clock and CPU-time profiling'], deps: ['precision_module'], description: 'Lightweight profiling. Feeds performance counters in data_module.' },
+                { name: 'validation_module', file: 'validation_module.f90', lines: 75, complete: 100, functions: ['Post-run physics validation', 'T < 500 K check', 'NaN/Inf field check', 'RMSE(T, T_target) < threshold', 'Sets results%validation_passed'], deps: ['precision_module', 'types_module'], description: 'Post-run sanity checks on all output fields.' },
+                { name: 'fidelity_manager_module', file: 'fidelity_manager_module.f90', lines: 744, complete: 95, functions: ['derive_mf_hf_from_lf()', 'LF 1-20 => 1/5 ratio', 'LF 21-50 => 1/8 ratio', 'LF >250 => 1/30 ratio', 'Must stay in sync with simv3_wrapper.get_scaling_factor()'], deps: ['precision_module', 'types_module'], description: '95% — LF/MF/HF solver switching with fidelity ratio table. Must stay in sync with Python simv3_wrapper.py.' },
+                { name: 'tensor_surrogate_module', file: 'tensor_surrogate_module.f90', lines: 828, complete: 100, functions: ['CP-ALS (Canonical Polyadic Alternating Least Squares)', 'Tensor surrogate for PSO fitness landscape', 'Reduces expensive evaluations by interpolation'], deps: ['precision_module', 'constants_module'], description: 'CP-ALS tensor surrogate. Approximates fitness landscape for PSO to reduce expensive HiFi calls.' },
+                { name: 'cleanup_utilities', file: 'cleanup_utilities.f90', lines: 241, complete: 100, functions: ['Memory deallocation', 'File handle cleanup', 'Graceful shutdown on error'], deps: ['types_module', 'error_module'], description: 'Deallocation and graceful shutdown. Called in main.f90 FINALIZE and from error handlers.' }
             ],
             python: [
-                { name: 'simv1_wrapper.py', file: 'simv1_wrapper.py', lines: 346, complete: 85, functions: ['SimV1Config', 'SimV1Results', 'SimV1Runner'], deps: ['sim1_command_module'], description: 'Python interface to Sim1' },
-                { name: 'simv2_wrapper.py', file: 'simv2_wrapper.py', lines: 493, complete: 80, functions: ['SimV2Config', 'SimV2Results', 'SimV2Runner'], deps: ['sim2_command_module'], description: 'Python interface to Sim2' },
-                { name: 'simv4_wrapper.py', file: 'simv4_wrapper.py', lines: 488, complete: 70, functions: ['SimV4Config', 'SimV4Results', 'SimV4Runner'], deps: ['sim4_command_module'], description: 'Python interface to Sim4' },
-                { name: 'data_acquisition.py', file: 'data_acquisition.py', lines: 180, complete: 75, functions: ['DataAcquisitionManager', 'fetch_sandia_pv_data', 'fetch_nrel_tmy_data'], deps: [], description: 'Download and manage external data' }
+                { name: 'run_sim.py', file: 'run_sim.py', lines: 209, complete: 100, functions: ['main entry point', 'Routes --mode to SimV1/2/3/4Runner', 'Reads run_config.json fallback', 'Location presets: sanjose/london/tokyo/sydney/phoenix'], deps: ['simv1_wrapper', 'simv2_wrapper', 'simv3_wrapper', 'simv4_wrapper'], description: 'Python orchestration entry point. Routes simulation modes and manages location presets.' },
+                { name: 'simv1_wrapper.py', file: 'simv1_wrapper.py', lines: 520, complete: 90, functions: ['SimV1Runner', 'Stage 1: Perez POA irradiance, Fresnel IAM, Faiman thermal', 'Stage 2: subprocess to bin/aura_mf --mode simv1', 'Writes fortran_bc.csv (M_spectral in col 3)'], deps: ['pv_physics_engine', 'sim1_command_module'], description: '90% — Gap 3: writes M_spectral to fortran_bc.csv col 3 but Fortran never reads it. ~5% photon energy error. ~3hr fix.' },
+                { name: 'simv2_wrapper.py', file: 'simv2_wrapper.py', lines: 722, complete: 95, functions: ['SimV2Runner', 'LHS initial sampling', 'PSO swarm management', 'Surrogate model interface', 'Results aggregation'], deps: ['pv_physics_engine', 'sim2_command_module'], description: 'Python interface to SimV2 PSO. Manages Latin Hypercube Sampling and surrogate construction.' },
+                { name: 'simv3_wrapper.py', file: 'simv3_wrapper.py', lines: 879, complete: 95, functions: ['SimV3Runner', '_evaluate_at_fidelity(theta, fidelity)', 'get_scaling_factor(): fidelity ratio table (must sync with fidelity_manager_module.f90)', 'GP posterior analysis', 'Writes simv3_summary.csv'], deps: ['pv_physics_engine', 'bayesian_analysis', 'sim3_command_module'], description: 'Python interface to SimV3 Bayesian BO. get_scaling_factor() must stay in sync with Fortran fidelity_manager_module.' },
+                { name: 'simv4_wrapper.py', file: 'simv4_wrapper.py', lines: 671, complete: 65, functions: ['SimV4Runner', 'Python Q-table over SAPM surrogate (~0.1ms/eval)', 'epsilon-greedy: 1.0->0.1 over 500 episodes', '128-state space', 'Saves simv4_qtable.npy'], deps: ['pv_physics_engine', 'sim4_command_module'], description: '65% — Gap 6: Python Q-table (SAPM surrogate, 128 states, 0.1ms/eval) completely separate from Fortran Q-table (HiFi, ~50s/eval). Must be unified.' },
+                { name: 'pv_physics_engine.py', file: 'pv_physics_engine.py', lines: 1966, complete: 100, functions: ['Perez transposition model (POA irradiance)', 'Fresnel IAM reflection losses', 'Faiman thermal model (T_cell)', 'SAPM cell parameters', 'Spectral mismatch factor M_spectral'], deps: [], description: 'Core Python physics module. All four sim wrappers call this for preprocessing. Most physics-critical Python file.' },
+                { name: 'weather_bridge.py', file: 'weather_bridge.py', lines: 533, complete: 100, functions: ['AR(1)+Fourier weather generation (Python-side)', 'Validates against Fortran climate_zone_module coefficients', 'test_weather_bridge.py integration'], deps: ['pv_physics_engine'], description: 'Python-side weather generation bridge. AR(1)+Fourier model matching Fortran weather_driver_module.' },
+                { name: 'bayesian_analysis.py', file: 'bayesian_analysis.py', lines: 1201, complete: 100, functions: ['GP posterior visualisation', 'Sobol sensitivity analysis', 'MCMC trace diagnostics', 'R-hat and ESS reporting', 'Reads simv3_gp_diagnostics.csv and simv4/rl_actions.csv'], deps: ['simv3_wrapper', 'simv4_wrapper'], description: 'Post-processing and visualisation for Bayesian and RL results.' },
+                { name: 'build_manager.py', file: 'build_manager.py', lines: 692, complete: 90, functions: ['build target: make + cmake', 'prepare-data target: calls DataAcquisitionManager', 'python-install target: pip install -e python/', '--test target: bin/aura_mf --test'], deps: ['data_acquisition'], description: '90% — Gap 1: --test step does not yet invoke pytest python/tests/. Test suite exists but not wired. ~4hr fix.' },
+                { name: 'data_acquisition.py', file: 'data_acquisition.py', lines: 579, complete: 95, functions: ['DataAcquisitionManager.run_all()', 'process_silicon_optical(): generates si_nk_table.dat', 'fetch_astm_g173(): AM1.5G spectrum', 'fetch_standard_atmosphere(): JSON LUT', 'Called by build_manager.py prepare-data target (Gap 5 resolved)'], deps: [], description: '95% — Gap 5 resolved. Generates all data/ files. Still requires data/si_nk_table.dat source (manual download from refractiveindex.info).' }
             ]
         };
 
