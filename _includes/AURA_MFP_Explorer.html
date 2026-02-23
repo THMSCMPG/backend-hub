@@ -468,22 +468,194 @@
 
             <div id="arch" class="tab-content">
                 <h2>Layered Architecture</h2>
+                <p style="color: #666; margin-bottom: 20px; font-size: 0.95em;">Click any layer to expand details. The layer numbers (4→3→2→1) follow the handbook's architecture table — see Layer 4 for why the C interpreter carries the highest number.</p>
                 <div class="layer-section">
-                    <div class="layer-box" style="border-color: #004d40; background: rgba(0, 77, 64, 0.05);">
-                        Layer 4 (Top): Rust GUI (bin/aura_mfp · egui/eframe) — egui native desktop, live CSV plots, terminal, run_config.json reader
+
+                    <!-- LAYER 3: Rust GUI -->
+                    <div class="layer-box arch-expandable" data-layer="rust"
+                         style="border-color: #004d40; background: rgba(0, 77, 64, 0.05); cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><strong>Layer 3</strong> — Rust GUI &nbsp;<code style="font-size:0.8em;">bin/aura_mfp</code></span>
+                            <span class="arch-chevron" style="font-size:0.85em; color:#666;">▼ details</span>
+                        </div>
+                        <div style="font-size:0.85em; color:#555; margin-top:4px;">egui/eframe native desktop · live CSV plots · terminal · run_config.json reader</div>
                     </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #37474f; background: rgba(55, 71, 79, 0.05);">
-                        Layer 4 (Bridge): C Interpreter (aura_interp.c / .h) — fork/exec process spawning, ring-buffer stdout capture, JSON config serialisation
+                    <div class="arch-detail" id="detail-rust" style="display:none; border:2px solid #004d40; border-top:none; border-radius:0 0 10px 10px; background:#f0faf8; padding:20px; margin-top:-8px; margin-bottom:0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:16px;">
+                            <div>
+                                <strong style="color:#004d40;">Source Files</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li><code>gui/src/main.rs</code> — entry point</li>
+                                    <li><code>gui/src/app.rs</code> — root egui app loop</li>
+                                    <li><code>gui/src/config.rs</code> — reads/writes run_config.json</li>
+                                    <li><code>gui/src/process_mgr.rs</code> — calls C layer to spawn Python</li>
+                                    <li><code>gui/src/terminal.rs</code> — live stdout terminal widget</li>
+                                    <li><code>gui/src/ffi/mod.rs</code> — FFI bindings to aura_interp.h</li>
+                                    <li><code>gui/src/tabs/params.rs</code> — simulation parameter forms</li>
+                                    <li><code>gui/src/tabs/graphs.rs</code> — real-time CSV plot renderer (notify watcher)</li>
+                                    <li><code>gui/src/tabs/data.rs</code> — results data table</li>
+                                    <li><code>gui/src/tabs/help.rs</code> — inline documentation</li>
+                                    <li><code>gui/build.rs</code> — links aura_interp.c at build time</li>
+                                    <li><code>gui/Cargo.toml</code> — eframe 0.27, notify crate</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong style="color:#004d40;">Runtime Behaviour</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li>User fills params tab → serialised to <code>run_config.json</code></li>
+                                    <li>Click Run → calls <code>aura_spawn_python()</code> (C Layer 4)</li>
+                                    <li>Polls ring buffers from C layer every frame for live stdout</li>
+                                    <li>graphs.rs watches <code>results/live_data.csv</code> via <code>notify</code> crate — re-renders plots on every FLUSH</li>
+                                    <li>Terminal widget streams stdout/stderr in real time</li>
+                                    <li>On completion, data tab reads all results CSVs</li>
+                                </ul>
+                                <strong style="color:#004d40; display:block; margin-top:14px;">Why Layer 3, not Layer 4?</strong>
+                                <p style="font-size:0.9em; margin-top:6px; color:#444;">Rust is the user-facing shell but it depends on the C ABI (Layer 4) to safely perform OS-level process management. Layer 4 provides the stable interface; Layer 3 consumes it.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05);">
-                        Layer 3: Python Orchestration (run_sim.py + simv1–4_wrapper.py) — Perez POA, Fresnel IAM, Faiman thermal, GP/PSO/RL surrogate management
+
+                    <div class="arrow-down" style="margin:6px 0;">Calls Into ↓</div>
+
+                    <!-- LAYER 4: C Interpreter -->
+                    <div class="layer-box arch-expandable" data-layer="c"
+                         style="border-color: #37474f; background: rgba(55, 71, 79, 0.05); cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><strong>Layer 4</strong> — C Interpreter ABI &nbsp;<code style="font-size:0.8em;">aura_interp.c / .h</code></span>
+                            <span class="arch-chevron" style="font-size:0.85em; color:#666;">▼ details</span>
+                        </div>
+                        <div style="font-size:0.85em; color:#555; margin-top:4px;">fork/exec process spawning · ring-buffer stdout capture · JSON config serialisation</div>
                     </div>
-                    <div class="arrow-down">↓</div>
-                    <div class="layer-box" style="border-color: #01579b; background: rgba(1, 87, 155, 0.05);">
-                        Layer 1 (Bottom): Fortran 2018 Physics Kernel (bin/aura_mf) — BTE MC, Crank-Nicolson 3D heat, Navier-Stokes, PSO, co-Kriging BO, Q-learning RL, adjoint
+                    <div class="arch-detail" id="detail-c" style="display:none; border:2px solid #37474f; border-top:none; border-radius:0 0 10px 10px; background:#f5f5f5; padding:20px; margin-top:-8px; margin-bottom:0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:16px;">
+                            <div>
+                                <strong style="color:#37474f;">Source Files</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li><code>c_interp/aura_interp.c</code> — 845 LOC, C11/POSIX</li>
+                                    <li><code>c_interp/aura_interp.h</code> — public ABI header, consumed by Rust FFI</li>
+                                </ul>
+                                <strong style="color:#37474f; display:block; margin-top:14px;">Key API Functions</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li><code>aura_spawn_python(config_path)</code> — fork/exec Python subprocess</li>
+                                    <li><code>aura_read_stdout(buf, len)</code> — drain ring buffer</li>
+                                    <li><code>aura_config_flush(config)</code> — serialise run_config to JSON</li>
+                                    <li><code>aura_process_alive(pid)</code> — poll subprocess status</li>
+                                    <li><code>aura_kill_process(pid)</code> — clean shutdown/cancel</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong style="color:#37474f;">Why Does Layer 4 Have the Highest Number?</strong>
+                                <p style="font-size:0.9em; margin-top:8px; color:#444; line-height:1.6;">
+                                    In the handbook's architecture table, Layer 4 is listed <em>first</em> — at the top — because it is the outermost, user-visible ABI surface. Its number reflects architectural position in the abstraction stack, not call order.
+                                </p>
+                                <p style="font-size:0.9em; margin-top:8px; color:#444; line-height:1.6;">
+                                    The C layer is called <em>by</em> Rust (Layer 3) at runtime, but it is numbered 4 because it is the stable public contract: "The stable ABI that insulates Rust from OS details." Any future GUI technology (Layer 3 replacement) would still use this same C header without changes.
+                                </p>
+                                <p style="font-size:0.9em; margin-top:8px; color:#444; line-height:1.6;">
+                                    Think of it like POSIX system calls — they are a lower-level primitive but form the <em>outermost</em> stable interface in the OS abstraction model.
+                                </p>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="arrow-down" style="margin:6px 0;">↓</div>
+
+                    <!-- LAYER 2: Python -->
+                    <div class="layer-box arch-expandable" data-layer="python"
+                         style="border-color: #b71c1c; background: rgba(183, 28, 28, 0.05); cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><strong>Layer 2</strong> — Python Orchestration &nbsp;<code style="font-size:0.8em;">python/run_sim.py</code></span>
+                            <span class="arch-chevron" style="font-size:0.85em; color:#666;">▼ details</span>
+                        </div>
+                        <div style="font-size:0.85em; color:#555; margin-top:4px;">Perez POA · Fresnel IAM · Faiman thermal · GP/PSO/RL surrogate management · 14,529 LOC across 18 modules</div>
+                    </div>
+                    <div class="arch-detail" id="detail-python" style="display:none; border:2px solid #b71c1c; border-top:none; border-radius:0 0 10px 10px; background:#fff5f5; padding:20px; margin-top:-8px; margin-bottom:0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div>
+                                <strong style="color:#b71c1c;">Key Modules</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li><code>run_sim.py</code> (209) — entry point, routes modes, location presets</li>
+                                    <li><code>pv_physics_engine.py</code> (1,966) — Perez POA, Fresnel IAM, Faiman, SAPM, M_spectral</li>
+                                    <li><code>simv1_wrapper.py</code> (520) — Stage 1 pre-processing → Fortran subprocess</li>
+                                    <li><code>simv2_wrapper.py</code> (722) — LHS sampling, PSO swarm management</li>
+                                    <li><code>simv3_wrapper.py</code> (879) — GP BO, fidelity oracle calls</li>
+                                    <li><code>simv4_wrapper.py</code> (671) — Python Q-table, ε-greedy, SAPM surrogate</li>
+                                    <li><code>weather_bridge.py</code> (533) — AR(1)+Fourier weather generation</li>
+                                    <li><code>bayesian_analysis.py</code> (1,201) — GP posterior viz, Sobol, MCMC diagnostics</li>
+                                    <li><code>build_manager.py</code> (692) — build/prepare-data/test targets</li>
+                                    <li><code>data_acquisition.py</code> (579) — generates all data/ files</li>
+                                    <li><code>live_plotter.py</code> — polls results/live_data.csv every 500ms</li>
+                                    <li><code>optical_properties.py</code> — si_nk_table.dat reader/interpolator</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong style="color:#b71c1c;">Execution Flow</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li>Spawned by C Layer 4 via <code>fork/exec python run_sim.py</code></li>
+                                    <li>Reads <code>run_config.json</code> written by Rust GUI</li>
+                                    <li>SimV1: Stage 1 physics pre-processing (POA, IAM, thermal model) → writes <code>fortran_bc.csv</code> → Stage 2 subprocess to Fortran</li>
+                                    <li>SimV2: LHS sampling → PSO loop → repeated Fortran subprocess calls for fitness evaluation</li>
+                                    <li>SimV3: GP BO → _evaluate_at_fidelity() → Fortran subprocess per acquisition point</li>
+                                    <li>SimV4: ε-greedy Q-learning over SAPM surrogate + HiFi oracle Fortran calls</li>
+                                    <li>All modes: streams stdout back through C ring buffer to Rust terminal</li>
+                                </ul>
+                                <div style="background:#ffe0e0; padding:10px; border-radius:6px; margin-top:10px; font-size:0.85em;">
+                                    ⚠️ <strong>Gap 3:</strong> simv1_wrapper.py writes M_spectral to fortran_bc.csv col 3 but Fortran never reads it (~5% photon energy error).<br>
+                                    ⚠️ <strong>Gap 1:</strong> build_manager.py --test does not invoke pytest; conftest.py missing.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arrow-down" style="margin:6px 0;">↓</div>
+
+                    <!-- LAYER 1: Fortran -->
+                    <div class="layer-box arch-expandable" data-layer="fortran"
+                         style="border-color: #01579b; background: rgba(1, 87, 155, 0.05); cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><strong>Layer 1</strong> — Fortran 2018 Physics Kernel &nbsp;<code style="font-size:0.8em;">bin/aura_mf</code></span>
+                            <span class="arch-chevron" style="font-size:0.85em; color:#666;">▼ details</span>
+                        </div>
+                        <div style="font-size:0.85em; color:#555; margin-top:4px;">BTE MC · Crank-Nicolson 3D heat · Navier-Stokes · PSO · co-Kriging BO · Q-learning RL · adjoint · 37,096 LOC, 73 modules</div>
+                    </div>
+                    <div class="arch-detail" id="detail-fortran" style="display:none; border:2px solid #01579b; border-top:none; border-radius:0 0 10px 10px; background:#f0f4ff; padding:20px; margin-top:-8px; margin-bottom:0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div>
+                                <strong style="color:#01579b;">Module Groups (73 total, 37,096 LOC)</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li><strong>src/core/</strong> (6 modules, 2,748 LOC) — precision, constants, error, types, data, tuning</li>
+                                    <li><strong>src/solvers/</strong> (13 modules, 7,179 LOC) — BTE MC, BTE diffusion, CN heat, ADI, NS, BC, lofi/mefi/hifi</li>
+                                    <li><strong>src/materials/</strong> (5 modules, 2,573 LOC) — silicon, optical, thermal, material stack</li>
+                                    <li><strong>src/environment/</strong> (9 modules, 6,642 LOC) — NREL SPA solar, Bird 1984 spectral, AR(1)+Fourier weather, climate zones</li>
+                                    <li><strong>src/optimization/</strong> (9 modules, 5,730 LOC) — PSO (Clerc), co-Kriging GP, MCMC, adjoint, acquisition functions</li>
+                                    <li><strong>src/machine_learning/</strong> (5 modules, 2,441 LOC) — Q-learning RL, state features, reward, decision tree</li>
+                                    <li><strong>src/utils/</strong> (8 modules, 4,166 LOC) — I/O (FLUSH), fidelity manager, tensor surrogate, timers</li>
+                                    <li><strong>src/commands/</strong> (5 files, 6,581 LOC) — main.f90 + sim1–4_command_module</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong style="color:#01579b;">Execution Model</strong>
+                                <ul style="margin-top:8px; padding-left:18px; font-size:0.9em; line-height:1.9;">
+                                    <li>Invoked via subprocess by Python (Layer 2): <code>./bin/aura_mf --mode simv1 ...</code></li>
+                                    <li>main.f90 parses all CLI flags → builds tuning_config → dispatches to sim1/2/3/4_command_module</li>
+                                    <li>Writes <code>results/live_data.csv</code> with FLUSH every N steps → picked up by Rust graphs.rs via notify watcher</li>
+                                    <li>Writes mode-specific CSVs: simv1_timeseries, pso_convergence, simv3_gp_diagnostics, simv4/rl_actions</li>
+                                    <li>Self-test mode: <code>./bin/aura_mf --test</code> runs 8 physics unit tests, exits 0 on pass</li>
+                                    <li>SimV4: also runs its own Q-learning RL loop (separate from Python — see Gap 6)</li>
+                                </ul>
+                                <strong style="color:#01579b; display:block; margin-top:14px;">Physics Methods</strong>
+                                <ul style="margin-top:6px; padding-left:18px; font-size:0.9em; line-height:1.8;">
+                                    <li>BTE Monte Carlo with AM1.5G CDF wavelength sampling</li>
+                                    <li>Crank-Nicolson θ=0.5 3D heat (unconditionally stable)</li>
+                                    <li>Incompressible Navier-Stokes with Boussinesq buoyancy</li>
+                                    <li>Kennedy-O'Hagan co-Kriging, EI/UCB/PI/PIAF acquisition</li>
+                                    <li>Clerc-constriction PSO + CP-ALS tensor surrogate</li>
+                                    <li>Lagrange multiplier adjoint sensitivity (Albany Taylor test)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -995,5 +1167,31 @@
 
         // Initial render
         renderModules();
+
+        // Set first tab active by default
+        document.querySelector('.tab[data-tab="arch"]').classList.add('active');
+        document.getElementById('arch').classList.add('active');
+
+        // Architecture layer expand/collapse
+        document.querySelectorAll('.arch-expandable').forEach(box => {
+            box.addEventListener('click', () => {
+                const layerId = box.dataset.layer;
+                const detail = document.getElementById('detail-' + layerId);
+                const chevron = box.querySelector('.arch-chevron');
+                const isOpen = detail.style.display !== 'none';
+
+                // Close all others first
+                document.querySelectorAll('.arch-detail').forEach(d => d.style.display = 'none');
+                document.querySelectorAll('.arch-chevron').forEach(c => c.textContent = '▼ details');
+                document.querySelectorAll('.arch-expandable').forEach(b => b.style.borderRadius = '10px');
+
+                if (!isOpen) {
+                    detail.style.display = 'block';
+                    chevron.textContent = '▲ collapse';
+                    box.style.borderRadius = '10px 10px 0 0';
+                    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
     </script>
 </body>
